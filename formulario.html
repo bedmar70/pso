@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nueva Consulta - PSO Diseño 1</title>
+  <title>Nueva Consulta - PSO Diseño</title>
   <style>
     * {
       margin: 0;
@@ -26,7 +26,7 @@
       padding: 40px;
       border-radius: 12px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 600px;
+      max-width: 650px;
       width: 100%;
     }
     
@@ -233,28 +233,35 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
   <div class="form-container">
     <h2>🎨 Nueva Consulta de Diseño</h2>
-    <p class="subtitle">Completa el formulario para crear una nueva solicitud</p>
+    <p class="subtitle">Plásticos Sierra del Oro - Gestión de Proyectos</p>
     
     <div id="alertContainer"></div>
     
     <form id="consultaForm">
       <div class="form-group">
-        <label for="proyectoSearch" class="required">Buscar Proyecto/Cliente</label>
+        <label for="proyectoSearch" class="required">Buscar Proyecto Existente</label>
         <div class="autocomplete-container">
           <input 
             type="text" 
             id="proyectoSearch" 
-            placeholder="Escribe el nombre del cliente o proyecto (mín. 2 caracteres)..."
+            placeholder="Escribe el nombre del proyecto (mín. 2 caracteres)..."
             autocomplete="off"
             required
           >
           <div id="autocompleteResults" class="autocomplete-results"></div>
         </div>
+        <p class="help-text">Busca por: Env-2025, nombre del proyecto, o comercial asignado</p>
         <div id="selectedProject" class="selected-project"></div>
         <input type="hidden" id="proyectoId" name="proyecto_id" required>
         <input type="hidden" id="proyectoData" name="proyecto_data">
@@ -277,7 +284,7 @@
           id="descripcion" 
           name="descripcion" 
           rows="5" 
-          placeholder="Describe los detalles de tu solicitud: qué necesitas, plazos, especificaciones técnicas, etc."
+          placeholder="Describe los detalles: qué necesitas, plazos, especificaciones técnicas, referencias..."
           required
         ></textarea>
       </div>
@@ -289,18 +296,6 @@
           <option value="2">🟡 Alta (1-2 días)</option>
           <option value="1">🔴 Urgente (mismo día)</option>
         </select>
-      </div>
-
-      <div class="form-group">
-        <label for="adjuntos">Archivos Adjuntos (opcional)</label>
-        <input 
-          type="file" 
-          id="adjuntos" 
-          name="adjuntos"
-          multiple
-          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"
-        >
-        <small style="color: #666; font-size: 12px;">Formatos permitidos: PDF, imágenes, Word, Excel (máx. 10MB)</small>
       </div>
 
       <button type="submit" id="submitBtn">
@@ -315,20 +310,32 @@
     // ============================================
     
     const CONFIG = {
-      // Tu API key de ClickUp (usa una key con permisos de solo lectura en lista maestra)
-      CLICKUP_API_KEY: 'pk_4607189_07O17VA3VFOBLH8XOSWHW6ASFHNDHYZE',
+      // ===== CLICKUP API KEY =====
+      // ⚠️ IMPORTANTE: Reemplaza con tu API Key real
+      // Obtener en: ClickUp → Settings → Apps → API Token
+      CLICKUP_API_KEY: 'pk_4607189_DVKSS5JUJBLEMV7IEA5E63R5XGK959IV',
       
-      // ID de la lista donde están los proyectos maestros
-      CLICKUP_LIST_ID_MAESTRO: '901517007537',
+      // ===== LIST IDs =====
+      CLICKUP_LIST_ID_MAESTRO: '901517007537',    // ✅ Lista "Maestra Proyectos / CRM"
+      CLICKUP_LIST_ID_CONSULTAS: '901517601389',  // ✅ Lista "Consultas Comerciales"
       
-      // ID de la lista donde se crearán las nuevas consultas
-      CLICKUP_LIST_ID_CONSULTAS: '901517601389',
+      // ===== CUSTOM FIELD IDs DE LISTA CONSULTAS =====
+      // ✅ Configurados automáticamente
+      CUSTOM_FIELDS_CONSULTAS: {
+        nombre_proyecto: '781be8ce-58a3-41ab-b266-58ee4a6f839b',  // "Nombre del Proyecto"
+        proyecto_id: '11303f97-7fc2-4af5-973a-1a5def556ab1',      // "Proyecto_ID"
+        comercial: '102a560c-06f0-4f0e-84a5-ac0de8172bd2',        // "Comercial_Responsable"
+        tipo_original: '24290268-76f8-4a26-84fa-a579614407b2'     // "Tipo_Original"
+      },
       
-      // O webhook de n8n si prefieres procesar ahí
-      WEBHOOK_URL: 'https://n8n.escueladeefectividad.com/webhook-test/nueva-consulta',
-      
-      // Usar n8n (true) o ClickUp API directo (false)
-      USE_N8N: false
+      // ===== CUSTOM FIELD IDs DE LISTA MAESTRA =====
+      // ✅ Ya configurados
+      CUSTOM_FIELDS_MAESTRO: {
+        comercial_asignado: '62be3a36-e444-4928-872d-34f9d7468127',  // "Comercial_Asignado"
+        tipo_gestion: 'f1d46a8d-1177-4135-98cb-d18d8268e67e',        // "Tipo Gestión"
+        fases: 'f9cb1998-d396-4e84-8f43-74dbe5f01cd2',               // "Fases"
+        complejidad: '25eee947-6596-4751-8cdc-4e7d3d6a4bd3'          // "Complejidad"
+      }
     };
     
     // ============================================
@@ -348,6 +355,45 @@
     let searchTimeout = null;
 
     // ============================================
+    // FUNCIONES AUXILIARES
+    // ============================================
+    
+    function getCustomFieldValue(customFields, fieldId) {
+      const field = customFields?.find(f => f.id === fieldId);
+      if (!field) return null;
+      
+      // Manejar diferentes tipos de campos
+      if (field.type === 'users' && field.value) {
+        // Retornar array de usuarios
+        return field.value;
+      }
+      if (field.type === 'drop_down' && field.value) {
+        // Para dropdowns, ClickUp devuelve un objeto con id y name
+        // Si es un string, necesitamos buscar en type_config.options
+        if (typeof field.value === 'string') {
+          const option = field.type_config?.options?.find(opt => opt.id === field.value);
+          return option || { id: field.value, name: field.value };
+        }
+        return field.value;
+      }
+      
+      return field.value || null;
+    }
+
+    function extractClienteFromName(taskName) {
+      // Extraer cliente del nombre de tarea
+      // Formato: "Env-2025 Encargo Plasticos ImpulseOS"
+      // Puede tener varios formatos, ajusta según tu necesidad
+      
+      // Intenta extraer después del código Env-XXXX
+      const match = taskName.match(/Env-\d+\s+(.+)/);
+      if (match) return match[1];
+      
+      // Si no coincide, retorna el nombre completo
+      return taskName;
+    }
+
+    // ============================================
     // AUTOCOMPLETE - BÚSQUEDA EN CLICKUP
     // ============================================
     
@@ -362,11 +408,9 @@
         return;
       }
 
-      // Mostrar loading
       resultsContainer.innerHTML = '<div class="autocomplete-loading"><div class="spinner"></div>Buscando proyectos...</div>';
       resultsContainer.style.display = 'block';
 
-      // Debounce: esperar 400ms después de que el usuario deje de escribir
       searchTimeout = setTimeout(() => {
         searchClickUpProjects(query);
       }, 400);
@@ -399,11 +443,14 @@
           // Buscar en nombre de tarea
           if (taskName.includes(searchLower)) return true;
           
-          // Buscar en custom field "Cliente"
-          const clienteField = task.custom_fields?.find(f => 
-            f.name.toLowerCase() === 'cliente' || f.name.toLowerCase() === 'nombre_cliente'
-          );
-          if (clienteField?.value?.toLowerCase().includes(searchLower)) return true;
+          // Buscar en comercial asignado
+          const comercialField = getCustomFieldValue(task.custom_fields, CONFIG.CUSTOM_FIELDS_MAESTRO.comercial_asignado);
+          if (comercialField && Array.isArray(comercialField)) {
+            const comercialMatch = comercialField.some(user => 
+              user.username?.toLowerCase().includes(searchLower)
+            );
+            if (comercialMatch) return true;
+          }
           
           return false;
         });
@@ -414,7 +461,8 @@
         console.error('Error searching ClickUp:', error);
         resultsContainer.innerHTML = `
           <div class="autocomplete-item" style="color: #e74c3c;">
-            ❌ Error al buscar proyectos. Verifica la configuración de API.
+            ❌ Error al buscar proyectos: ${error.message}
+            <br><small>Verifica la API Key y el List ID en CONFIG</small>
           </div>
         `;
       }
@@ -435,16 +483,15 @@
 
       // Limitar a 10 resultados
       tasks.slice(0, 10).forEach(task => {
-        // Extraer custom fields
-        const getCustomField = (name) => {
-          return task.custom_fields?.find(f => 
-            f.name.toLowerCase() === name.toLowerCase()
-          )?.value || 'N/A';
-        };
+        const comercialField = getCustomFieldValue(task.custom_fields, CONFIG.CUSTOM_FIELDS_MAESTRO.comercial_asignado);
+        const tipoGestion = getCustomFieldValue(task.custom_fields, CONFIG.CUSTOM_FIELDS_MAESTRO.tipo_gestion);
+        const complejidad = getCustomFieldValue(task.custom_fields, CONFIG.CUSTOM_FIELDS_MAESTRO.complejidad);
 
-        const cliente = getCustomField('Cliente');
-        const idCRM = getCustomField('ID_CRM');
-        const idERP = getCustomField('ID_ERP');
+        const comercialNames = comercialField && Array.isArray(comercialField) 
+          ? comercialField.map(u => u.username).join(', ') 
+          : 'Sin asignar';
+
+        const tipoGestionName = tipoGestion?.name || 'N/A';
         const estado = task.status?.status || 'Sin estado';
 
         const item = document.createElement('div');
@@ -452,19 +499,21 @@
         item.innerHTML = `
           <strong>${task.name}</strong>
           <small>
-            👤 ${cliente} | 
-            CRM: ${idCRM} | 
-            ERP: ${idERP} | 
+            👤 ${comercialNames} | 
+            📋 ${tipoGestionName} | 
             📊 ${estado}
+            ${complejidad ? ` | ⭐ ${complejidad}` : ''}
           </small>
         `;
         
         item.addEventListener('click', () => selectProject({
           id: task.id,
           name: task.name,
-          cliente: cliente,
-          idCRM: idCRM,
-          idERP: idERP,
+          clienteExtraido: extractClienteFromName(task.name),
+          comercial: comercialField,
+          comercialNames: comercialNames,
+          tipoGestion: tipoGestion,
+          complejidad: complejidad,
           estado: estado,
           url: task.url,
           customFields: task.custom_fields,
@@ -481,13 +530,14 @@
       selectedProject = project;
       proyectoIdInput.value = project.id;
       proyectoDataInput.value = JSON.stringify(project);
-      searchInput.value = `${project.cliente} - ${project.name}`;
+      searchInput.value = project.name;
       
       selectedProjectDiv.innerHTML = `
         <strong>✅ Proyecto seleccionado</strong>
         <div class="detail">📁 Proyecto: ${project.name}</div>
-        <div class="detail">👤 Cliente: ${project.cliente}</div>
-        <div class="detail">🏢 CRM: ${project.idCRM} | ERP: ${project.idERP}</div>
+        <div class="detail">🏢 Cliente: ${project.clienteExtraido}</div>
+        <div class="detail">👤 Comercial: ${project.comercialNames}</div>
+        <div class="detail">📋 Tipo: ${project.tipoGestion?.name || 'N/A'}</div>
         <div class="detail">📊 Estado: ${project.estado}</div>
         <a href="${project.url}" target="_blank">🔗 Ver en ClickUp</a>
       `;
@@ -524,25 +574,20 @@
           tipo_consulta: document.getElementById('tipoConsulta').value,
           descripcion: document.getElementById('descripcion').value,
           prioridad: document.getElementById('prioridad').value,
-          timestamp: new Date().toISOString(),
-          solicitante: 'Formulario Web' // Aquí podrías capturar usuario real si hay auth
+          timestamp: new Date().toISOString()
         };
 
-        if (CONFIG.USE_N8N) {
-          // Opción A: Enviar a n8n
-          await sendToN8N(formData);
-        } else {
-          // Opción B: Crear tarea directamente en ClickUp
-          await createClickUpTask(formData);
-        }
+        const result = await createClickUpTask(formData);
 
-        showAlert('✅ Consulta enviada correctamente. Se ha creado la tarea en ClickUp.', 'success');
+        showAlert(`✅ Consulta enviada correctamente. Tarea creada: ${result.name}`, 'success');
         
         // Reset form
-        form.reset();
-        selectedProjectDiv.style.display = 'none';
-        selectedProject = null;
-        proyectoIdInput.value = '';
+        setTimeout(() => {
+          form.reset();
+          selectedProjectDiv.style.display = 'none';
+          selectedProject = null;
+          proyectoIdInput.value = '';
+        }, 2000);
         
       } catch (error) {
         console.error('Error:', error);
@@ -553,35 +598,20 @@
       }
     });
 
-    async function sendToN8N(formData) {
-      const response = await fetch(CONFIG.WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error al enviar a n8n: ${response.status}`);
-      }
-
-      return await response.json();
-    }
-
     async function createClickUpTask(formData) {
       const taskPayload = {
-        name: `${getTipoConsultaEmoji(formData.tipo_consulta)} ${formData.proyecto_metadata.cliente} - ${formData.tipo_consulta.toUpperCase()}`,
+        name: `${getTipoConsultaEmoji(formData.tipo_consulta)} ${formData.proyecto_metadata.clienteExtraido} - ${formData.tipo_consulta.toUpperCase()}`,
+        
         description: `**Tipo de Solicitud:** ${formData.tipo_consulta}
 
 **Descripción:**
 ${formData.descripcion}
 
 ---
-**Proyecto Relacionado:** [${formData.proyecto_metadata.name}](${formData.proyecto_metadata.url})
-**Cliente:** ${formData.proyecto_metadata.cliente}
-**CRM ID:** ${formData.proyecto_metadata.idCRM}
-**ERP ID:** ${formData.proyecto_metadata.idERP}
+**📁 Proyecto Relacionado:** [${formData.proyecto_metadata.name}](${formData.proyecto_metadata.url})
+**🏢 Cliente/Proyecto:** ${formData.proyecto_metadata.clienteExtraido}
+**👤 Comercial Responsable:** ${formData.proyecto_metadata.comercialNames}
+**📋 Tipo Original:** ${formData.proyecto_metadata.tipoGestion?.name || 'N/A'}
 
 ---
 *Solicitud creada desde formulario web el ${new Date(formData.timestamp).toLocaleString('es-ES')}*`,
@@ -593,22 +623,27 @@ ${formData.descripcion}
         
         custom_fields: [
           {
-            id: 'TU_CUSTOM_FIELD_ID_CLIENTE', // Reemplazar con IDs reales
-            value: formData.proyecto_metadata.cliente
+            id: CONFIG.CUSTOM_FIELDS_CONSULTAS.nombre_proyecto,
+            value: formData.proyecto_metadata.name
           },
           {
-            id: 'TU_CUSTOM_FIELD_ID_CRM',
-            value: formData.proyecto_metadata.idCRM
-          },
-          {
-            id: 'TU_CUSTOM_FIELD_ID_ERP',
-            value: formData.proyecto_metadata.idERP
-          },
-          {
-            id: 'TU_CUSTOM_FIELD_PROYECTO_REF',
+            id: CONFIG.CUSTOM_FIELDS_CONSULTAS.proyecto_id,
             value: formData.proyecto_id
-          }
-        ]
+          },
+          {
+            id: CONFIG.CUSTOM_FIELDS_CONSULTAS.comercial,
+            value: formData.proyecto_metadata.comercial?.map(u => u.id) || []
+          },
+          // Tipo_Original: Enviar el ID de la opción del dropdown
+          ...(formData.proyecto_metadata.tipoGestion?.id ? [{
+            id: CONFIG.CUSTOM_FIELDS_CONSULTAS.tipo_original,
+            value: formData.proyecto_metadata.tipoGestion.id  // ID de la opción del dropdown
+          }] : [])
+        ].filter(cf => {
+          // Filtrar campos vacíos pero mantener arrays vacíos para campos de usuarios
+          if (Array.isArray(cf.value)) return cf.value.length > 0;
+          return cf.value !== null && cf.value !== undefined && cf.value !== '';
+        })
       };
 
       const response = await fetch(
