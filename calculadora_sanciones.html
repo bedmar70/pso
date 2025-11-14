@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Sanciones Urbanísticas - Ayuntamiento de Padul</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+        .main-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        input[type="number"], input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .checkbox-group {
+            margin: 15px 0;
+        }
+        .checkbox-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .checkbox-item label {
+            display: inline;
+            font-weight: normal;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .calculadora-vivo {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 20px;
+        }
+        .calculadora-vivo h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 8px;
+        }
+        .calculo-linea-vivo {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .calculo-linea-vivo.destacado {
+            background: #e8f5e9;
+            font-weight: bold;
+            border: 1px solid #4caf50;
+        }
+        .calculo-linea-vivo.sancion-final {
+            background: #c8e6c9;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 15px;
+            border: 2px solid #2e7d32;
+        }
+        .calculo-linea-vivo .valor {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .calculo-linea-vivo .reduccion {
+            color: #d32f2f;
+        }
+        .resultado {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 4px;
+        }
+        .resultado h2 {
+            color: #2e7d32;
+            border: none;
+            margin-top: 0;
+        }
+        .calculo-detalle {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .calculo-linea {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+        .calculo-linea.total {
+            font-weight: bold;
+            font-size: 16px;
+            border-top: 2px solid #333;
+            margin-top: 10px;
+            padding-top: 10px;
+            color: #2e7d32;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .fundamento-juridico {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.8;
+            border: 1px solid #ddd;
+        }
+        .fundamento-juridico h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+        .fundamento-juridico p {
+            margin: 10px 0;
+            text-align: justify;
+        }
+        .fundamento-juridico strong {
+            color: #2c3e50;
+        }
+        .fundamento-juridico ul {
+            margin: 10px 0 10px 20px;
+        }
+        .fundamento-juridico li {
+            margin: 5px 0;
+        }
+        .copiar-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+            width: auto;
+        }
+        .copiar-btn:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <h1>Calculadora de Sanciones Urbanísticas</h1>
+            <p class="subtitle">Ayuntamiento de Padul (Granada) - Ley 7/2021 y Decreto 550/2022</p>
+
+            <div class="section">
+                <h2>1. Tipo de Infracción</h2>
+                <label for="tipoInfraccion">Gravedad de la infracción:</label>
+                <select id="tipoInfraccion" onchange="actualizarCalculoVivo()">
+                    <option value="">-- Seleccione --</option>
+                    <option value="leve">LEVE (600€ - 2.999€)</option>
+                    <option value="grave">GRAVE (3.000€ - 29.999€)</option>
+                    <option value="muy_grave">MUY GRAVE (30.000€ - 120.000€)</option>
+                </select>
+
+                <label for="descripcionInfraccion" style="margin-top: 15px;">Descripción de la infracción:</label>
+                <textarea id="descripcionInfraccion" placeholder="Describa brevemente los hechos constitutivos de la infracción..."></textarea>
+            </div>
+
+            <div class="section">
+                <h2>2. Cálculo por Valor de Obras/Terrenos/Daños (Solo Graves y Muy Graves)</h2>
+                <div class="info">
+                    Para infracciones <strong>GRAVES</strong>: Si el valor de obras/terrenos/daños supera 29.999€, la multa puede alcanzar el <strong>75%</strong> de dicho valor.<br>
+                    Para infracciones <strong>MUY GRAVES</strong>: Si el valor supera 120.000€, la multa puede alcanzar el <strong>150%</strong> de dicho valor.
+                </div>
+                
+                <label for="aplicaValor">¿Se aplica cálculo por valor de obras/terrenos/daños?</label>
+                <select id="aplicaValor" onchange="toggleValor(); actualizarCalculoVivo()">
+                    <option value="no">No</option>
+                    <option value="si">Sí</option>
+                </select>
+
+                <div id="valorContainer" style="display: none; margin-top: 15px;">
+                    <label for="valorObras">Valor de obras ejecutadas / terrenos afectados / daños (€):</label>
+                    <input type="number" id="valorObras" min="0" step="0.01" oninput="actualizarCalculoVivo()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>3. Circunstancias Atenuantes</h2>
+                <div class="info">
+                    <strong>Efecto en la graduación:</strong><br>
+                    • <strong>1 atenuante</strong>: sanción en mitad inferior<br>
+                    • <strong>Varias atenuantes</strong>: puede alcanzar el mínimo de la mitad inferior<br>
+                    • Si una es <strong>reparación voluntaria</strong>: sanción en grado mínimo (Art. 384.2.a Decreto 550/2022)
+                </div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="aten1" value="facilitar" onchange="actualizarCalculoVivo()">
+                        <label for="aten1">Facilitar las labores de inspección</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="aten2" value="paralizacion" onchange="actualizarCalculoVivo()">
+                        <label for="aten2">Paralización voluntaria de obras/cese tras advertencia del inspector</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="aten3" value="ausencia_intencion" onchange="actualizarCalculoVivo()">
+                        <label for="aten3">Ausencia de intención de causar un daño grave</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="aten4" value="reparacion" onchange="actualizarCalculoVivo()">
+                        <label for="aten4">Reparación voluntaria y espontánea del daño causado (⭐ Grado mínimo)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>4. Circunstancias Agravantes</h2>
+                <div class="info">
+                    <strong>Efecto en la graduación:</strong><br>
+                    • <strong>1 agravante</strong>: sanción en mitad superior<br>
+                    • <strong>Varias agravantes o una muy cualificada</strong>: puede alcanzar el máximo (Art. 384.2.d Decreto 550/2022)
+                </div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr1" value="cargo_publico" onchange="actualizarCalculoVivo()">
+                        <label for="agr1">Prevalerse de cargo público</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr2" value="violencia" onchange="actualizarCalculoVivo()">
+                        <label for="agr2">Empleo de violencia, coacción o soborno</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr3" value="falsedad" onchange="actualizarCalculoVivo()">
+                        <label for="agr3">Manipulación de hechos, declaración de datos falsos o falsificación de documentos</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr4" value="aprovechamiento" onchange="actualizarCalculoVivo()">
+                        <label for="agr4">Aprovechamiento de grave necesidad pública o de particulares</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr5" value="reincidencia" onchange="actualizarCalculoVivo()">
+                        <label for="agr5">Reincidencia (sanción firme por graves/muy graves en el último año)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr6" value="sin_tecnico" onchange="actualizarCalculoVivo()">
+                        <label for="agr6">Obras sin orden del técnico director o modificaciones sin instrucciones</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr7" value="persistencia" onchange="actualizarCalculoVivo()">
+                        <label for="agr7">Persistencia tras advertencia del inspector</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="agr8" value="obstruccion" onchange="actualizarCalculoVivo()">
+                        <label for="agr8">Falta de colaboración/obstrucción de la inspección</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>5. Reducciones Aplicables (Art. 403 Decreto 550/2022)</h2>
+                
+                <label for="pagoVoluntario">¿Pago voluntario antes de la resolución?</label>
+                <select id="pagoVoluntario" onchange="actualizarCalculoVivo()">
+                    <option value="no">No</option>
+                    <option value="si">Sí (20% de reducción - acumulable con reconocimiento)</option>
+                </select>
+
+                <label for="reconocimiento" style="margin-top: 15px;">¿Reconocimiento de responsabilidad antes de la resolución?</label>
+                <select id="reconocimiento" onchange="actualizarCalculoVivo()">
+                    <option value="no">No</option>
+                    <option value="si">Sí (20% de reducción - acumulable con pago)</option>
+                </select>
+
+                <label for="reposicion" style="margin-top: 15px;">¿Reposición voluntaria de la realidad física alterada?</label>
+                <select id="reposicion" onchange="actualizarCalculoVivo()">
+                    <option value="no">No</option>
+                    <option value="plazo">Sí, en forma y plazos de la Administración (50% adicional)</option>
+                    <option value="fuera_plazo">Sí, fuera de plazo pero antes de ejecución subsidiaria (25% adicional)</option>
+                </select>
+
+                <label for="legalizacion" style="margin-top: 15px;">¿Es legalizable la actuación?</label>
+                <select id="legalizacion" onchange="actualizarCalculoVivo()">
+                    <option value="no">No</option>
+                    <option value="si">Sí (75% de reducción sobre sanción ya reducida)</option>
+                </select>
+
+                <div class="warning" style="margin-top: 15px;">
+                    <strong>⚠️ IMPORTANTE sobre las reducciones:</strong><br>
+                    • Las reducciones por pago voluntario y reconocimiento de responsabilidad están <strong>condicionadas al desistimiento o renuncia de cualquier acción o recurso en vía administrativa</strong> contra la sanción (Art. 403.1 Decreto 550/2022).<br>
+                    • La posterior interposición de recurso implica la <strong>pérdida de estas reducciones</strong>.<br>
+                    • La reducción por reposición voluntaria <strong>no será eficaz hasta que se cumpla plenamente</strong> la resolución de restablecimiento o se garantice mediante aval del 100% del importe de las obras necesarias (Art. 403.2 Decreto 550/2022).
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>6. Sanciones Accesorias (Solo Graves y Muy Graves)</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="acc1" value="prohibicion_contratar" onchange="toggleAccesorias()">
+                        <label for="acc1">Prohibición de contratar con la Administración</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="acc2" value="inhabilitacion_fomento" onchange="toggleAccesorias()">
+                        <label for="acc2">Inhabilitación para ser beneficiario de medidas de fomento</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="acc3" value="prohibicion_iniciativa" onchange="toggleAccesorias()">
+                        <label for="acc3">Prohibición de ejercicio del derecho de iniciativa en actuaciones de transformación urbanística</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="acc4" value="revocacion_habilitacion" onchange="toggleAccesorias()">
+                        <label for="acc4">Revocación de habilitación de entidad urbanística certificadora</label>
+                    </div>
+                </div>
+
+                <div id="duracionAccesorias" style="display: none; margin-top: 15px;">
+                    <label for="duracionSanciones">Duración de las sanciones accesorias:</label>
+                    <select id="duracionSanciones">
+                        <option value="">-- Seleccione --</option>
+                        <option value="grave">Infracción grave (mínimo 6 meses, máximo 2 años)</option>
+                        <option value="muy_grave">Infracción muy grave (mínimo 2 años, máximo 4 años)</option>
+                    </select>
+                    <input type="number" id="aniosSancion" min="0.5" max="4" step="0.5" placeholder="Años (0.5 a 4)" style="margin-top: 10px;">
+                </div>
+            </div>
+
+            <button onclick="generarPropuesta()">GENERAR PROPUESTA DE RESOLUCIÓN COMPLETA</button>
+
+            <div id="resultado" style="display: none;"></div>
+        </div>
+
+        <div class="sidebar">
+            <div class="calculadora-vivo">
+                <h3>💰 CÁLCULO EN TIEMPO REAL</h3>
+                <div id="calculoVivoContent">
+                    <p style="color: #7f8c8d; font-size: 13px; text-align: center;">Seleccione el tipo de infracción para comenzar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleValor() {
+            const aplicaValor = document.getElementById('aplicaValor').value;
+            document.getElementById('valorContainer').style.display = aplicaValor === 'si' ? 'block' : 'none';
+        }
+
+        function toggleAccesorias() {
+            const checkboxesAccesorias = ['acc1', 'acc2', 'acc3', 'acc4'];
+            const algunaMarcada = checkboxesAccesorias.some(id => document.getElementById(id).checked);
+            document.getElementById('duracionAccesorias').style.display = algunaMarcada ? 'block' : 'none';
+        }
+
+        function calcularSancionBase() {
+            const tipoInfraccion = document.getElementById('tipoInfraccion').value;
+            if (!tipoInfraccion) return null;
+
+            // Rangos base
+            let rangoMin, rangoMax, porcentajeValor;
+            switch(tipoInfraccion) {
+                case 'leve':
+                    rangoMin = 600;
+                    rangoMax = 2999;
+                    porcentajeValor = 0;
+                    break;
+                case 'grave':
+                    rangoMin = 3000;
+                    rangoMax = 29999;
+                    porcentajeValor = 0.75;
+                    break;
+                case 'muy_grave':
+                    rangoMin = 30000;
+                    rangoMax = 120000;
+                    porcentajeValor = 1.50;
+                    break;
+            }
+
+            // Verificar si aplica valor de obras
+            const aplicaValor = document.getElementById('aplicaValor').value === 'si';
+            let valorObras = 0;
+            if (aplicaValor && tipoInfraccion !== 'leve') {
+                valorObras = parseFloat(document.getElementById('valorObras').value) || 0;
+                const valorCalculado = valorObras * porcentajeValor;
+                if (valorCalculado > rangoMax) {
+                    rangoMax = valorCalculado;
+                }
+            }
+
+            // Contar atenuantes y agravantes
+            const atenuantes = [];
+            for (let i = 1; i <= 4; i++) {
+                const cb = document.getElementById('aten' + i);
+                if (cb && cb.checked) {
+                    atenuantes.push(cb.value);
+                }
+            }
+
+            const agravantes = [];
+            for (let i = 1; i <= 8; i++) {
+                const cb = document.getElementById('agr' + i);
+                if (cb && cb.checked) {
+                    agravantes.push(cb.value);
+                }
+            }
+
+            // Calcular sanción base según circunstancias
+            let sancionBase;
+            let fundamentoGraduacion = '';
+            const numAtenuantes = atenuantes.length;
+            const numAgravantes = agravantes.length;
+            const tieneReparacionVoluntaria = atenuantes.includes('reparacion');
+
+            if (numAtenuantes === 0 && numAgravantes === 0) {
+                // Grado medio
+                sancionBase = (rangoMin + rangoMax) / 2;
+                fundamentoGraduacion = 'grado medio (sin circunstancias)';
+            } else if (numAtenuantes > 0 && numAgravantes === 0) {
+                // Mitad inferior
+                const mitadInferiorMin = rangoMin;
+                const mitadInferiorMax = rangoMin + (rangoMax - rangoMin) / 2;
+                
+                if (tieneReparacionVoluntaria) {
+                    sancionBase = mitadInferiorMin;
+                    fundamentoGraduacion = 'grado mínimo (reparación voluntaria)';
+                } else if (numAtenuantes >= 2) {
+                    // VARIAS atenuantes
+                    sancionBase = mitadInferiorMin + (mitadInferiorMax - mitadInferiorMin) * 0.2;
+                    fundamentoGraduacion = 'mitad inferior hacia el mínimo (varias atenuantes)';
+                } else {
+                    // UNA atenuante
+                    sancionBase = (mitadInferiorMin + mitadInferiorMax) / 2;
+                    fundamentoGraduacion = 'mitad inferior (1 atenuante)';
+                }
+            } else if (numAtenuantes === 0 && numAgravantes > 0) {
+                // Mitad superior
+                const mitadSuperiorMin = rangoMin + (rangoMax - rangoMin) / 2;
+                const mitadSuperiorMax = rangoMax;
+                
+                if (numAgravantes > 1) {
+                    sancionBase = mitadSuperiorMax;
+                    fundamentoGraduacion = 'máximo (varias agravantes)';
+                } else {
+                    sancionBase = (mitadSuperiorMin + mitadSuperiorMax) / 2;
+                    fundamentoGraduacion = 'mitad superior (1 agravante)';
+                }
+            } else {
+                // Ambas circunstancias
+                sancionBase = (rangoMin + rangoMax) / 2;
+                if (numAgravantes > numAtenuantes) {
+                    sancionBase = rangoMin + (rangoMax - rangoMin) * 0.65;
+                    fundamentoGraduacion = 'valoración conjunta (predominan agravantes)';
+                } else if (numAtenuantes > numAgravantes) {
+                    sancionBase = rangoMin + (rangoMax - rangoMin) * 0.35;
+                    fundamentoGraduacion = 'valoración conjunta (predominan atenuantes)';
+                } else {
+                    fundamentoGraduacion = 'valoración conjunta (equilibradas)';
+                }
+            }
+
+            return {
+                rangoMin,
+                rangoMax,
+                sancionBase: Math.round(sancionBase * 100) / 100,
+                fundamentoGraduacion,
+                numAtenuantes,
+                numAgravantes,
+                tieneReparacionVoluntaria
+            };
+        }
+
+        function calcularReducciones(sancionBase) {
+            let sancionTrasReducciones = sancionBase;
+            const pasos = [];
+
+            // Reducción por pago voluntario (20%)
+            const pagoVoluntario = document.getElementById('pagoVoluntario').value === 'si';
+            if (pagoVoluntario) {
+                const reduccion = sancionTrasReducciones * 0.20;
+                pasos.push({
+                    concepto: 'Pago voluntario (-20%)',
+                    reduccion: reduccion,
+                    resultado: sancionTrasReducciones - reduccion
+                });
+                sancionTrasReducciones -= reduccion;
+            }
+
+            // Reducción por reconocimiento (20%)
+            const reconocimiento = document.getElementById('reconocimiento').value === 'si';
+            if (reconocimiento) {
+                const reduccion = sancionTrasReducciones * 0.20;
+                pasos.push({
+                    concepto: 'Reconocimiento (-20%)',
+                    reduccion: reduccion,
+                    resultado: sancionTrasReducciones - reduccion
+                });
+                sancionTrasReducciones -= reduccion;
+            }
+
+            // Reducción por reposición voluntaria
+            const reposicion = document.getElementById('reposicion').value;
+            if (reposicion === 'plazo') {
+                const reduccion = sancionTrasReducciones * 0.50;
+                pasos.push({
+                    concepto: 'Reposición en plazo (-50%)',
+                    reduccion: reduccion,
+                    resultado: sancionTrasReducciones - reduccion
+                });
+                sancionTrasReducciones -= reduccion;
+            } else if (reposicion === 'fuera_plazo') {
+                const reduccion = sancionTrasReducciones * 0.25;
+                pasos.push({
+                    concepto: 'Reposición fuera plazo (-25%)',
+                    reduccion: reduccion,
+                    resultado: sancionTrasReducciones - reduccion
+                });
+                sancionTrasReducciones -= reduccion;
+            }
+
+            // Reducción por legalización (75%)
+            const legalizacion = document.getElementById('legalizacion').value === 'si';
+            if (legalizacion) {
+                const reduccion = sancionTrasReducciones * 0.75;
+                pasos.push({
+                    concepto: 'Legalización (-75%)',
+                    reduccion: reduccion,
+                    resultado: sancionTrasReducciones - reduccion
+                });
+                sancionTrasReducciones -= reduccion;
+            }
+
+            return {
+                sancionFinal: Math.round(sancionTrasReducciones * 100) / 100,
+                pasos: pasos
+            };
+        }
+
+        function actualizarCalculoVivo() {
+            const resultado = calcularSancionBase();
+            const contenedor = document.getElementById('calculoVivoContent');
+            
+            if (!resultado) {
+                contenedor.innerHTML = '<p style="color: #7f8c8d; font-size: 13px; text-align: center;">Seleccione el tipo de infracción para comenzar</p>';
+                return;
+            }
+
+            let html = '';
+            
+            // Rango legal
+            html += `<div class="calculo-linea-vivo">
+                <span>Rango legal:</span>
+                <span>${resultado.rangoMin.toFixed(0)}€ - ${resultado.rangoMax.toFixed(0)}€</span>
+            </div>`;
+
+            // Sanción base tras graduación
+            html += `<div class="calculo-linea-vivo destacado">
+                <span>Sanción base (${resultado.fundamentoGraduacion}):</span>
+                <span class="valor">${resultado.sancionBase.toFixed(2)}€</span>
+            </div>`;
+
+            // Calcular reducciones
+            const reducciones = calcularReducciones(resultado.sancionBase);
+
+            // Mostrar cada paso de reducción
+            if (reducciones.pasos.length > 0) {
+                html += '<div style="margin: 10px 0; padding-top: 10px; border-top: 1px solid #ddd;">';
+                reducciones.pasos.forEach(paso => {
+                    html += `<div class="calculo-linea-vivo">
+                        <span>${paso.concepto}</span>
+                        <span class="reduccion">-${paso.reduccion.toFixed(2)}€</span>
+                    </div>`;
+                    html += `<div class="calculo-linea-vivo" style="font-size: 12px; background: white;">
+                        <span>→ Subtotal:</span>
+                        <span>${paso.resultado.toFixed(2)}€</span>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            // Sanción final
+            html += `<div class="calculo-linea-vivo sancion-final">
+                <span>SANCIÓN FINAL:</span>
+                <span>${reducciones.sancionFinal.toFixed(2)}€</span>
+            </div>`;
+
+            contenedor.innerHTML = html;
+        }
+
+        function generarPropuesta() {
+            const tipoInfraccion = document.getElementById('tipoInfraccion').value;
+            const descripcionInfraccion = document.getElementById('descripcionInfraccion').value;
+            
+            if (!tipoInfraccion) {
+                alert('Por favor, seleccione el tipo de infracción');
+                return;
+            }
+
+            const resultado = calcularSancionBase();
+            const reducciones = calcularReducciones(resultado.sancionBase);
+
+            // Obtener circunstancias
+            const atenuantes = [];
+            const agravantes = [];
+            
+            for (let i = 1; i <= 4; i++) {
+                const cb = document.getElementById('aten' + i);
+                if (cb.checked) {
+                    atenuantes.push(cb.parentElement.textContent.trim());
+                }
+            }
+            
+            for (let i = 1; i <= 8; i++) {
+                const cb = document.getElementById('agr' + i);
+                if (cb.checked) {
+                    agravantes.push(cb.parentElement.textContent.trim());
+                }
+            }
+
+            // Obtener sanciones accesorias
+            const sancionesAccesorias = [];
+            if (tipoInfraccion !== 'leve') {
+                if (document.getElementById('acc1').checked) sancionesAccesorias.push('Prohibición de contratar con la Administración');
+                if (document.getElementById('acc2').checked) sancionesAccesorias.push('Inhabilitación para ser beneficiario de medidas de fomento');
+                if (document.getElementById('acc3').checked) sancionesAccesorias.push('Prohibición de ejercicio del derecho de iniciativa');
+                if (document.getElementById('acc4').checked) sancionesAccesorias.push('Revocación de habilitación de entidad urbanística certificadora');
+            }
+
+            const duracionSanciones = document.getElementById('aniosSancion').value;
+            const pagoVoluntario = document.getElementById('pagoVoluntario').value === 'si';
+            const reconocimiento = document.getElementById('reconocimiento').value === 'si';
+            const reposicion = document.getElementById('reposicion').value;
+            const legalizacion = document.getElementById('legalizacion').value === 'si';
+
+            mostrarResultado({
+                tipoInfraccion,
+                descripcionInfraccion,
+                resultado,
+                reducciones,
+                atenuantes,
+                agravantes,
+                sancionesAccesorias,
+                duracionSanciones,
+                pagoVoluntario,
+                reconocimiento,
+                reposicion,
+                legalizacion
+            });
+        }
+
+        function mostrarResultado(datos) {
+            const resultadoDiv = document.getElementById('resultado');
+            
+            let html = '<div class="resultado">';
+            html += '<h2>📋 PROPUESTA DE RESOLUCIÓN SANCIONADORA</h2>';
+            
+            // Tipo de infracción
+            html += '<div class="calculo-detalle">';
+            html += '<h3 style="margin-bottom: 10px; color: #2c3e50;">HECHOS</h3>';
+            html += `<p><strong>Gravedad de la infracción:</strong> ${datos.tipoInfraccion.toUpperCase().replace('_', ' ')}</p>`;
+            if (datos.descripcionInfraccion) {
+                html += `<p style="margin-top: 10px;"><strong>Descripción de los hechos:</strong></p>`;
+                html += `<p style="text-align: justify;">${datos.descripcionInfraccion}</p>`;
+            }
+            html += `<p style="margin-top: 10px;"><strong>Rango legal de la sanción:</strong> ${datos.resultado.rangoMin.toFixed(2)}€ - ${datos.resultado.rangoMax.toFixed(2)}€ (Art. 380 Decreto 550/2022)</p>`;
+            html += '</div>';
+
+            // Circunstancias
+            if (datos.atenuantes.length > 0 || datos.agravantes.length > 0) {
+                html += '<div class="calculo-detalle">';
+                html += '<h3 style="margin-bottom: 10px; color: #2c3e50;">CIRCUNSTANCIAS CONCURRENTES</h3>';
+                
+                if (datos.atenuantes.length > 0) {
+                    html += '<p><strong>Circunstancias atenuantes (Arts. 164.4 Ley 7/2021 y 386 Decreto 550/2022):</strong></p><ul style="margin: 5px 0 10px 20px;">';
+                    datos.atenuantes.forEach(at => {
+                        html += `<li>${at}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                if (datos.agravantes.length > 0) {
+                    html += '<p><strong>Circunstancias agravantes (Arts. 164.3 Ley 7/2021 y 385 Decreto 550/2022):</strong></p><ul style="margin: 5px 0 10px 20px;">';
+                    datos.agravantes.forEach(ag => {
+                        html += `<li>${ag}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                html += '</div>';
+            }
+
+            // Graduación
+            html += '<div class="calculo-detalle">';
+            html += '<h3 style="margin-bottom: 10px; color: #2c3e50;">GRADUACIÓN DE LA SANCIÓN</h3>';
+            html += '<p style="text-align: justify; margin-bottom: 10px;">';
+            
+            if (datos.resultado.numAtenuantes === 0 && datos.resultado.numAgravantes === 0) {
+                html += 'De conformidad con lo establecido en el artículo 384.2.b) del Decreto 550/2022, al no concurrir circunstancias atenuantes ni agravantes, la sanción se impone en su <strong>grado medio</strong>.';
+            } else if (datos.resultado.numAtenuantes > 0 && datos.resultado.numAgravantes === 0) {
+                if (datos.resultado.tieneReparacionVoluntaria) {
+                    html += 'De conformidad con el artículo 384.2.a) del Decreto 550/2022, al concurrir la circunstancia atenuante de <strong>reparación voluntaria y espontánea del daño</strong>, la sanción se impone en su <strong>grado mínimo</strong>.';
+                } else if (datos.resultado.numAtenuantes >= 2) {
+                    html += 'De conformidad con el artículo 384.2.a) del Decreto 550/2022, al concurrir <strong>varias circunstancias atenuantes</strong>, la sanción se impone dentro de su mitad inferior, pudiendo alcanzar la cuantía mínima de dicha mitad en función de la ponderación de la incidencia de dichas circunstancias en la valoración global de la infracción.';
+                } else {
+                    html += 'De conformidad con el artículo 384.2.a) del Decreto 550/2022, al concurrir <strong>una circunstancia atenuante</strong>, la sanción se impone dentro de su <strong>mitad inferior</strong>.';
+                }
+            } else if (datos.resultado.numAtenuantes === 0 && datos.resultado.numAgravantes > 0) {
+                if (datos.resultado.numAgravantes > 1) {
+                    html += 'De conformidad con el artículo 384.2.d) del Decreto 550/2022, al concurrir <strong>varias circunstancias agravantes</strong>, la sanción puede alcanzar la cuantía máxima de la mitad superior.';
+                } else {
+                    html += 'De conformidad con el artículo 384.2.d) del Decreto 550/2022, al concurrir <strong>una circunstancia agravante</strong>, la sanción se impone dentro de su <strong>mitad superior</strong>.';
+                }
+            } else {
+                html += 'De conformidad con el artículo 384.2.c) del Decreto 550/2022, al concurrir tanto circunstancias atenuantes como agravantes, se valoran conjuntamente para graduar adecuadamente la sanción a imponer, atendiendo a la trascendencia de unas y otras.';
+            }
+            
+            html += '</p>';
+            html += `<div class="calculo-linea"><span>Sanción base propuesta:</span><span><strong>${datos.resultado.sancionBase.toFixed(2)}€</strong></span></div>`;
+            html += '</div>';
+
+            // Reducciones
+            if (datos.reducciones.pasos.length > 0) {
+                html += '<div class="calculo-detalle">';
+                html += '<h3 style="margin-bottom: 10px; color: #2c3e50;">REDUCCIONES APLICABLES</h3>';
+                html += '<p style="text-align: justify; margin-bottom: 10px;">Conforme al artículo 403 del Decreto 550/2022 y artículo 172 de la Ley 7/2021, resultan aplicables las siguientes reducciones:</p>';
+                
+                datos.reducciones.pasos.forEach((paso, index) => {
+                    html += `<div class="calculo-linea">`;
+                    html += `<span>${paso.concepto}</span>`;
+                    html += `<span style="color: #d32f2f;">-${paso.reduccion.toFixed(2)}€</span>`;
+                    html += `</div>`;
+                    html += `<div class="calculo-linea" style="font-size: 13px; color: #666;">`;
+                    html += `<span>Subtotal tras reducción:</span>`;
+                    html += `<span>${paso.resultado.toFixed(2)}€</span>`;
+                    html += `</div>`;
+                });
+                
+                html += '</div>';
+            }
+
+            // Sanción final
+            html += '<div class="calculo-detalle" style="background-color: #e8f5e9; border: 2px solid #4caf50;">';
+            html += `<div class="calculo-linea total" style="font-size: 18px;">`;
+            html += `<span>SANCIÓN PECUNIARIA PROPUESTA:</span>`;
+            html += `<span style="font-size: 22px; color: #2e7d32;">${datos.reducciones.sancionFinal.toFixed(2)}€</span>`;
+            html += `</div>`;
+            html += '</div>';
+
+            // Condiciones de las reducciones
+            if (datos.pagoVoluntario || datos.reconocimiento) {
+                html += '<div class="warning">';
+                html += '<strong>⚠️ CONDICIONES DE EFECTIVIDAD DE LAS REDUCCIONES:</strong><br><br>';
+                html += 'De conformidad con lo dispuesto en el artículo 403.1 del Decreto 550/2022, la efectividad de las reducciones por pago voluntario y/o reconocimiento de responsabilidad <strong>está condicionada al desistimiento o renuncia de cualquier acción o recurso en vía administrativa</strong> contra la sanción.<br><br>';
+                html += 'La posterior interposición de recurso administrativo implicará la <strong>pérdida de las referidas reducciones</strong>, debiendo abonarse la sanción sin aplicación de las mismas.';
+                html += '</div>';
+            }
+
+            if (datos.reposicion !== 'no') {
+                html += '<div class="warning">';
+                html += '<strong>⚠️ CONDICIÓN DE LA REDUCCIÓN POR REPOSICIÓN VOLUNTARIA:</strong><br><br>';
+                html += 'De conformidad con el artículo 403.2 del Decreto 550/2022, la reducción de la sanción pecuniaria por reposición voluntaria de la realidad física alterada <strong>no será eficaz hasta que el infractor cumpla plenamente</strong> la resolución que ordena el restablecimiento de la legalidad vulnerada o, en su caso, se comprometa a restaurar el orden infringido a su situación inicial en la forma y plazos dispuestos por la Administración <strong>y garantice este compromiso mediante aval del cien por cien del importe de las obras o actuaciones necesarias</strong>.<br><br>';
+                if (datos.reposicion === 'fuera_plazo') {
+                    html += 'Al realizarse la reposición fuera de los plazos señalados por la Administración, pero antes del inicio de la ejecución subsidiaria, la reducción aplicable es del <strong>veinticinco por ciento</strong>.';
+                } else {
+                    html += 'Al realizarse la reposición en la forma y plazos dispuestos por la Administración, la reducción aplicable es del <strong>cincuenta por ciento</strong>.';
+                }
+                html += '</div>';
+            }
+
+            // Sanciones accesorias
+            if (datos.sancionesAccesorias.length > 0) {
+                html += '<div class="calculo-detalle">';
+                html += '<h3 style="margin-bottom: 10px; color: #2c3e50;">SANCIONES ACCESORIAS</h3>';
+                html += '<p style="text-align: justify; margin-bottom: 10px;">De conformidad con los artículos 163 de la Ley 7/2021 y 382 del Decreto 550/2022, además de la multa, se propone la imposición de las siguientes sanciones accesorias:</p>';
+                html += '<ul style="margin: 10px 0 10px 20px;">';
+                datos.sancionesAccesorias.forEach(sanc => {
+                    html += `<li>${sanc}</li>`;
+                });
+                html += '</ul>';
+                if (datos.duracionSanciones) {
+                    html += `<p style="margin-top: 10px;"><strong>Duración propuesta:</strong> ${datos.duracionSanciones} año(s)</p>`;
+                    const tipoSancion = document.getElementById('duracionSanciones').value;
+                    if (tipoSancion === 'grave') {
+                        html += '<p style="font-size: 13px; color: #666; margin-top: 5px;">Conforme al artículo 383.4 del Decreto 550/2022, la duración mínima es de 6 meses y la máxima de 2 años para infracciones graves.</p>';
+                    } else if (tipoSancion === 'muy_grave') {
+                        html += '<p style="font-size: 13px; color: #666; margin-top: 5px;">Conforme al artículo 383.4 del Decreto 550/2022, la duración mínima es de 2 años y la máxima de 4 años para infracciones muy graves.</p>';
+                    }
+                }
+                html += '</div>';
+            }
+
+            // FUNDAMENTO JURÍDICO COMPLETO
+            html += '<div class="fundamento-juridico" id="fundamentoJuridico">';
+            html += '<h3>FUNDAMENTO JURÍDICO</h3>';
+            
+            html += '<p><strong>I. COMPETENCIA Y PROCEDIMIENTO</strong></p>';
+            html += '<p>Este Ayuntamiento es competente para la incoación, instrucción y resolución del presente procedimiento sancionador en virtud de lo dispuesto en el artículo 401 del Decreto 550/2022, de 29 de noviembre, por el que se aprueba el Reglamento de la Ley 7/2021, de 1 de diciembre, de impulso para la sostenibilidad del territorio de Andalucía, en relación con los artículos 171 de la citada Ley 7/2021.</p>';
+            
+            html += '<p>El procedimiento se ha tramitado conforme a lo establecido en el artículo 397 del Decreto 550/2022, en relación con los artículos 170 de la Ley 7/2021, la Ley 39/2015, de 1 de octubre, del Procedimiento Administrativo Común de las Administraciones Públicas, y la Ley 40/2015, de 1 de octubre, de Régimen Jurídico del Sector Público.</p>';
+            
+            html += '<p><strong>II. TIPIFICACIÓN DE LA INFRACCIÓN</strong></p>';
+            const tipoTexto = datos.tipoInfraccion === 'leve' ? 'LEVE' : (datos.tipoInfraccion === 'grave' ? 'GRAVE' : 'MUY GRAVE');
+            html += `<p>Los hechos descritos constituyen una infracción urbanística <strong>${tipoTexto}</strong>, tipificada en el artículo 378 del Decreto 550/2022, en relación con el artículo 161 de la Ley 7/2021.</p>`;
+            
+            html += '<p><strong>III. GRADUACIÓN DE LA SANCIÓN</strong></p>';
+            html += '<p>Para la graduación de la cuantía de la sanción se ha atendido a la concurrencia de las circunstancias atenuantes y agravantes establecidas en los artículos 164.3 y 164.4 de la Ley 7/2021 y desarrolladas en los artículos 385 y 386 del Decreto 550/2022, respetando el principio de proporcionalidad establecido en el artículo 384.1 del citado Decreto.</p>';
+            
+            if (datos.atenuantes.length > 0) {
+                html += '<p><strong>Circunstancias atenuantes concurrentes:</strong></p><ul>';
+                datos.atenuantes.forEach(at => html += `<li>${at}</li>`);
+                html += '</ul>';
+            }
+            
+            if (datos.agravantes.length > 0) {
+                html += '<p><strong>Circunstancias agravantes concurrentes:</strong></p><ul>';
+                datos.agravantes.forEach(ag => html += `<li>${ag}</li>`);
+                html += '</ul>';
+            }
+            
+            html += `<p>Aplicando las reglas de graduación del artículo 384.2 del Decreto 550/2022, la sanción se ha determinado en su <strong>${datos.resultado.fundamentoGraduacion}</strong>, resultando una sanción base de <strong>${datos.resultado.sancionBase.toFixed(2)} euros</strong>.</p>`;
+            
+            if (datos.reducciones.pasos.length > 0) {
+                html += '<p><strong>IV. REDUCCIONES APLICABLES</strong></p>';
+                html += '<p>Conforme al artículo 403 del Decreto 550/2022 y al artículo 172 de la Ley 7/2021, resultan aplicables las siguientes reducciones sobre la sanción graduada:</p>';
+                
+                if (datos.pagoVoluntario) {
+                    html += '<p>• <strong>Reducción por pago voluntario (20%):</strong> El artículo 403.1 del Decreto 550/2022 establece que "el pago voluntario en cualquier momento anterior a la resolución sancionadora implicará una reducción del veinte por ciento en el importe de la sanción propuesta". Esta reducción está condicionada al desistimiento o renuncia de cualquier acción o recurso en vía administrativa contra la sanción.</p>';
+                }
+                
+                if (datos.reconocimiento) {
+                    html += '<p>• <strong>Reducción por reconocimiento de responsabilidad (20%):</strong> El artículo 403.1 del Decreto 550/2022 establece que procederá "idéntica reducción cuando el infractor reconozca su responsabilidad en cualquier momento anterior a la citada resolución". Esta reducción es acumulable con la anterior y está igualmente condicionada al desistimiento o renuncia de recurso.</p>';
+                }
+                
+                if (datos.reposicion === 'plazo') {
+                    html += '<p>• <strong>Reducción por reposición voluntaria en plazo (50%):</strong> Conforme al artículo 403.2 del Decreto 550/2022, cuando el infractor ejecute voluntariamente la resolución del procedimiento de restablecimiento de la legalidad territorial o urbanística en la forma y plazos dispuestos por la Administración, podrá beneficiarse de una reducción adicional del cincuenta por ciento sobre la cuantía resultante de aplicar las reducciones previstas anteriormente. Esta reducción no será eficaz hasta que se cumpla plenamente la resolución de restablecimiento o se garantice mediante aval del 100% del importe de las obras necesarias.</p>';
+                } else if (datos.reposicion === 'fuera_plazo') {
+                    html += '<p>• <strong>Reducción por reposición voluntaria fuera de plazo (25%):</strong> El artículo 403.2 del Decreto 550/2022 establece que cuando la reposición no se hiciere en la forma y plazos señalados por la Administración, el porcentaje de reducción será del veinticinco por ciento, siempre y cuando no se hubiere iniciado por la Administración la ejecución subsidiaria.</p>';
+                }
+                
+                if (datos.legalizacion) {
+                    html += '<p>• <strong>Reducción por legalización (75%):</strong> Conforme al artículo 403.5 del Decreto 550/2022, si el hecho constitutivo de una infracción pudiera ser legalizado por no ser disconforme con la ordenación territorial y urbanística, la sanción se reducirá en un setenta y cinco por ciento de su importe.</p>';
+                }
+                
+                html += `<p>Aplicadas todas las reducciones procedentes, la sanción pecuniaria definitiva asciende a <strong>${datos.reducciones.sancionFinal.toFixed(2)} euros</strong>.</p>`;
+            }
+            
+            if (datos.sancionesAccesorias.length > 0) {
+                html += '<p><strong>V. SANCIONES ACCESORIAS</strong></p>';
+                html += '<p>De conformidad con los artículos 163 de la Ley 7/2021 y 382 y 383 del Decreto 550/2022, además de la multa pecuniaria, procede la imposición de las siguientes sanciones accesorias, cuya imposición respeta el principio de proporcionalidad y está debidamente motivada atendiendo a la gravedad de los hechos constitutivos de la infracción y sus circunstancias concurrentes:</p>';
+                html += '<ul>';
+                datos.sancionesAccesorias.forEach(sanc => html += `<li>${sanc}</li>`);
+                html += '</ul>';
+                if (datos.duracionSanciones) {
+                    const tipoSancion = document.getElementById('duracionSanciones').value;
+                    const minimo = tipoSancion === 'grave' ? '6 meses' : '2 años';
+                    const maximo = tipoSancion === 'grave' ? '2 años' : '4 años';
+                    html += `<p>La duración de estas sanciones accesorias se establece en <strong>${datos.duracionSanciones} año(s)</strong>, conforme al artículo 383.4 del Decreto 550/2022, que establece para infracciones ${tipoSancion === 'grave' ? 'graves' : 'muy graves'} una duración mínima de ${minimo} y máxima de ${maximo}.</p>`;
+                }
+            }
+            
+            html += '<p><strong>VI. EFECTOS Y COMPATIBILIDAD</strong></p>';
+            html += '<p>Conforme al artículo 387 del Decreto 550/2022, las multas por la comisión de infracciones territoriales o urbanísticas se imponen con independencia de las demás medidas de restablecimiento de la legalidad, de resarcimiento de los daños e indemnización de los perjuicios ocasionados y del decomiso de las ganancias provenientes de la infracción.</p>';
+            
+            html += '<p><strong>VII. NORMATIVA APLICABLE</strong></p>';
+            html += '<ul>';
+            html += '<li>Ley 7/2021, de 1 de diciembre, de impulso para la sostenibilidad del territorio de Andalucía (artículos 161 a 172)</li>';
+            html += '<li>Decreto 550/2022, de 29 de noviembre, por el que se aprueba el Reglamento de la Ley 7/2021 (artículos 374 a 403)</li>';
+            html += '<li>Ley 39/2015, de 1 de octubre, del Procedimiento Administrativo Común de las Administraciones Públicas</li>';
+            html += '<li>Ley 40/2015, de 1 de octubre, de Régimen Jurídico del Sector Público</li>';
+            html += '</ul>';
+            
+            html += '<p><strong>VIII. PRESCRIPCIÓN</strong></p>';
+            if (datos.tipoInfraccion === 'leve') {
+                html += '<p>Conforme al artículo 394.1 del Decreto 550/2022, las infracciones leves prescriben al <strong>año</strong>.</p>';
+            } else {
+                html += '<p>Conforme al artículo 394.1 del Decreto 550/2022, las infracciones graves y muy graves prescriben a los <strong>cuatro años</strong>.</p>';
+            }
+            
+            html += '</div>';
+            
+            html += '<button class="copiar-btn" onclick="copiarFundamento()">📋 COPIAR FUNDAMENTO JURÍDICO</button>';
+
+            html += '</div>';
+
+            resultadoDiv.innerHTML = html;
+            resultadoDiv.style.display = 'block';
+            resultadoDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function copiarFundamento() {
+            const fundamento = document.getElementById('fundamentoJuridico');
+            const texto = fundamento.innerText;
+            
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('✅ Fundamento jurídico copiado al portapapeles');
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                // Fallback para navegadores que no soportan clipboard API
+                const textarea = document.createElement('textarea');
+                textarea.value = texto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('✅ Fundamento jurídico copiado al portapapeles');
+            });
+        }
+
+        // Inicializar
+        actualizarCalculoVivo();
+    </script>
+</body>
+</html>
