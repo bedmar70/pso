@@ -167,6 +167,13 @@
       color: #7b1fa2;
     }
     
+    .badge-status {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+    
     .autocomplete-loading {
       padding: 14px;
       text-align: center;
@@ -668,26 +675,62 @@
         const comercialField = getCustomFieldValue(task.custom_fields, CONFIG.CUSTOM_FIELDS.comercial_asignado);
         const faseIndex = getCustomFieldValue(task.custom_fields, 'f9cb1998-d396-4e84-8f43-74dbe5f01cd2');
         const complejidad = getCustomFieldValue(task.custom_fields, CONFIG.CUSTOM_FIELDS.complejidad);
+        const fechaPrometida = getCustomFieldValue(task.custom_fields, CONFIG.CUSTOM_FIELDS.fecha_prometida_comercial);
 
         const comercialNames = comercialField && Array.isArray(comercialField) 
           ? comercialField.map(u => u.username).join(', ') 
           : 'Sin asignar';
 
         const faseNombre = getFaseFromIndex(faseIndex);
-        const estado = task.status?.status || 'Sin estado';
+        
+        // Status nativo con color
+        const statusNativo = task.status?.status || 'Sin estado';
+        const statusColor = task.status?.color || '#87909e';
+        
+        // Fecha prometida
+        let fechaPrometidaText = '';
+        if (fechaPrometida) {
+          const fecha = new Date(parseInt(fechaPrometida));
+          fechaPrometidaText = fecha.toLocaleDateString('es-ES', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: '2-digit' 
+          });
+        }
+        
+        // Fecha límite
+        let fechaLimiteText = '';
+        if (task.due_date) {
+          const fecha = new Date(parseInt(task.due_date));
+          fechaLimiteText = fecha.toLocaleDateString('es-ES', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: '2-digit' 
+          });
+        }
+        
+        // Complejidad (estrellas)
+        let complejidadHTML = '';
+        if (complejidad) {
+          complejidadHTML = '⭐'.repeat(complejidad);
+        }
 
         const item = document.createElement('div');
         item.className = 'autocomplete-item';
         item.innerHTML = `
           <strong>${task.name}</strong>
-          <div>
+          <div style="margin: 6px 0;">
             <span class="badge badge-fase">${faseNombre}</span>
+            <span class="badge badge-status" style="background-color: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor};">
+              ${statusNativo}
+            </span>
             <span class="badge badge-comercial">👤 ${comercialNames}</span>
           </div>
-          <small>
-            📊 ${estado}
-            ${complejidad ? ` | ⭐ Complejidad: ${complejidad}` : ''}
-          </small>
+          <div style="font-size: 12px; color: #666; margin-top: 4px;">
+            ${fechaPrometidaText ? `📅 Prometida: ${fechaPrometidaText}` : ''}
+            ${fechaLimiteText ? ` | ⏰ Límite: ${fechaLimiteText}` : ''}
+            ${complejidadHTML ? ` | ${complejidadHTML}` : ''}
+          </div>
         `;
         
         item.addEventListener('click', () => selectProject({
@@ -698,7 +741,10 @@
           fase: faseNombre,
           faseIndex: faseIndex,
           complejidad: complejidad,
-          estado: estado,
+          statusNativo: statusNativo,
+          statusColor: statusColor,
+          fechaPrometida: fechaPrometidaText,
+          fechaLimite: fechaLimiteText,
           url: task.url,
           customFields: task.custom_fields,
           listId: task.list.id
@@ -719,9 +765,12 @@
       selectedProjectDiv.innerHTML = `
         <strong>✅ Proyecto seleccionado</strong>
         <div class="detail">📁 Proyecto: ${project.name}</div>
-        <div class="detail">👤 Comercial: ${project.comercialNames}</div>
         <div class="detail">📊 Fase: ${project.fase}</div>
-        <div class="detail">🎯 Estado: ${project.estado}</div>
+        <div class="detail" style="color: ${project.statusColor}">🔵 Estado: ${project.statusNativo}</div>
+        <div class="detail">👤 Comercial: ${project.comercialNames}</div>
+        ${project.fechaPrometida ? `<div class="detail">📅 Fecha Prometida: ${project.fechaPrometida}</div>` : ''}
+        ${project.fechaLimite ? `<div class="detail">⏰ Fecha Límite: ${project.fechaLimite}</div>` : ''}
+        ${project.complejidad ? `<div class="detail">${'⭐'.repeat(project.complejidad)} Complejidad</div>` : ''}
         <a href="${project.url}" target="_blank">🔗 Ver en ClickUp</a>
       `;
       selectedProjectDiv.style.display = 'block';
