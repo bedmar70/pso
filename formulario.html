@@ -425,6 +425,18 @@
         </div>
       </div>
 
+      <!-- EMAIL DEL SOLICITANTE -->
+      <div class="form-group">
+        <label for="emailSolicitante">📧 Email del Solicitante</label>
+        <input 
+          type="email" 
+          id="emailSolicitante" 
+          name="email_solicitante"
+          placeholder="tu@email.com"
+        >
+        <p class="help-text">Tu email de contacto para recibir respuestas</p>
+      </div>
+
       <!-- FECHA PROMETIDA -->
       <div class="form-group">
         <label for="fechaPrometida">Fecha Prometida al Cliente</label>
@@ -452,7 +464,7 @@
     
     const CONFIG = {
       // ===== CLICKUP API KEY =====
-      CLICKUP_API_KEY: 'pk_4607189_DVKSS5JUJBLEMV7IEA5E63R5XGK959IV',
+      CLICKUP_API_KEY: 'pk_AQUI_TU_API_KEY_REAL',
       
       // ===== LIST IDs =====
       CLICKUP_LIST_ID_PROYECTOS: '901517007537',     // Lista "Proyectos" (antes Maestra)
@@ -465,7 +477,8 @@
         presupuesto: 'c55e8eaa-a47b-427c-87e3-e99ae8840e1f',
         complejidad: '25eee947-6596-4751-8cdc-4e7d3d6a4bd3',
         fecha_prometida: '56efbe25-38ec-41c4-b890-0d2be4bc143e',
-        lista_tareas_relacionada: '889345bd-0082-440d-a470-6d6d1fa09d6e'
+        lista_tareas_relacionada: '889345bd-0082-440d-a470-6d6d1fa09d6e',
+        email_solicitante: 'b4fd724c-1a0d-4ae7-bd84-a226fffeeb93'
       },
       
       // ===== TIPOS DE GESTIÓN =====
@@ -901,6 +914,14 @@
         customFields.push({
           id: CONFIG.CUSTOM_FIELDS.fecha_prometida,
           value: new Date(formData.fecha_prometida).getTime()
+        });
+      }
+
+      // Email del solicitante
+      if (formData.email_solicitante && formData.email_solicitante.trim()) {
+        customFields.push({
+          id: CONFIG.CUSTOM_FIELDS.email_solicitante,
+          value: formData.email_solicitante.trim()
         });
       }
 
