@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Proyectos PSO</title>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        
+        /* Buscador */
+        .search-container {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #999;
+        }
+        
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .autocomplete-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        
+        .autocomplete-item:hover {
+            background: #f8f9ff;
+        }
+        
+        /* KPIs */
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .kpi-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .kpi-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Gráficos */
+        .chart-container {
+            margin-bottom: 40px;
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        /* Vista Proyecto */
+        .project-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .project-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .project-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .meta-item {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .meta-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        /* Subtareas */
+        .subtasks-list {
+            margin-top: 30px;
+        }
+        
+        .subtask-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .subtask-icon {
+            font-size: 24px;
+        }
+        
+        .subtask-name {
+            flex: 1;
+            font-size: 16px;
+        }
+        
+        .subtask-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-complete {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-pending {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        /* Botones */
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Visor de Proyectos PSO</h1>
+        
+        <!-- Buscador -->
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Buscar proyecto por nombre o referencia..."
+                autocomplete="off"
+            >
+            <span class="search-icon">🔍</span>
+            <div id="autocompleteResults" class="autocomplete-results"></div>
+        </div>
+        
+        <!-- Vista General -->
+        <div id="vistaGeneral">
+            <!-- KPIs -->
+            <div class="kpis">
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiTotal">-</div>
+                    <div class="kpi-label">Total Proyectos</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiEnCurso">-</div>
+                    <div class="kpi-label">En Curso</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiCompletos">-</div>
+                    <div class="kpi-label">Completados</div>
+                </div>
+            </div>
+            
+            <!-- Gráfico Proyectos por Fase -->
+            <div class="chart-container">
+                <h3>📊 Proyectos por Fase</h3>
+                <div id="chartFases" style="height: 400px;"></div>
+            </div>
+            
+            <!-- Gráfico Proyectos por Comercial -->
+            <div class="chart-container">
+                <h3>👥 Proyectos por Comercial</h3>
+                <div id="chartComerciales" style="height: 400px;"></div>
+            </div>
+        </div>
+        
+        <!-- Vista Proyecto -->
+        <div id="vistaProyecto" class="hidden">
+            <button class="btn btn-secondary" onclick="volverListado()">← Volver al listado</button>
+            
+            <div id="projectDetails"></div>
+            
+            <div class="chart-container">
+                <h3>📊 Progreso de Subtareas</h3>
+                <div id="chartProgreso" style="height: 300px;"></div>
+            </div>
+            
+            <div class="subtasks-list">
+                <h3>✅ Subtareas del Proyecto</h3>
+                <div id="subtasksList"></div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading hidden">Cargando...</div>
+    </div>
+
+    <script>
+        const API_KEY = 'pk_4607189_DVKSS5JUJBLEMV7IEA5E63R5XGK959IV';
+        const LIST_PROYECTOS = '901517007537';
+        
+        let proyectosData = [];
+        let proyectoSeleccionado = null;
+        
+        // Cargar proyectos al iniciar
+        async function cargarProyectos() {
+            try {
+                document.getElementById('loading').classList.remove('hidden');
+                
+                const response = await fetch(
+                    `https://api.clickup.com/api/v2/list/${LIST_PROYECTOS}/task?subtasks=false&archived=false`,
+                    {
+                        headers: {
+                            'Authorization': API_KEY
+                        }
+                    }
+                );
+                
+                const data = await response.json();
+                proyectosData = data.tasks;
+                
+                mostrarKPIs();
+                mostrarGraficoFases();
+                mostrarGraficoComerciales();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar proyectos');
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+        
+        // Buscador con autocomplete
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const resultsDiv = document.getElementById('autocompleteResults');
+            
+            if (searchTerm.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            const filtered = proyectosData.filter(p => 
+                p.name.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filtered.length === 0) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            resultsDiv.innerHTML = filtered.slice(0, 5).map(p => `
+                <div class="autocomplete-item" onclick="seleccionarProyecto('${p.id}')">
+                    <strong>${p.name}</strong><br>
+                    <small>${p.status.status} • ${new Date(p.date_created).toLocaleDateString()}</small>
+                </div>
+            `).join('');
+            
+            resultsDiv.style.display = 'block';
+        });
+        
+        // Seleccionar proyecto
+        async function seleccionarProyecto(projectId) {
+            try {
+                document.getElementById('loading').classList.remove('hidden');
+                document.getElementById('autocompleteResults').style.display = 'none';
+                
+                // Obtener detalles + subtareas
+                const response = await fetch(
+                    `https://api.clickup.com/api/v2/task/${projectId}?include_subtasks=true`,
+                    {
+                        headers: {
+                            'Authorization': API_KEY
+                        }
+                    }
+                );
+                
+                proyectoSeleccionado = await response.json();
+                
+                mostrarVistaProyecto();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar proyecto');
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+        
+        // Mostrar KPIs
+        function mostrarKPIs() {
+            document.getElementById('kpiTotal').textContent = proyectosData.length;
+            document.getElementById('kpiEnCurso').textContent = 
+                proyectosData.filter(p => p.status.status !== 'complete').length;
+            document.getElementById('kpiCompletos').textContent = 
+                proyectosData.filter(p => p.status.status === 'complete').length;
+        }
+        
+        // Gráfico Proyectos por Fase
+        function mostrarGraficoFases() {
+            const fases = {};
+            proyectosData.forEach(task => {
+                const faseField = task.custom_fields.find(cf => cf.id === 'f9cb1998-d396-4e84-8f43-74dbe5f01cd2');
+                const fase = faseField?.value || 'Sin fase';
+                fases[fase] = (fases[fase] || 0) + 1;
+            });
+            
+            const data = [{
+                x: Object.keys(fases),
+                y: Object.values(fases),
+                type: 'bar',
+                marker: {
+                    color: ['#667eea', '#764ba2', '#f093fb', '#4facfe']
+                }
+            }];
+            
+            const layout = {
+                margin: { t: 20, b: 40, l: 40, r: 20 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            
+            Plotly.newPlot('chartFases', data, layout, {responsive: true});
+        }
+        
+        // Gráfico Proyectos por Comercial
+        function mostrarGraficoComerciales() {
+            const comerciales = {};
+            proyectosData.forEach(task => {
+                const comercialField = task.custom_fields.find(cf => cf.id === '62be3a36-e444-4928-872d-34f9d7468127');
+                const comercial = comercialField?.value?.map(u => u.username).join(', ') || 'Sin asignar';
+                comerciales[comercial] = (comerciales[comercial] || 0) + 1;
+            });
+            
+            const data = [{
+                labels: Object.keys(comerciales),
+                values: Object.values(comerciales),
+                type: 'pie',
+                hole: 0.4,
+                marker: {
+                    colors: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b']
+                }
+            }];
+            
+            const layout = {
+                margin: { t: 20, b: 20, l: 20, r: 20 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                showlegend: true
+            };
+            
+            Plotly.newPlot('chartComerciales', data, layout, {responsive: true});
+        }
+        
+        // Mostrar vista de proyecto
+        function mostrarVistaProyecto() {
+            const p = proyectoSeleccionado;
+            
+            // Ocultar vista general
+            document.getElementById('vistaGeneral').classList.add('hidden');
+            document.getElementById('vistaProyecto').classList.remove('hidden');
+            
+            // Detalles del proyecto
+            const comercialField = p.custom_fields.find(cf => cf.id === '62be3a36-e444-4928-872d-34f9d7468127');
+            const faseField = p.custom_fields.find(cf => cf.id === 'f9cb1998-d396-4e84-8f43-74dbe5f01cd2');
+            
+            document.getElementById('projectDetails').innerHTML = `
+                <div class="project-header">
+                    <div class="project-title">${p.name}</div>
+                    <div class="project-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Estado:</span> ${p.status.status}
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Comercial:</span> 
+                            ${comercialField?.value?.map(u => u.username).join(', ') || 'Sin asignar'}
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Fase:</span> ${faseField?.value || 'Sin fase'}
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Creado:</span> ${new Date(p.date_created).toLocaleDateString()}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Subtareas
+            const subtasks = p.subtasks || [];
+            
+            if (subtasks.length > 0) {
+                mostrarGraficoProgreso(subtasks);
+                mostrarListaSubtareas(subtasks);
+            } else {
+                document.getElementById('chartProgreso').innerHTML = '<p>No hay subtareas</p>';
+                document.getElementById('subtasksList').innerHTML = '<p>Este proyecto no tiene subtareas.</p>';
+            }
+        }
+        
+        // Gráfico progreso subtareas
+        function mostrarGraficoProgreso(subtasks) {
+            const completadas = subtasks.filter(s => s.status.status === 'complete').length;
+            const pendientes = subtasks.length - completadas;
+            
+            const data = [{
+                labels: ['Completadas', 'Pendientes'],
+                values: [completadas, pendientes],
+                type: 'pie',
+                hole: 0.4,
+                marker: {
+                    colors: ['#28a745', '#6c757d']
+                }
+            }];
+            
+            const layout = {
+                annotations: [{
+                    text: `${completadas}/${subtasks.length}`,
+                    font: { size: 32, weight: 'bold' },
+                    showarrow: false
+                }],
+                margin: { t: 20, b: 20, l: 20, r: 20 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                showlegend: true
+            };
+            
+            Plotly.newPlot('chartProgreso', data, layout, {responsive: true});
+        }
+        
+        // Lista de subtareas
+        function mostrarListaSubtareas(subtasks) {
+            const sortedSubtasks = subtasks.sort((a, b) => a.orderindex - b.orderindex);
+            
+            document.getElementById('subtasksList').innerHTML = sortedSubtasks.map(s => {
+                const isComplete = s.status.status === 'complete';
+                const icon = isComplete ? '✅' : (s.status.status === 'in progress' ? '⏳' : '⬜');
+                const statusClass = isComplete ? 'status-complete' : (s.status.status === 'in progress' ? 'status-progress' : 'status-pending');
+                
+                return `
+                    <div class="subtask-item">
+                        <span class="subtask-icon">${icon}</span>
+                        <span class="subtask-name">${s.name}</span>
+                        <span class="subtask-status ${statusClass}">${s.status.status}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Volver al listado
+        function volverListado() {
+            document.getElementById('vistaGeneral').classList.remove('hidden');
+            document.getElementById('vistaProyecto').classList.add('hidden');
+            proyectoSeleccionado = null;
+        }
+        
+        // Iniciar
+        cargarProyectos();
+    </script>
+</body>
+</html>
