@@ -34,6 +34,11 @@
             font-size: 32px;
         }
         
+        h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
         /* Buscador */
         .search-container {
             position: relative;
@@ -77,6 +82,7 @@
             overflow-y: auto;
             display: none;
             z-index: 1000;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         
         .autocomplete-item {
@@ -88,6 +94,16 @@
         
         .autocomplete-item:hover {
             background: #f8f9ff;
+        }
+        
+        .autocomplete-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .autocomplete-item small {
+            color: #666;
         }
         
         /* KPIs */
@@ -104,6 +120,7 @@
             padding: 25px;
             border-radius: 15px;
             text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
         
         .kpi-value {
@@ -132,6 +149,7 @@
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
+            margin-top: 20px;
         }
         
         .project-title {
@@ -169,15 +187,33 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            transition: all 0.3s;
+        }
+        
+        .subtask-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
         }
         
         .subtask-icon {
             font-size: 24px;
+            min-width: 30px;
         }
         
         .subtask-name {
             flex: 1;
             font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .subtask-complexity {
+            margin-left: auto;
+            margin-right: 10px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
         }
         
         .subtask-status {
@@ -185,6 +221,7 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
+            white-space: nowrap;
         }
         
         .status-complete {
@@ -200,6 +237,79 @@
         .status-pending {
             background: #f8f9fa;
             color: #6c757d;
+        }
+        
+        /* Tooltip para descripción/comentarios */
+        .info-icon-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .info-icon {
+            font-size: 18px;
+            cursor: help;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        
+        .info-icon:hover {
+            opacity: 1;
+        }
+        
+        .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            width: 350px;
+            max-width: 90vw;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: opacity 0.3s, visibility 0.3s;
+            margin-bottom: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .tooltip-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #333;
+        }
+        
+        .info-icon-container:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .tooltip-section {
+            margin-bottom: 12px;
+        }
+        
+        .tooltip-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .tooltip-section strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffd700;
+        }
+        
+        .tooltip-section p {
+            margin: 0;
+            color: #e0e0e0;
         }
         
         /* Botones */
@@ -227,6 +337,10 @@
             color: #333;
         }
         
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
         /* Hidden */
         .hidden {
             display: none !important;
@@ -237,6 +351,18 @@
             text-align: center;
             padding: 40px;
             color: #999;
+            font-size: 18px;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
         }
     </style>
 </head>
@@ -305,7 +431,7 @@
             </div>
         </div>
         
-        <div id="loading" class="loading hidden">Cargando...</div>
+        <div id="loading" class="loading hidden">Cargando datos</div>
     </div>
 
     <script>
@@ -338,7 +464,7 @@
                 
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cargar proyectos');
+                alert('Error al cargar proyectos. Verifica tu conexión.');
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }
@@ -359,7 +485,8 @@
             );
             
             if (filtered.length === 0) {
-                resultsDiv.style.display = 'none';
+                resultsDiv.innerHTML = '<div class="autocomplete-item"><small>No se encontraron proyectos</small></div>';
+                resultsDiv.style.display = 'block';
                 return;
             }
             
@@ -373,11 +500,19 @@
             resultsDiv.style.display = 'block';
         });
         
+        // Cerrar autocomplete al hacer click fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('autocompleteResults').style.display = 'none';
+            }
+        });
+        
         // Seleccionar proyecto
         async function seleccionarProyecto(projectId) {
             try {
                 document.getElementById('loading').classList.remove('hidden');
                 document.getElementById('autocompleteResults').style.display = 'none';
+                document.getElementById('searchInput').value = '';
                 
                 // Obtener detalles + subtareas
                 const response = await fetch(
@@ -391,11 +526,34 @@
                 
                 proyectoSeleccionado = await response.json();
                 
+                // Cargar comentarios para cada subtarea
+                if (proyectoSeleccionado.subtasks && proyectoSeleccionado.subtasks.length > 0) {
+                    await Promise.all(
+                        proyectoSeleccionado.subtasks.map(async (subtask) => {
+                            try {
+                                const commentsResponse = await fetch(
+                                    `https://api.clickup.com/api/v2/task/${subtask.id}/comment`,
+                                    {
+                                        headers: {
+                                            'Authorization': API_KEY
+                                        }
+                                    }
+                                );
+                                const commentsData = await commentsResponse.json();
+                                subtask.comments = commentsData.comments || [];
+                            } catch (error) {
+                                console.error(`Error cargando comentarios de ${subtask.id}:`, error);
+                                subtask.comments = [];
+                            }
+                        })
+                    );
+                }
+                
                 mostrarVistaProyecto();
                 
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cargar proyecto');
+                alert('Error al cargar el proyecto');
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }
@@ -424,17 +582,27 @@
                 y: Object.values(fases),
                 type: 'bar',
                 marker: {
-                    color: ['#667eea', '#764ba2', '#f093fb', '#4facfe']
+                    color: ['#667eea', '#764ba2', '#f093fb', '#4facfe'],
+                    line: {
+                        color: 'rgba(0,0,0,0.1)',
+                        width: 1
+                    }
                 }
             }];
             
             const layout = {
-                margin: { t: 20, b: 40, l: 40, r: 20 },
+                margin: { t: 20, b: 60, l: 40, r: 20 },
                 paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)'
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                xaxis: {
+                    title: 'Fase'
+                },
+                yaxis: {
+                    title: 'Cantidad de Proyectos'
+                }
             };
             
-            Plotly.newPlot('chartFases', data, layout, {responsive: true});
+            Plotly.newPlot('chartFases', data, layout, {responsive: true, displayModeBar: false});
         }
         
         // Gráfico Proyectos por Comercial
@@ -453,16 +621,22 @@
                 hole: 0.4,
                 marker: {
                     colors: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b']
-                }
+                },
+                textinfo: 'label+percent',
+                textposition: 'outside'
             }];
             
             const layout = {
                 margin: { t: 20, b: 20, l: 20, r: 20 },
                 paper_bgcolor: 'rgba(0,0,0,0)',
-                showlegend: true
+                showlegend: true,
+                legend: {
+                    orientation: 'h',
+                    y: -0.1
+                }
             };
             
-            Plotly.newPlot('chartComerciales', data, layout, {responsive: true});
+            Plotly.newPlot('chartComerciales', data, layout, {responsive: true, displayModeBar: false});
         }
         
         // Mostrar vista de proyecto
@@ -505,8 +679,8 @@
                 mostrarGraficoProgreso(subtasks);
                 mostrarListaSubtareas(subtasks);
             } else {
-                document.getElementById('chartProgreso').innerHTML = '<p>No hay subtareas</p>';
-                document.getElementById('subtasksList').innerHTML = '<p>Este proyecto no tiene subtareas.</p>';
+                document.getElementById('chartProgreso').innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">No hay subtareas en este proyecto</p>';
+                document.getElementById('subtasksList').innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">Este proyecto no tiene subtareas.</p>';
             }
         }
         
@@ -522,24 +696,30 @@
                 hole: 0.4,
                 marker: {
                     colors: ['#28a745', '#6c757d']
-                }
+                },
+                textinfo: 'value',
+                textposition: 'inside'
             }];
             
             const layout = {
                 annotations: [{
                     text: `${completadas}/${subtasks.length}`,
-                    font: { size: 32, weight: 'bold' },
+                    font: { size: 32, weight: 'bold', color: '#333' },
                     showarrow: false
                 }],
                 margin: { t: 20, b: 20, l: 20, r: 20 },
                 paper_bgcolor: 'rgba(0,0,0,0)',
-                showlegend: true
+                showlegend: true,
+                legend: {
+                    orientation: 'h',
+                    y: -0.1
+                }
             };
             
-            Plotly.newPlot('chartProgreso', data, layout, {responsive: true});
+            Plotly.newPlot('chartProgreso', data, layout, {responsive: true, displayModeBar: false});
         }
         
-        // Lista de subtareas
+        // Lista de subtareas (VERSIÓN MEJORADA)
         function mostrarListaSubtareas(subtasks) {
             const sortedSubtasks = subtasks.sort((a, b) => a.orderindex - b.orderindex);
             
@@ -548,14 +728,75 @@
                 const icon = isComplete ? '✅' : (s.status.status === 'in progress' ? '⏳' : '⬜');
                 const statusClass = isComplete ? 'status-complete' : (s.status.status === 'in progress' ? 'status-progress' : 'status-pending');
                 
+                // Obtener complejidad del custom field
+                const complejidadField = s.custom_fields?.find(cf => cf.id === 'c55e8eaa-a47b-427c-87e3-e99ae8840e1f');
+                const complejidad = complejidadField?.value || null;
+                
+                // Mapear complejidad a texto y color
+                const complejidadMap = {
+                    0: { label: 'Baja', color: '#28a745', emoji: '🟢' },
+                    1: { label: 'Media', color: '#ffc107', emoji: '🟡' },
+                    2: { label: 'Alta', color: '#dc3545', emoji: '🔴' }
+                };
+                
+                const complejidadInfo = complejidad !== null ? complejidadMap[complejidad] : null;
+                
+                // Descripción y comentarios para tooltip
+                const hasInfo = s.description || (s.comments && s.comments.length > 0);
+                const tooltipContent = generateTooltipContent(s);
+                
                 return `
                     <div class="subtask-item">
                         <span class="subtask-icon">${icon}</span>
                         <span class="subtask-name">${s.name}</span>
+                        
+                        ${complejidadInfo ? `
+                            <span class="subtask-complexity" style="background: ${complejidadInfo.color}20; color: ${complejidadInfo.color};">
+                                ${complejidadInfo.emoji} ${complejidadInfo.label}
+                            </span>
+                        ` : ''}
+                        
+                        ${hasInfo ? `
+                            <div class="info-icon-container">
+                                <span class="info-icon">ℹ️</span>
+                                <div class="tooltip-content">${tooltipContent}</div>
+                            </div>
+                        ` : ''}
+                        
                         <span class="subtask-status ${statusClass}">${s.status.status}</span>
                     </div>
                 `;
             }).join('');
+        }
+        
+        // Generar contenido del tooltip
+        function generateTooltipContent(subtask) {
+            let content = '';
+            
+            // Descripción
+            if (subtask.description) {
+                const desc = subtask.description.replace(/<[^>]*>/g, ''); // Eliminar HTML
+                content += `
+                    <div class="tooltip-section">
+                        <strong>📝 Descripción:</strong>
+                        <p>${desc.substring(0, 200)}${desc.length > 200 ? '...' : ''}</p>
+                    </div>
+                `;
+            }
+            
+            // Comentarios
+            if (subtask.comments && subtask.comments.length > 0) {
+                const lastComment = subtask.comments[subtask.comments.length - 1];
+                const commentText = lastComment.comment_text.replace(/<[^>]*>/g, ''); // Eliminar HTML
+                content += `
+                    <div class="tooltip-section">
+                        <strong>💬 Último comentario:</strong>
+                        <p><em>${lastComment.user.username}:</em> ${commentText.substring(0, 150)}${commentText.length > 150 ? '...' : ''}</p>
+                    </div>
+                `;
+            }
+            
+            return content || '<p>Sin información adicional</p>';
         }
         
         // Volver al listado
@@ -563,6 +804,7 @@
             document.getElementById('vistaGeneral').classList.remove('hidden');
             document.getElementById('vistaProyecto').classList.add('hidden');
             proyectoSeleccionado = null;
+            document.getElementById('searchInput').value = '';
         }
         
         // Iniciar
