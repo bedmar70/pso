@@ -401,10 +401,10 @@
                 </div>
             </div>
             
-            <!-- Gráfico Proyectos por Fase -->
+            <!-- Gráfico Proyectos por Estado -->
             <div class="chart-container">
-                <h3>📊 Proyectos por Fase</h3>
-                <div id="chartFases" style="height: 400px;"></div>
+                <h3>📊 Proyectos por Estado</h3>
+                <div id="chartEstados" style="height: 400px;"></div>
             </div>
             
             <!-- Gráfico Proyectos por Comercial -->
@@ -447,7 +447,7 @@
                 document.getElementById('loading').classList.remove('hidden');
                 
                 const response = await fetch(
-                    `https://api.clickup.com/api/v2/list/${LIST_PROYECTOS}/task?subtasks=false&archived=false`,
+                    `https://api.clickup.com/api/v2/list/${LIST_PROYECTOS}/task?subtasks=false&archived=false&include_closed=true`,
                     {
                         headers: {
                             'Authorization': API_KEY
@@ -459,7 +459,7 @@
                 proyectosData = data.tasks;
                 
                 mostrarKPIs();
-                mostrarGraficoFases();
+                mostrarGraficoEstados();
                 mostrarGraficoComerciales();
                 
             } catch (error) {
@@ -568,21 +568,29 @@
                 proyectosData.filter(p => p.status.status === 'complete').length;
         }
         
-        // Gráfico Proyectos por Fase
-        function mostrarGraficoFases() {
-            const fases = {};
+        // Gráfico Proyectos por Estado
+        function mostrarGraficoEstados() {
+            const estados = {};
             proyectosData.forEach(task => {
-                const faseField = task.custom_fields.find(cf => cf.id === 'f9cb1998-d396-4e84-8f43-74dbe5f01cd2');
-                const fase = faseField?.value || 'Sin fase';
-                fases[fase] = (fases[fase] || 0) + 1;
+                const estado = task.status.status || 'Sin estado';
+                const estadoLabel = estado === 'complete' ? 'Completado' : 
+                                   estado === 'in progress' ? 'En Curso' :
+                                   estado === 'to do' ? 'Pendiente' : estado;
+                estados[estadoLabel] = (estados[estadoLabel] || 0) + 1;
             });
             
+            const coloresEstado = {
+                'Completado': '#28a745',
+                'En Curso': '#ffc107',
+                'Pendiente': '#6c757d'
+            };
+            
             const data = [{
-                x: Object.keys(fases),
-                y: Object.values(fases),
+                x: Object.keys(estados),
+                y: Object.values(estados),
                 type: 'bar',
                 marker: {
-                    color: ['#667eea', '#764ba2', '#f093fb', '#4facfe'],
+                    color: Object.keys(estados).map(e => coloresEstado[e] || '#667eea'),
                     line: {
                         color: 'rgba(0,0,0,0.1)',
                         width: 1
@@ -595,14 +603,14 @@
                 paper_bgcolor: 'rgba(0,0,0,0)',
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 xaxis: {
-                    title: 'Fase'
+                    title: 'Estado'
                 },
                 yaxis: {
                     title: 'Cantidad de Proyectos'
                 }
             };
             
-            Plotly.newPlot('chartFases', data, layout, {responsive: true, displayModeBar: false});
+            Plotly.newPlot('chartEstados', data, layout, {responsive: true, displayModeBar: false});
         }
         
         // Gráfico Proyectos por Comercial
@@ -650,6 +658,16 @@
             // Detalles del proyecto
             const comercialField = p.custom_fields.find(cf => cf.id === '62be3a36-e444-4928-872d-34f9d7468127');
             const faseField = p.custom_fields.find(cf => cf.id === 'f9cb1998-d396-4e84-8f43-74dbe5f01cd2');
+            const complejidadField = p.custom_fields.find(cf => cf.id === 'c55e8eaa-a47b-427c-87e3-e99ae8840e1f');
+            
+            // Mapear complejidad
+            const complejidadMap = {
+                0: { label: 'Baja', emoji: '🟢' },
+                1: { label: 'Media', emoji: '🟡' },
+                2: { label: 'Alta', emoji: '🔴' }
+            };
+            const complejidad = complejidadField?.value !== null && complejidadField?.value !== undefined ? 
+                               complejidadMap[complejidadField.value] : null;
             
             document.getElementById('projectDetails').innerHTML = `
                 <div class="project-header">
@@ -663,7 +681,7 @@
                             ${comercialField?.value?.map(u => u.username).join(', ') || 'Sin asignar'}
                         </div>
                         <div class="meta-item">
-                            <span class="meta-label">Fase:</span> ${faseField?.value || 'Sin fase'}
+                            <span class="meta-label">Complejidad:</span> ${complejidad ? `${complejidad.emoji} ${complejidad.label}` : 'Sin definir'}
                         </div>
                         <div class="meta-item">
                             <span class="meta-label">Creado:</span> ${new Date(p.date_created).toLocaleDateString()}
