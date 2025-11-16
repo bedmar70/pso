@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard PSO - Proyectos</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { 
+            font-size: 32px; 
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { color: #888; margin-bottom: 30px; font-size: 14px; }
+        .kpis { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px; 
+        }
+        .kpi {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .kpi:hover { transform: translateY(-5px); border-color: #667eea; }
+        .kpi-value { 
+            font-size: 48px; 
+            font-weight: bold; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .kpi-label { 
+            color: #888; 
+            font-size: 13px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .chart { 
+            background: #1a1a1a; 
+            border: 1px solid #333;
+            border-radius: 12px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 18px;
+        }
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .update-time {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Dashboard Proyectos PSO</h1>
+        <p class="subtitle">Diseño y Preimpresión - Datos en tiempo real de ClickUp</p>
+        
+        <div id="loading" class="loading">⏳ Cargando datos de ClickUp...</div>
+        <div id="error" style="display:none;"></div>
+        
+        <!-- KPIs -->
+        <div class="kpis" id="kpis" style="display:none;">
+            <div class="kpi">
+                <div class="kpi-value" id="total">0</div>
+                <div class="kpi-label">Total Proyectos</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value" id="pendientes">0</div>
+                <div class="kpi-label">Pendientes</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value" id="enCurso">0</div>
+                <div class="kpi-label">En Curso</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value" id="completados">0</div>
+                <div class="kpi-label">Completados</div>
+            </div>
+        </div>
+        
+        <!-- Gráficos -->
+        <div id="charts" style="display:none;">
+            <div class="chart" id="chartFases"></div>
+            <div class="chart" id="chartComerciales"></div>
+            <div class="chart" id="chartEstados"></div>
+        </div>
+        
+        <div class="update-time" id="updateTime"></div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            API_KEY: 'pk_4607189_DVKSS5JUJBLEMV7IEA5E63R5XGK959IV',
+            LIST_ID: '901517007537',
+            FASES_FIELD_ID: 'f9cb1998-d396-4e84-8f43-74dbe5f01cd2',
+            COMERCIAL_FIELD_ID: '62be3a36-e444-4928-872d-34f9d7468127'
+        };
+
+        const FASE_MAP = {
+            0: 'Solicitud',
+            1: 'Diseño',
+            3: 'Cliché'
+        };
+
+        const FASE_COLORS = {
+            'Solicitud': '#667684',
+            'Diseño': '#0231E8',
+            'Cliché': '#9b59b6',
+            'Sin fase': '#444'
+        };
+
+        async function fetchClickUpData() {
+            const url = `https://api.clickup.com/api/v2/list/${CONFIG.LIST_ID}/task?archived=false&include_closed=true`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': CONFIG.API_KEY,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            return response.json();
+        }
+
+        function updateKPIs(tasks) {
+            document.getElementById('total').textContent = tasks.length;
+            
+            const pendientes = tasks.filter(t => t.status.status === 'to do' || t.status.status === 'pendiente').length;
+            const enCurso = tasks.filter(t => t.status.status === 'in progress' || t.status.status === 'en curso').length;
+            const completados = tasks.filter(t => t.status.status === 'complete' || t.status.status === 'completado').length;
+            
+            document.getElementById('pendientes').textContent = pendientes;
+            document.getElementById('enCurso').textContent = enCurso;
+            document.getElementById('completados').textContent = completados;
+        }
+
+        function createFasesChart(tasks) {
+            const fases = {};
+            
+            tasks.forEach(task => {
+                const faseField = task.custom_fields.find(cf => cf.id === CONFIG.FASES_FIELD_ID);
+                let faseNombre = 'Sin fase';
+                
+                if (faseField && faseField.value !== null && faseField.value !== undefined) {
+                    faseNombre = FASE_MAP[faseField.value] || 'Sin fase';
+                }
+                
+                fases[faseNombre] = (fases[faseNombre] || 0) + 1;
+            });
+
+            const data = [{
+                x: Object.keys(fases),
+                y: Object.values(fases),
+                type: 'bar',
+                marker: {
+                    color: Object.keys(fases).map(f => FASE_COLORS[f] || '#888')
+                },
+                text: Object.values(fases),
+                textposition: 'auto',
+            }];
+
+            const layout = {
+                title: {
+                    text: 'Proyectos por Fase',
+                    font: { color: '#fff', size: 18 }
+                },
+                paper_bgcolor: '#1a1a1a',
+                plot_bgcolor: '#1a1a1a',
+                font: { color: '#fff' },
+                xaxis: { 
+                    gridcolor: '#333',
+                    color: '#999'
+                },
+                yaxis: { 
+                    gridcolor: '#333',
+                    color: '#999'
+                },
+                margin: { t: 50, b: 50, l: 50, r: 20 }
+            };
+
+            Plotly.newPlot('chartFases', data, layout, {responsive: true});
+        }
+
+        function createComercialesChart(tasks) {
+            const comerciales = {};
+            
+            tasks.forEach(task => {
+                const comercialField = task.custom_fields.find(cf => cf.id === CONFIG.COMERCIAL_FIELD_ID);
+                
+                if (comercialField && comercialField.value && comercialField.value.length > 0) {
+                    comercialField.value.forEach(user => {
+                        comerciales[user.username] = (comerciales[user.username] || 0) + 1;
+                    });
+                } else {
+                    comerciales['Sin asignar'] = (comerciales['Sin asignar'] || 0) + 1;
+                }
+            });
+
+            const data = [{
+                labels: Object.keys(comerciales),
+                values: Object.values(comerciales),
+                type: 'pie',
+                marker: {
+                    colors: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe']
+                },
+                textinfo: 'label+percent',
+                textfont: { color: '#fff' }
+            }];
+
+            const layout = {
+                title: {
+                    text: 'Proyectos por Comercial',
+                    font: { color: '#fff', size: 18 }
+                },
+                paper_bgcolor: '#1a1a1a',
+                plot_bgcolor: '#1a1a1a',
+                font: { color: '#fff' },
+                showlegend: true,
+                legend: { 
+                    font: { color: '#999' }
+                },
+                margin: { t: 50, b: 20, l: 20, r: 20 }
+            };
+
+            Plotly.newPlot('chartComerciales', data, layout, {responsive: true});
+        }
+
+        function createEstadosChart(tasks) {
+            const estados = {};
+            
+            tasks.forEach(task => {
+                const estado = task.status.status || 'Sin estado';
+                estados[estado] = (estados[estado] || 0) + 1;
+            });
+
+            const data = [{
+                x: Object.keys(estados),
+                y: Object.values(estados),
+                type: 'bar',
+                marker: {
+                    color: '#667eea'
+                },
+                text: Object.values(estados),
+                textposition: 'auto',
+            }];
+
+            const layout = {
+                title: {
+                    text: 'Proyectos por Estado',
+                    font: { color: '#fff', size: 18 }
+                },
+                paper_bgcolor: '#1a1a1a',
+                plot_bgcolor: '#1a1a1a',
+                font: { color: '#fff' },
+                xaxis: { 
+                    gridcolor: '#333',
+                    color: '#999'
+                },
+                yaxis: { 
+                    gridcolor: '#333',
+                    color: '#999'
+                },
+                margin: { t: 50, b: 80, l: 50, r: 20 }
+            };
+
+            Plotly.newPlot('chartEstados', data, layout, {responsive: true});
+        }
+
+        async function loadDashboard() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+                
+                const data = await fetchClickUpData();
+                const tasks = data.tasks || [];
+
+                if (tasks.length === 0) {
+                    throw new Error('No se encontraron proyectos');
+                }
+
+                // Actualizar KPIs
+                updateKPIs(tasks);
+
+                // Crear gráficos
+                createFasesChart(tasks);
+                createComercialesChart(tasks);
+                createEstadosChart(tasks);
+
+                // Mostrar contenido
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('kpis').style.display = 'grid';
+                document.getElementById('charts').style.display = 'block';
+
+                // Actualizar timestamp
+                const now = new Date().toLocaleString('es-ES');
+                document.getElementById('updateTime').textContent = `Última actualización: ${now}`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').innerHTML = `
+                    <div class="error">
+                        ❌ Error al cargar datos: ${error.message}
+                        <br><small>Verifica la conexión y la API key de ClickUp</small>
+                    </div>
+                `;
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        // Cargar al iniciar
+        loadDashboard();
+
+        // Auto-actualizar cada 5 minutos
+        setInterval(loadDashboard, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
