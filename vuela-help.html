@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Tareas - ClickUp</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --pending-color: #94a3b8;
+            --in-progress-color: #8b5cf6;
+            --completed-color: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ===== LOGIN PAGE ===== */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .logo-section p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .user-selection h2 {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .user-buttons {
+            display: grid;
+            gap: 16px;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .user-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-icon {
+            font-size: 2rem;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard-container {
+            min-height: 100vh;
+            background: var(--bg-color);
+            display: none;
+        }
+
+        .dashboard-container.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: white;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-content h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .current-user {
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 8px 16px;
+            background: var(--bg-color);
+            border-radius: 8px;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ===== STATISTICS ===== */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            border-left: 4px solid;
+        }
+
+        .stat-card.pending {
+            border-left-color: var(--pending-color);
+        }
+
+        .stat-card.in-progress {
+            border-left-color: var(--in-progress-color);
+        }
+
+        .stat-card.completed {
+            border-left-color: var(--completed-color);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== FILTERS ===== */
+        .filters-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* ===== TASKS LIST ===== */
+        .tasks-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        .task-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .task-card.status-pending {
+            border-left-color: var(--pending-color);
+        }
+
+        .task-card.status-in-progress {
+            border-left-color: var(--in-progress-color);
+        }
+
+        .task-card.status-completed {
+            border-left-color: var(--completed-color);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .task-priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-urgent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-high {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-normal {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .priority-low {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .task-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .task-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-assignees {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .assignee-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: var(--bg-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .task-custom-fields {
+            margin-bottom: 16px;
+        }
+
+        .custom-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .custom-field-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .custom-field-value a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .custom-field-value a:hover {
+            text-decoration: underline;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .status-btn.pending {
+            background: white;
+            color: var(--pending-color);
+            border-color: var(--pending-color);
+        }
+
+        .status-btn.pending.active,
+        .status-btn.pending:hover {
+            background: var(--pending-color);
+            color: white;
+        }
+
+        .status-btn.in-progress {
+            background: white;
+            color: var(--in-progress-color);
+            border-color: var(--in-progress-color);
+        }
+
+        .status-btn.in-progress.active,
+        .status-btn.in-progress:hover {
+            background: var(--in-progress-color);
+            color: white;
+        }
+
+        .status-btn.completed {
+            background: white;
+            color: var(--completed-color);
+            border-color: var(--completed-color);
+        }
+
+        .status-btn.completed.active,
+        .status-btn.completed:hover {
+            background: var(--completed-color);
+            color: white;
+        }
+
+        .status-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== LOADING & EMPTY STATES ===== */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .error-message button {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: #991b1b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+
+            .logo-section h1 {
+                font-size: 2rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .user-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-section {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+
+            .task-header {
+                flex-direction: column;
+            }
+
+            .task-actions {
+                flex-direction: column;
+            }
+
+            .status-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-btn {
+                padding: 16px;
+                font-size: 1rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .task-title {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- PÁGINA DE LOGIN -->
+    <div id="loginPage" class="container">
+        <div class="login-card">
+            <div class="logo-section">
+                <h1>📋 Portal de Tareas</h1>
+                <p>Gestión de tareas ClickUp</p>
+            </div>
+            
+            <div class="user-selection">
+                <h2>Selecciona tu usuario</h2>
+                <div class="user-buttons">
+                    <button class="user-btn" onclick="selectUser('Diego', '901409806415')">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name">Diego</span>
+                    </button>
+                    
+                    <button class="user-btn" onclick="selectUser('Jose', '901409837370')">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name">Jose</span>
+                    </button>
+                    
+                    <button class="user-btn" onclick="selectUser('Maribel', '901409806416')">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name">Maribel</span>
+                    </button>
+                    
+                    <button class="user-btn" onclick="selectUser('Consultor', 'consultor')">
+                        <span class="user-icon">👨‍💼</span>
+                        <span class="user-name">Consultor</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PÁGINA DE DASHBOARD -->
+    <div id="dashboardPage" class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>📋 Mis Tareas</h1>
+                <div class="user-info">
+                    <span class="current-user" id="currentUserName"></span>
+                    <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Estadísticas -->
+            <div class="stats-section">
+                <div class="stat-card pending">
+                    <div class="stat-number" id="statPending">0</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+                <div class="stat-card in-progress">
+                    <div class="stat-number" id="statInProgress">0</div>
+                    <div class="stat-label">En Curso</div>
+                </div>
+                <div class="stat-card completed">
+                    <div class="stat-number" id="statCompleted">0</div>
+                    <div class="stat-label">Completadas</div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filters-section">
+                <button class="filter-btn active" onclick="filterTasks('all', event)">
+                    Todas (<span id="countAll">0</span>)
+                </button>
+                <button class="filter-btn" onclick="filterTasks('pending', event)">
+                    ⏳ Pendientes (<span id="countPending">0</span>)
+                </button>
+                <button class="filter-btn" onclick="filterTasks('in-progress', event)">
+                    🔵 En Curso (<span id="countInProgress">0</span>)
+                </button>
+                <button class="filter-btn" onclick="filterTasks('completed', event)">
+                    ✅ Completadas (<span id="countCompleted">0</span>)
+                </button>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Cargando tareas...</p>
+            </div>
+
+            <!-- Error -->
+            <div id="error" class="error-message hidden">
+                <p>❌ Error al cargar las tareas. Por favor, intenta de nuevo.</p>
+                <button onclick="loadTasks()">Reintentar</button>
+            </div>
+
+            <!-- Lista de tareas -->
+            <div id="tasksList" class="tasks-list"></div>
+
+            <!-- Empty state -->
+            <div id="emptyState" class="empty-state hidden">
+                <p>🎉 ¡No tienes tareas en esta categoría!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURACIÓN =====
+        const CLICKUP_API_KEY = 'pk_4607189_DVKSS5JUJBLEMV7IEA5E63R5XGK959IV';
+        const API_BASE_URL = 'https://api.clickup.com/api/v2';
+
+        const USER_LISTS = {
+            'Diego': '901409806415',
+            'Jose': '901409837370',
+            'Maribel': '901409806416',
+            'Consultor': 'consultor'
+        };
+
+        const STATUS_MAPPING = {
+            'to do': { key: 'pending', label: 'Pendiente', emoji: '⏳' },
+            'in progress': { key: 'in-progress', label: 'En Curso', emoji: '🔵' },
+            'complete': { key: 'completed', label: 'Completada', emoji: '✅' },
+            'Open': { key: 'pending', label: 'Pendiente', emoji: '⏳' }
+        };
+
+        // ===== ESTADO GLOBAL =====
+        let allTasks = [];
+        let currentFilter = 'all';
+        let currentUser = null;
+        let currentListId = null;
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar si hay sesión activa
+            currentUser = localStorage.getItem('currentUser');
+            currentListId = localStorage.getItem('currentListId');
+            
+            if (currentUser && currentListId) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        });
+
+        // ===== NAVEGACIÓN =====
+        function showLogin() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.remove('active');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('active');
+            document.getElementById('currentUserName').textContent = `👤 ${currentUser}`;
+            loadTasks();
+        }
+
+        function selectUser(userName, listId) {
+            currentUser = userName;
+            currentListId = listId;
+            localStorage.setItem('currentUser', userName);
+            localStorage.setItem('currentListId', listId);
+            showDashboard();
+        }
+
+        function logout() {
+            currentUser = null;
+            currentListId = null;
+            allTasks = [];
+            currentFilter = 'all';
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('currentListId');
+            showLogin();
+        }
+
+        // ===== API CLICKUP =====
+        async function loadTasks() {
+            showLoading(true);
+            hideError();
+            
+            try {
+                let tasks = [];
+                
+                if (currentListId === 'consultor') {
+                    const allLists = Object.values(USER_LISTS).filter(id => id !== 'consultor');
+                    const promises = allLists.map(id => fetchTasksFromList(id));
+                    const results = await Promise.all(promises);
+                    tasks = results.flat();
+                } else {
+                    tasks = await fetchTasksFromList(currentListId);
+                }
+                
+                allTasks = tasks;
+                updateStatistics();
+                renderTasks(allTasks);
+                showLoading(false);
+            } catch (error) {
+                console.error('Error al cargar tareas:', error);
+                showError();
+                showLoading(false);
+            }
+        }
+
+        async function fetchTasksFromList(listId) {
+            const response = await fetch(`${API_BASE_URL}/list/${listId}/task?archived=false`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': CLICKUP_API_KEY,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.tasks || [];
+        }
+
+        async function updateTaskStatus(taskId, newStatus) {
+            const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
+            const buttons = taskCard.querySelectorAll('.status-btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            try {
+                const statusMap = {
+                    'pending': 'to do',
+                    'in-progress': 'in progress',
+                    'completed': 'complete'
+                };
+                
+                const clickupStatus = statusMap[newStatus];
+                
+                const response = await fetch(`${API_BASE_URL}/task/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': CLICKUP_API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: clickupStatus
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                await loadTasks();
+                showNotification('✅ Estado actualizado correctamente', 'success');
+                
+            } catch (error) {
+                console.error('Error al actualizar estado:', error);
+                showNotification('❌ Error al actualizar el estado', 'error');
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        // ===== ESTADÍSTICAS =====
+        function updateStatistics() {
+            const stats = {
+                pending: 0,
+                inProgress: 0,
+                completed: 0
+            };
+            
+            allTasks.forEach(task => {
+                const status = getTaskStatus(task);
+                if (status === 'pending') stats.pending++;
+                else if (status === 'in-progress') stats.inProgress++;
+                else if (status === 'completed') stats.completed++;
+            });
+            
+            document.getElementById('statPending').textContent = stats.pending;
+            document.getElementById('statInProgress').textContent = stats.inProgress;
+            document.getElementById('statCompleted').textContent = stats.completed;
+            
+            document.getElementById('countAll').textContent = allTasks.length;
+            document.getElementById('countPending').textContent = stats.pending;
+            document.getElementById('countInProgress').textContent = stats.inProgress;
+            document.getElementById('countCompleted').textContent = stats.completed;
+        }
+
+        // ===== RENDERIZADO =====
+        function renderTasks(tasks) {
+            const tasksList = document.getElementById('tasksList');
+            const emptyState = document.getElementById('emptyState');
+            
+            let filteredTasks = tasks;
+            if (currentFilter !== 'all') {
+                filteredTasks = tasks.filter(task => getTaskStatus(task) === currentFilter);
+            }
+            
+            filteredTasks.sort((a, b) => parseInt(b.date_created) - parseInt(a.date_created));
+            
+            if (filteredTasks.length === 0) {
+                tasksList.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            tasksList.innerHTML = filteredTasks.map(task => createTaskCard(task)).join('');
+        }
+
+        function createTaskCard(task) {
+            const status = getTaskStatus(task);
+            const dueDate = task.due_date ? formatDate(parseInt(task.due_date)) : null;
+            const startDate = task.start_date ? formatDate(parseInt(task.start_date)) : null;
+            const priorityClass = task.priority ? getPriorityClass(task.priority.priority) : 'low';
+            const priorityLabel = task.priority ? task.priority.priority : 'Sin prioridad';
+            
+            const assignees = task.assignees.map(a => 
+                `<span class="assignee-badge">${a.initials || a.username}</span>`
+            ).join('');
+            
+            const customFields = task.custom_fields.filter(cf => cf.value).map(cf => {
+                if (cf.type === 'url' && cf.value) {
+                    return `
+                        <div class="custom-field">
+                            <span class="custom-field-label">${cf.name}:</span>
+                            <span class="custom-field-value">
+                                <a href="${cf.value}" target="_blank" rel="noopener noreferrer">
+                                    🔗 Ver enlace
+                                </a>
+                            </span>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('');
+            
+            return `
+                <div class="task-card status-${status}" data-task-id="${task.id}">
+                    <div class="task-header">
+                        <h3 class="task-title">${task.name}</h3>
+                        <span class="task-priority priority-${priorityClass}">${priorityLabel}</span>
+                    </div>
+                    
+                    ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+                    
+                    <div class="task-meta">
+                        ${startDate ? `<div class="task-meta-item">📅 <strong>Inicio:</strong> ${startDate}</div>` : ''}
+                        ${dueDate ? `<div class="task-meta-item">⏰ <strong>Vencimiento:</strong> ${dueDate}</div>` : ''}
+                        <div class="task-meta-item">📋 <strong>Lista:</strong> ${task.list.name}</div>
+                    </div>
+                    
+                    ${assignees ? `<div class="task-assignees"><strong>Asignados:</strong> ${assignees}</div>` : ''}
+                    ${customFields ? `<div class="task-custom-fields">${customFields}</div>` : ''}
+                    
+                    <div class="task-actions">
+                        <button 
+                            class="status-btn pending ${status === 'pending' ? 'active' : ''}"
+                            onclick="updateTaskStatus('${task.id}', 'pending')"
+                            ${status === 'pending' ? 'disabled' : ''}
+                        >
+                            ⏳ Pendiente
+                        </button>
+                        <button 
+                            class="status-btn in-progress ${status === 'in-progress' ? 'active' : ''}"
+                            onclick="updateTaskStatus('${task.id}', 'in-progress')"
+                            ${status === 'in-progress' ? 'disabled' : ''}
+                        >
+                            🔵 En Curso
+                        </button>
+                        <button 
+                            class="status-btn completed ${status === 'completed' ? 'active' : ''}"
+                            onclick="updateTaskStatus('${task.id}', 'completed')"
+                            ${status === 'completed' ? 'disabled' : ''}
+                        >
+                            ✅ Completada
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== FILTROS =====
+        function filterTasks(filter, event) {
+            currentFilter = filter;
+            
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            if (event) event.target.classList.add('active');
+            
+            renderTasks(allTasks);
+        }
+
+        // ===== UTILIDADES =====
+        function getTaskStatus(task) {
+            const statusText = task.status.status.toLowerCase();
+            const mapping = STATUS_MAPPING[statusText];
+            return mapping ? mapping.key : 'pending';
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('es-ES', options);
+        }
+
+        function getPriorityClass(priority) {
+            const priorityMap = {
+                'urgent': 'urgent',
+                'high': 'high',
+                'normal': 'normal',
+                'low': 'low'
+            };
+            return priorityMap[priority.toLowerCase()] || 'normal';
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const tasksList = document.getElementById('tasksList');
+            
+            if (show) {
+                loading.classList.remove('hidden');
+                tasksList.classList.add('hidden');
+            } else {
+                loading.classList.add('hidden');
+                tasksList.classList.remove('hidden');
+            }
+        }
+
+        function showError() {
+            document.getElementById('error').classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error').classList.add('hidden');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                animation: slideInRight 0.3s ease;
+                font-weight: 500;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
