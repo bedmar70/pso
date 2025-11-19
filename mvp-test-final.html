@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVP - Lookup Test (CORS Configurado)</title>
+  <title>MVP - Lookup Test 33 (CORS Configurado)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -107,8 +107,11 @@
           throw new Error(`Error ${response.status}`);
         }
 
-        const data = await response.json();
-        console.log('✅ Datos recibidos:', data);
+        const text = await response.text();
+        console.log('📄 Respuesta como texto:', text);
+        
+        const data = JSON.parse(text);
+        console.log('✅ Datos parseados:', data);
 
         // Mostrar resultados
         mostrarResultados(data, query);
