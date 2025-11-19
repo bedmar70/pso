@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVP - Lookup Test</title>
+  <title>MVP - Lookup Test (Con Proxy)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -48,9 +48,21 @@
     .proyecto:hover {
       background: #e3f2fd;
     }
+    .warning {
+      background: #fff3cd;
+      border-left: 3px solid #ffc107;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
+  <div class="warning">
+    ⚠️ <strong>Usando proxy CORS temporal</strong><br>
+    Esto es solo para validar que funciona. Luego configuraremos N8N correctamente.
+  </div>
+
   <h1>🔍 MVP - Lookup Test</h1>
   
   <input 
@@ -64,8 +76,9 @@
   <div id="resultados"></div>
 
   <script>
-    // ⚠️ USANDO PROXY CORS TEMPORAL (solo para pruebas)
-    const WEBHOOK_URL = 'https://corsproxy.io/?https://n8n.escueladeefectividad.com/webhook/mvp-lookup';
+    // Usando proxy CORS alternativo
+    const N8N_WEBHOOK = 'https://n8n.escueladeefectividad.com/webhook/mvp-lookup';
+    const WEBHOOK_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(N8N_WEBHOOK)}`;
 
     async function buscar() {
       const query = document.getElementById('buscar').value;
@@ -79,8 +92,10 @@
       resultadosDiv.innerHTML = '🔄 Buscando...';
 
       try {
-        console.log('Enviando a:', WEBHOOK_URL);
-        console.log('Query:', query);
+        console.log('🌐 Usando proxy CORS');
+        console.log('📡 Webhook N8N:', N8N_WEBHOOK);
+        console.log('🔗 URL con proxy:', WEBHOOK_URL);
+        console.log('🔍 Query:', query);
 
         const response = await fetch(WEBHOOK_URL, {
           method: 'POST',
@@ -88,20 +103,20 @@
           body: JSON.stringify({ query })
         });
 
-        console.log('Status:', response.status);
+        console.log('📥 Status:', response.status);
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('Datos recibidos:', data);
+        console.log('✅ Datos recibidos:', data);
 
         // Mostrar resultados
         mostrarResultados(data, query);
 
       } catch (error) {
-        console.error('ERROR:', error);
+        console.error('❌ ERROR:', error);
         resultadosDiv.innerHTML = `❌ Error: ${error.message}`;
       }
     }
@@ -109,9 +124,16 @@
     function mostrarResultados(tasks, query) {
       const resultadosDiv = document.getElementById('resultados');
       
+      // Verificar si tasks es un array
+      if (!Array.isArray(tasks)) {
+        console.log('Respuesta no es array:', tasks);
+        resultadosDiv.innerHTML = '⚠️ Respuesta inesperada del servidor';
+        return;
+      }
+
       // Filtrar proyectos que contengan el query
       const filtrados = tasks.filter(t => 
-        t.name.toLowerCase().includes(query.toLowerCase())
+        t.name && t.name.toLowerCase().includes(query.toLowerCase())
       );
 
       if (filtrados.length === 0) {
@@ -122,16 +144,22 @@
       resultadosDiv.innerHTML = `
         <strong>✅ ${filtrados.length} proyectos encontrados:</strong><br><br>
         ${filtrados.map(t => `
-          <div class="proyecto" onclick="seleccionar('${t.id}', '${t.name}')">
-            📁 ${t.name}
+          <div class="proyecto" onclick="seleccionar('${t.id}', '${escapeHtml(t.name)}')">
+            📁 ${escapeHtml(t.name)}
           </div>
         `).join('')}
       `;
     }
 
     function seleccionar(id, nombre) {
-      alert(`Seleccionado: ${nombre}\nID: ${id}`);
-      console.log('Proyecto seleccionado:', { id, nombre });
+      alert(`✅ Seleccionado:\n${nombre}\n\nID: ${id}`);
+      console.log('✅ Proyecto seleccionado:', { id, nombre });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     // Buscar al presionar Enter
