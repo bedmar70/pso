@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVP - Lookup Test 33 (CORS Configurado)</title>
+  <title>MVP - Lookup Test (CORS Configurado)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -59,7 +59,7 @@
 </head>
 <body>
   <div class="success">
-    ✅ <strong>CORS configurado en N8N</strong><br>
+    ✅ <strong>CORS configurado en N8N 44</strong><br>
     Conexión directa sin proxy.
   </div>
 
@@ -122,12 +122,16 @@
       }
     }
 
-    function mostrarResultados(tasks, query) {
+    function mostrarResultados(response, query) {
       const resultadosDiv = document.getElementById('resultados');
       
-      // Verificar si tasks es un array
-      if (!Array.isArray(tasks)) {
-        console.log('Respuesta no es array:', tasks);
+      // N8N devuelve [{"json": {...}}, {"json": {...}}]
+      // Extraer solo los objetos json
+      let tasks = [];
+      if (Array.isArray(response)) {
+        tasks = response.map(item => item.json || item);
+      } else {
+        console.log('Respuesta no es array:', response);
         resultadosDiv.innerHTML = '⚠️ Respuesta inesperada del servidor';
         return;
       }
@@ -138,12 +142,12 @@
       );
 
       if (filtrados.length === 0) {
-        resultadosDiv.innerHTML = '📭 No se encontraron proyectos';
+        resultadosDiv.innerHTML = '📭 No se encontraron proyectos con ese término';
         return;
       }
 
       resultadosDiv.innerHTML = `
-        <strong>✅ ${filtrados.length} proyectos encontrados:</strong><br><br>
+        <strong>✅ ${filtrados.length} proyecto(s) encontrado(s):</strong><br><br>
         ${filtrados.map(t => `
           <div class="proyecto" onclick="seleccionar('${t.id}', '${escapeHtml(t.name)}')">
             📁 ${escapeHtml(t.name)}
@@ -163,10 +167,4 @@
       return div.innerHTML;
     }
 
-    // Buscar al presionar Enter
-    document.getElementById('buscar').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') buscar();
-    });
-  </script>
-</body>
-</html>
+    /
