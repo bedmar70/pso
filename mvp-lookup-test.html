@@ -64,8 +64,8 @@
   <div id="resultados"></div>
 
   <script>
-    // ⚠️ PEGA AQUÍ TU URL DE N8N
-    const WEBHOOK_URL = 'https://n8n.escueladeefectividad.com/webhook/mvp-lookup';
+    // ⚠️ USANDO PROXY CORS TEMPORAL (solo para pruebas)
+    const WEBHOOK_URL = 'https://corsproxy.io/?https://n8n.escueladeefectividad.com/webhook/mvp-lookup';
 
     async function buscar() {
       const query = document.getElementById('buscar').value;
