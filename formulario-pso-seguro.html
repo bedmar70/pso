@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión Comercial PSO - Seguro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .form-container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 700px;
+      width: 100%;
+      animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .header h2 {
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 26px;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .security-badge {
+      background: #d4edda;
+      color: #155724;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-top: 10px;
+      display: inline-block;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group.hidden {
+      display: none;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .required::after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .autocomplete-container {
+      position: relative;
+    }
+    
+    .autocomplete-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #667eea;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .autocomplete-item {
+      padding: 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+    }
+    
+    .autocomplete-item:hover {
+      background: #f8f9ff;
+    }
+    
+    .autocomplete-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .selected-project {
+      padding: 16px;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-left: 4px solid #4caf50;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+    }
+    
+    .selected-project strong {
+      color: #2e7d32;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #1565c0;
+    }
+
+    .info-box.warning {
+      background: #fff3e0;
+      border-left-color: #ff9800;
+      color: #e65100;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .alert {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="header">
+      <h2>📋 Gestión Comercial</h2>
+      <div class="subtitle">Plásticos Sierra del Oro</div>
+      <div class="security-badge">🔒 Conexión Segura vía N8N</div>
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <form id="gestionForm">
+      
+      <!-- Tipo de Gestión -->
+      <div class="form-group">
+        <label for="tipoGestion" class="required">Tipo de Gestión</label>
+        <select id="tipoGestion" required>
+          <option value="">Selecciona un tipo...</option>
+          <option value="8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce">✨ Alta Nueva</option>
+          <option value="bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d">🔄 Modificación</option>
+          <option value="4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f">❓ Consultas Varios</option>
+          <option value="7513d3be-e1fd-401e-a3ae-8dbccf6f4eee">💰 Consulta Precio</option>
+          <option value="94f46c5f-0ca7-49e2-85e2-5dfdae638976">📐 Consulta Plano</option>
+          <option value="48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2">🎨 Consulta Diseño</option>
+        </select>
+      </div>
+
+      <!-- Info Box -->
+      <div id="infoBox" class="info-box hidden"></div>
+
+      <!-- Búsqueda de Proyecto -->
+      <div id="seccionBusqueda" class="form-group hidden">
+        <label for="searchProyecto" class="required">Buscar Proyecto Existente</label>
+        <div class="autocomplete-container">
+          <input 
+            type="text" 
+            id="searchProyecto" 
+            placeholder="Escribe para buscar..."
+            autocomplete="off"
+          >
+          <div id="searchResults" class="autocomplete-results"></div>
+        </div>
+        <input type="hidden" id="proyectoId">
+        <div id="selectedProject" class="selected-project"></div>
+      </div>
+
+      <!-- Nombre Proyecto (Alta Nueva) -->
+      <div id="seccionNombreProyecto" class="form-group hidden">
+        <label for="nombreProyecto" class="required">Nombre del Nuevo Proyecto</label>
+        <input 
+          type="text" 
+          id="nombreProyecto" 
+          placeholder="Ej: Envase 500ml - Cliente ABC"
+        >
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group">
+        <label for="descripcion" class="required">Descripción</label>
+        <textarea 
+          id="descripcion" 
+          rows="4" 
+          placeholder="Describe los detalles de la solicitud..."
+          required
+        ></textarea>
+      </div>
+
+      <!-- Presupuesto -->
+      <div class="form-group">
+        <label for="presupuesto">Presupuesto (€)</label>
+        <input 
+          type="number" 
+          id="presupuesto" 
+          placeholder="Ej: 5000"
+          step="0.01"
+          min="0"
+        >
+      </div>
+
+      <!-- Complejidad -->
+      <div class="form-group">
+        <label for="complejidad">Complejidad</label>
+        <select id="complejidad">
+          <option value="">Seleccionar...</option>
+          <option value="1">⭐ Baja</option>
+          <option value="2">⭐⭐ Media</option>
+          <option value="3">⭐⭐⭐ Alta</option>
+        </select>
+      </div>
+
+      <!-- Fecha Prometida -->
+      <div class="form-group">
+        <label for="fechaPrometida">Fecha Prometida</label>
+        <input type="date" id="fechaPrometida">
+      </div>
+
+      <!-- Email Solicitante -->
+      <div class="form-group">
+        <label for="emailSolicitante">Email del Solicitante</label>
+        <input 
+          type="email" 
+          id="emailSolicitante" 
+          placeholder="tu@email.com"
+        >
+      </div>
+
+      <!-- Botón Submit -->
+      <button type="submit" id="submitBtn">Enviar Solicitud</button>
+
+    </form>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIGURACIÓN - CAMBIAR URLS DE N8N
+    // ============================================
+    
+    const CONFIG = {
+      webhooks: {
+        buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
+        crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
+      },
+      tipos: {
+        ALTA_NUEVA: '8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce'
+      }
+    };
+
+    // ============================================
+    // ELEMENTOS DEL DOM
+    // ============================================
+    
+    const form = document.getElementById('gestionForm');
+    const tipoGestionSelect = document.getElementById('tipoGestion');
+    const seccionBusqueda = document.getElementById('seccionBusqueda');
+    const seccionNombreProyecto = document.getElementById('seccionNombreProyecto');
+    const searchInput = document.getElementById('searchProyecto');
+    const resultsContainer = document.getElementById('searchResults');
+    const selectedProjectDiv = document.getElementById('selectedProject');
+    const proyectoIdInput = document.getElementById('proyectoId');
+    const nombreProyectoInput = document.getElementById('nombreProyecto');
+    const infoBox = document.getElementById('infoBox');
+    const submitBtn = document.getElementById('submitBtn');
+    const alertContainer = document.getElementById('alertContainer');
+
+    let selectedProject = null;
+    let searchTimeout = null;
+
+    // ============================================
+    // CAMBIO DE TIPO DE GESTIÓN
+    // ============================================
+    
+    tipoGestionSelect.addEventListener('change', (e) => {
+      const tipo = e.target.value;
+      
+      if (!tipo) {
+        seccionBusqueda.classList.add('hidden');
+        seccionNombreProyecto.classList.add('hidden');
+        infoBox.classList.add('hidden');
+        return;
+      }
+
+      if (tipo === CONFIG.tipos.ALTA_NUEVA) {
+        seccionBusqueda.classList.add('hidden');
+        seccionNombreProyecto.classList.remove('hidden');
+        nombreProyectoInput.required = true;
+        searchInput.required = false;
+        
+        infoBox.className = 'info-box';
+        infoBox.textContent = 'ℹ️ Vas a crear un proyecto completamente nuevo.';
+        infoBox.classList.remove('hidden');
+      } else {
+        seccionNombreProyecto.classList.add('hidden');
+        seccionBusqueda.classList.remove('hidden');
+        nombreProyectoInput.required = false;
+        searchInput.required = true;
+        
+        infoBox.className = 'info-box warning';
+        infoBox.textContent = '⚠️ Debes buscar y seleccionar un proyecto existente.';
+        infoBox.classList.remove('hidden');
+      }
+
+      selectedProject = null;
+      proyectoIdInput.value = '';
+      selectedProjectDiv.style.display = 'none';
+      searchInput.value = '';
+      resultsContainer.style.display = 'none';
+    });
+
+    // ============================================
+    // BÚSQUEDA DE PROYECTOS
+    // ============================================
+    
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      
+      clearTimeout(searchTimeout);
+      
+      if (query.length < 2) {
+        resultsContainer.style.display = 'none';
+        return;
+      }
+
+      searchTimeout = setTimeout(() => searchProjects(query), 300);
+    });
+
+    async function searchProjects(query) {
+      resultsContainer.innerHTML = '<div style="padding: 14px; text-align: center;">🔍 Buscando...</div>';
+      resultsContainer.style.display = 'block';
+
+      try {
+        const response = await fetch(CONFIG.webhooks.buscarProyectos, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Extraer tareas de respuesta N8N
+        const tasks = data.map(item => item.json);
+        
+        displayResults(tasks, query);
+
+      } catch (error) {
+        console.error('Error al buscar:', error);
+        resultsContainer.innerHTML = '<div style="padding: 14px; color: #e74c3c;">❌ Error al buscar</div>';
+      }
+    }
+
+    function displayResults(tasks, query) {
+      // Filtrar en cliente
+      const filtrados = tasks.filter(t => 
+        t.name && t.name.toLowerCase().includes(query.toLowerCase())
+      );
+
+      if (filtrados.length === 0) {
+        resultsContainer.innerHTML = '<div style="padding: 14px;">No se encontraron proyectos</div>';
+        return;
+      }
+
+      resultsContainer.innerHTML = filtrados.map(task => `
+        <div class="autocomplete-item" onclick='selectProject(${JSON.stringify(task).replace(/'/g, "&apos;")})'>
+          <strong>${task.name}</strong>
+          <small>ID: ${task.id}</small>
+        </div>
+      `).join('');
+
+      resultsContainer.style.display = 'block';
+    }
+
+    function selectProject(project) {
+      selectedProject = project;
+      proyectoIdInput.value = project.id;
+      searchInput.value = project.name;
+      
+      selectedProjectDiv.innerHTML = `
+        <strong>✅ Proyecto seleccionado</strong>
+        <div>📁 ${project.name}</div>
+        <div>🆔 ${project.id}</div>
+      `;
+      selectedProjectDiv.style.display = 'block';
+      resultsContainer.style.display = 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.autocomplete-container')) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+
+    // ============================================
+    // ENVÍO DEL FORMULARIO
+    // ============================================
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const tipoGestion = tipoGestionSelect.value;
+      
+      // Validaciones
+      if (tipoGestion === CONFIG.tipos.ALTA_NUEVA) {
+        if (!nombreProyectoInput.value.trim()) {
+          showAlert('Por favor ingresa el nombre del proyecto', 'error');
+          return;
+        }
+      } else {
+        if (!selectedProject) {
+          showAlert('Por favor selecciona un proyecto', 'error');
+          return;
+        }
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<div class="spinner"></div>Enviando...';
+
+      try {
+        const formData = {
+          tipo_gestion_comercial: tipoGestion,
+          descripcion: document.getElementById('descripcion').value,
+          presupuesto: document.getElementById('presupuesto').value || null,
+          complejidad: document.getElementById('complejidad').value || null,
+          fecha_prometida: document.getElementById('fechaPrometida').value || null,
+          email_solicitante: document.getElementById('emailSolicitante').value || null,
+          timestamp: new Date().toISOString()
+        };
+
+        if (tipoGestion === CONFIG.tipos.ALTA_NUEVA) {
+          formData.nombre_proyecto = nombreProyectoInput.value.trim();
+          formData.proyecto_relacionado = null;
+        } else {
+          formData.nombre_proyecto = selectedProject.name;
+          formData.proyecto_relacionado = selectedProject;
+        }
+
+        const response = await fetch(CONFIG.webhooks.crearTarea, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}`);
+        }
+
+        const result = await response.json();
+        const tarea = result[0].json;
+
+        showAlert(`✅ Tarea creada: ${tarea.taskName}`, 'success');
+        
+        setTimeout(() => {
+          form.reset();
+          selectedProjectDiv.style.display = 'none';
+          selectedProject = null;
+          proyectoIdInput.value = '';
+          seccionBusqueda.classList.add('hidden');
+          seccionNombreProyecto.classList.add('hidden');
+          infoBox.classList.add('hidden');
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert(`❌ Error: ${error.message}`, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Enviar Solicitud';
+      }
+    });
+
+    function showAlert(message, type) {
+      alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      alertContainer.firstChild.style.display = 'block';
+      
+      setTimeout(() => {
+        alertContainer.innerHTML = '';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
