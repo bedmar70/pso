@@ -59,7 +59,7 @@
 </head>
 <body>
   <div class="success">
-    ✅ <strong>CORS configurado en N8N 44</strong><br>
+    ✅ <strong>CORS configurado en N8N</strong><br>
     Conexión directa sin proxy.
   </div>
 
@@ -167,4 +167,10 @@
       return div.innerHTML;
     }
 
-    /
+    // Buscar al presionar Enter
+    document.getElementById('buscar').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') buscar();
+    });
+  </script>
+</body>
+</html>
