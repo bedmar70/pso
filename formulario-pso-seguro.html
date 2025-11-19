@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gesti贸n Comercial PSO - Seguro</title>
+  <title>Gestión Comercial PSO - Seguro</title>
   <style>
     * {
       margin: 0;
@@ -287,31 +287,31 @@
 <body>
   <div class="form-container">
     <div class="header">
-      <h2>馃搵 Gesti贸n Comercial</h2>
-      <div class="subtitle">Pl谩sticos Sierra del Oro</div>
-      <div class="security-badge">馃敀 Conexi贸n Segura v铆a N8N</div>
+      <h2>📋 Gestión Comercial</h2>
+      <div class="subtitle">Plásticos Sierra del Oro</div>
+      <div class="security-badge">🔒 Conexión Segura vía N8N</div>
     </div>
 
     <form id="gestionForm">
       
-      <!-- Tipo de Gesti贸n -->
+      <!-- Tipo de Gestión -->
       <div class="form-group">
-        <label for="tipoGestion" class="required">Tipo de Gesti贸n</label>
+        <label for="tipoGestion" class="required">Tipo de Gestión</label>
         <select id="tipoGestion" required>
           <option value="">Selecciona un tipo...</option>
-          <option value="8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce">鉁?Alta Nueva</option>
-          <option value="bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d">馃攧 Modificaci贸n</option>
-          <option value="4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f">鉂?Consultas Varios</option>
-          <option value="7513d3be-e1fd-401e-a3ae-8dbccf6f4eee">馃挵 Consulta Precio</option>
-          <option value="94f46c5f-0ca7-49e2-85e2-5dfdae638976">馃搻 Consulta Plano</option>
-          <option value="48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2">馃帹 Consulta Dise帽o</option>
+          <option value="8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce">✨ Alta Nueva</option>
+          <option value="bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d">🔄 Modificación</option>
+          <option value="4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f">❓ Consultas Varios</option>
+          <option value="7513d3be-e1fd-401e-a3ae-8dbccf6f4eee">💰 Consulta Precio</option>
+          <option value="94f46c5f-0ca7-49e2-85e2-5dfdae638976">📐 Consulta Plano</option>
+          <option value="48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2">🎨 Consulta Diseño</option>
         </select>
       </div>
 
       <!-- Info Box -->
       <div id="infoBox" class="info-box hidden"></div>
 
-      <!-- B煤squeda de Proyecto -->
+      <!-- Búsqueda de Proyecto -->
       <div id="seccionBusqueda" class="form-group hidden">
         <label for="searchProyecto" class="required">Buscar Proyecto Existente</label>
         <div class="autocomplete-container">
@@ -337,9 +337,9 @@
         >
       </div>
 
-      <!-- Descripci贸n -->
+      <!-- Descripción -->
       <div class="form-group">
-        <label for="descripcion" class="required">Descripci贸n</label>
+        <label for="descripcion" class="required">Descripción</label>
         <textarea 
           id="descripcion" 
           rows="4" 
@@ -350,7 +350,7 @@
 
       <!-- Presupuesto -->
       <div class="form-group">
-        <label for="presupuesto">Presupuesto (鈧?</label>
+        <label for="presupuesto">Presupuesto (€)</label>
         <input 
           type="number" 
           id="presupuesto" 
@@ -365,9 +365,9 @@
         <label for="complejidad">Complejidad</label>
         <select id="complejidad">
           <option value="">Seleccionar...</option>
-          <option value="1">猸?Baja</option>
-          <option value="2">猸愨瓙 Media</option>
-          <option value="3">猸愨瓙猸?Alta</option>
+          <option value="1">⭐ Baja</option>
+          <option value="2">⭐⭐ Media</option>
+          <option value="3">⭐⭐⭐ Alta</option>
         </select>
       </div>
 
@@ -387,7 +387,7 @@
         >
       </div>
 
-      <!-- Bot贸n Submit -->
+      <!-- Botón Submit -->
       <button type="submit" id="submitBtn">Enviar Solicitud</button>
 
     </form>
@@ -395,7 +395,7 @@
 
   <script>
     // ============================================
-    // CONFIGURACI脫N - CAMBIAR URLS DE N8N
+    // CONFIGURACIÓN - CAMBIAR URLS DE N8N
     // ============================================
     
     const CONFIG = {
@@ -428,7 +428,7 @@
     let searchTimeout = null;
 
     // ============================================
-    // CAMBIO DE TIPO DE GESTI脫N
+    // CAMBIO DE TIPO DE GESTIÓN
     // ============================================
     
     tipoGestionSelect.addEventListener('change', (e) => {
@@ -448,7 +448,7 @@
         searchInput.required = false;
         
         infoBox.className = 'info-box';
-        infoBox.textContent = '鈩癸笍 Vas a crear un proyecto completamente nuevo.';
+        infoBox.textContent = 'ℹ️ Vas a crear un proyecto completamente nuevo.';
         infoBox.classList.remove('hidden');
       } else {
         seccionNombreProyecto.classList.add('hidden');
@@ -457,7 +457,7 @@
         searchInput.required = true;
         
         infoBox.className = 'info-box warning';
-        infoBox.textContent = '鈿狅笍 Debes buscar y seleccionar un proyecto existente.';
+        infoBox.textContent = '⚠️ Debes buscar y seleccionar un proyecto existente.';
         infoBox.classList.remove('hidden');
       }
 
@@ -469,7 +469,7 @@
     });
 
     // ============================================
-    // B脷SQUEDA DE PROYECTOS
+    // BÚSQUEDA DE PROYECTOS
     // ============================================
     
     searchInput.addEventListener('input', (e) => {
@@ -486,11 +486,11 @@
     });
 
     async function searchProjects(query) {
-      resultsContainer.innerHTML = '<div style="padding: 14px; text-align: center;">馃攳 Buscando...</div>';
+      resultsContainer.innerHTML = '<div style="padding: 14px; text-align: center;">🔍 Buscando...</div>';
       resultsContainer.style.display = 'block';
 
       try {
-        console.log('馃攳 Buscando proyectos:', query);
+        console.log('🔍 Buscando proyectos:', query);
 
         const response = await fetch(CONFIG.webhooks.buscarProyectos, {
           method: 'POST',
@@ -503,7 +503,7 @@
         }
 
         const data = await response.json();
-        console.log('馃摜 Proyectos recibidos:', data);
+        console.log('📥 Proyectos recibidos:', data);
         
         // Extraer tareas de respuesta N8N
         const tasks = data.map(item => item.json);
@@ -511,8 +511,8 @@
         displayResults(tasks, query);
 
       } catch (error) {
-        console.error('鉂?Error al buscar:', error);
-        resultsContainer.innerHTML = '<div style="padding: 14px; color: #e74c3c;">鉂?Error al buscar</div>';
+        console.error('❌ Error al buscar:', error);
+        resultsContainer.innerHTML = '<div style="padding: 14px; color: #e74c3c;">❌ Error al buscar</div>';
       }
     }
 
@@ -528,7 +528,7 @@
       }
 
       resultsContainer.innerHTML = filtrados.map(task => {
-        // Indicador si est谩 cerrado
+        // Indicador si está cerrado
         const statusBadge = task.status && task.status.status ? 
           `<span style="font-size: 11px; background: ${task.status.color || '#ccc'}22; color: ${task.status.color || '#666'}; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">${task.status.status}</span>` : '';
 
@@ -549,12 +549,12 @@
       searchInput.value = project.name;
       
       const statusInfo = project.status && project.status.status ? 
-        `<div style="color: #666;">馃搳 Estado: ${project.status.status}</div>` : '';
+        `<div style="color: #666;">📊 Estado: ${project.status.status}</div>` : '';
 
       selectedProjectDiv.innerHTML = `
-        <strong>鉁?Proyecto seleccionado</strong>
-        <div>馃搧 ${project.name}</div>
-        <div style="font-size: 12px; color: #666;">馃啍 ${project.id}</div>
+        <strong>✅ Proyecto seleccionado</strong>
+        <div>📁 ${project.name}</div>
+        <div style="font-size: 12px; color: #666;">🆔 ${project.id}</div>
         ${statusInfo}
       `;
       selectedProjectDiv.style.display = 'block';
@@ -568,7 +568,7 @@
     });
 
     // ============================================
-    // ENV脥O DEL FORMULARIO
+    // ENVÍO DEL FORMULARIO
     // ============================================
     
     form.addEventListener('submit', async (e) => {
@@ -611,7 +611,7 @@
           formData.proyecto_relacionado = selectedProject;
         }
 
-        console.log('馃摛 Enviando tarea:', formData);
+        console.log('📤 Enviando tarea:', formData);
 
         const response = await fetch(CONFIG.webhooks.crearTarea, {
           method: 'POST',
@@ -624,21 +624,21 @@
         }
 
         const result = await response.json();
-        console.log('鉁?Respuesta completa:', result);
+        console.log('✅ Respuesta completa:', result);
 
         // Extraer info de la tarea creada
-        let mensaje = '鉁?Solicitud enviada correctamente';
+        let mensaje = '✅ Solicitud enviada correctamente';
         
         if (Array.isArray(result) && result.length > 0 && result[0].json) {
           const tareaInfo = result[0].json;
-          console.log('馃帀 Tarea creada:', tareaInfo);
+          console.log('🎉 Tarea creada:', tareaInfo);
           
-          mensaje = `鉁?Tarea creada: ${tareaInfo.taskName || tareaInfo.name || 'Nueva tarea'}`;
+          mensaje = `✅ Tarea creada: ${tareaInfo.taskName || tareaInfo.name || 'Nueva tarea'}`;
         }
 
         showToast(mensaje, 'success');
         
-        // Reset form despu茅s de 1.5 segundos
+        // Reset form después de 1.5 segundos
         setTimeout(() => {
           form.reset();
           selectedProjectDiv.style.display = 'none';
@@ -650,7 +650,7 @@
         }, 1500);
         
       } catch (error) {
-        console.error('鉂?Error:', error);
+        console.error('❌ Error:', error);
         showToast(`Error: ${error.message}`, 'error');
       } finally {
         submitBtn.disabled = false;
@@ -659,7 +659,7 @@
     });
 
     // ============================================
-    // NOTIFICACI脫N TOAST ESTILO WHATSAPP
+    // NOTIFICACIÓN TOAST ESTILO WHATSAPP
     // ============================================
     
     function showToast(message, type = 'success') {
@@ -667,7 +667,7 @@
       const toast = document.createElement('div');
       toast.className = `toast toast-${type}`;
       
-      const icon = type === 'success' ? '鉁? : '鉂?;
+      const icon = type === 'success' ? '✅' : '❌';
       
       toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
@@ -676,7 +676,7 @@
       
       document.body.appendChild(toast);
       
-      // Auto-eliminar despu茅s de 4 segundos
+      // Auto-eliminar después de 4 segundos
       setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(20px)';
