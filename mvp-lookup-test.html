@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVP - Lookup Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #resultados {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      min-height: 50px;
+    }
+    .proyecto {
+      padding: 10px;
+      margin: 5px 0;
+      background: white;
+      border-left: 3px solid #007bff;
+      cursor: pointer;
+    }
+    .proyecto:hover {
+      background: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 MVP - Lookup Test</h1>
+  
+  <input 
+    type="text" 
+    id="buscar" 
+    placeholder="Escribe para buscar proyectos..."
+  >
+  
+  <button onclick="buscar()">Buscar</button>
+  
+  <div id="resultados"></div>
+
+  <script>
+    // ⚠️ PEGA AQUÍ TU URL DE N8N
+    const WEBHOOK_URL = 'https://n8n.escueladeefectividad.com/webhook/mvp-lookup';
+
+    async function buscar() {
+      const query = document.getElementById('buscar').value;
+      const resultadosDiv = document.getElementById('resultados');
+      
+      if (!query) {
+        resultadosDiv.innerHTML = '⚠️ Escribe algo para buscar';
+        return;
+      }
+
+      resultadosDiv.innerHTML = '🔄 Buscando...';
+
+      try {
+        console.log('Enviando a:', WEBHOOK_URL);
+        console.log('Query:', query);
+
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+
+        console.log('Status:', response.status);
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Datos recibidos:', data);
+
+        // Mostrar resultados
+        mostrarResultados(data, query);
+
+      } catch (error) {
+        console.error('ERROR:', error);
+        resultadosDiv.innerHTML = `❌ Error: ${error.message}`;
+      }
+    }
+
+    function mostrarResultados(tasks, query) {
+      const resultadosDiv = document.getElementById('resultados');
+      
+      // Filtrar proyectos que contengan el query
+      const filtrados = tasks.filter(t => 
+        t.name.toLowerCase().includes(query.toLowerCase())
+      );
+
+      if (filtrados.length === 0) {
+        resultadosDiv.innerHTML = '📭 No se encontraron proyectos';
+        return;
+      }
+
+      resultadosDiv.innerHTML = `
+        <strong>✅ ${filtrados.length} proyectos encontrados:</strong><br><br>
+        ${filtrados.map(t => `
+          <div class="proyecto" onclick="seleccionar('${t.id}', '${t.name}')">
+            📁 ${t.name}
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function seleccionar(id, nombre) {
+      alert(`Seleccionado: ${nombre}\nID: ${id}`);
+      console.log('Proyecto seleccionado:', { id, nombre });
+    }
+
+    // Buscar al presionar Enter
+    document.getElementById('buscar').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') buscar();
+    });
+  </script>
+</body>
+</html>
