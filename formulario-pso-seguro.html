@@ -562,10 +562,24 @@
           throw new Error(`Error ${response.status}`);
         }
 
-        const result = await response.json();
-        const tarea = result[0].json;
+const result = await response.json();
 
-        showAlert(`✅ Tarea creada: ${tarea.taskName}`, 'success');
+// Verificar estructura de respuesta
+let mensaje = '✅ Solicitud enviada correctamente';
+let tareaInfo = null;
+
+if (Array.isArray(result) && result.length > 0 && result[0].json) {
+  tareaInfo = result[0].json;
+  mensaje = `✅ Tarea creada: ${tareaInfo.taskName || tareaInfo.name || 'Nueva tarea'}`;
+  
+  // Si tiene URL, mostrarla
+  if (tareaInfo.url) {
+    mensaje += `\n\n🔗 Ver tarea: ${tareaInfo.url}`;
+  }
+}
+
+console.log('✅ Tarea creada:', tareaInfo);
+showAlert(mensaje, 'success');
         
         setTimeout(() => {
           form.reset();
