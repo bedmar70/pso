@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVP - Lookup Test (CORS Configurado)</title>
+  <title>MVP - Lookup FUNCIONANDO ✅</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,6 +27,7 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+      width: 100%;
     }
     button:hover {
       background: #0056b3;
@@ -59,11 +60,11 @@
 </head>
 <body>
   <div class="success">
-    ✅ <strong>CORS configurado en N8N</strong><br>
-    Conexión directa sin proxy.
+    ✅ <strong>MVP FUNCIONANDO</strong><br>
+    HTML → N8N → ClickUp → HTML
   </div>
 
-  <h1>🔍 MVP - Lookup Test</h1>
+  <h1>🔍 Búsqueda de Proyectos</h1>
   
   <input 
     type="text" 
@@ -76,7 +77,7 @@
   <div id="resultados"></div>
 
   <script>
-    // URL directa de N8N (sin proxy)
+    // URL del webhook de N8N
     const WEBHOOK_URL = 'https://n8n.escueladeefectividad.com/webhook/test-directo';
 
     async function buscar() {
@@ -91,7 +92,7 @@
       resultadosDiv.innerHTML = '🔄 Buscando...';
 
       try {
-        console.log('📡 Llamando a N8N directamente (sin proxy)');
+        console.log('📡 Llamando a N8N');
         console.log('🔗 URL:', WEBHOOK_URL);
         console.log('🔍 Query:', query);
 
@@ -136,29 +137,33 @@
         return;
       }
 
+      console.log('📦 Tareas extraídas:', tasks);
+
       // Filtrar proyectos que contengan el query
       const filtrados = tasks.filter(t => 
         t.name && t.name.toLowerCase().includes(query.toLowerCase())
       );
 
+      console.log('🔍 Proyectos filtrados:', filtrados);
+
       if (filtrados.length === 0) {
-        resultadosDiv.innerHTML = '📭 No se encontraron proyectos con ese término';
+        resultadosDiv.innerHTML = `📭 No se encontraron proyectos con "${query}"`;
         return;
       }
 
       resultadosDiv.innerHTML = `
         <strong>✅ ${filtrados.length} proyecto(s) encontrado(s):</strong><br><br>
         ${filtrados.map(t => `
-          <div class="proyecto" onclick="seleccionar('${t.id}', '${escapeHtml(t.name)}')">
+          <div class="proyecto" onclick='seleccionar(${JSON.stringify({id: t.id, name: t.name})})'>
             📁 ${escapeHtml(t.name)}
           </div>
         `).join('')}
       `;
     }
 
-    function seleccionar(id, nombre) {
-      alert(`✅ Seleccionado:\n${nombre}\n\nID: ${id}`);
-      console.log('✅ Proyecto seleccionado:', { id, nombre });
+    function seleccionar(proyecto) {
+      alert(`✅ Proyecto seleccionado:\n\n${proyecto.name}\n\nID: ${proyecto.id}`);
+      console.log('✅ Proyecto seleccionado:', proyecto);
     }
 
     function escapeHtml(text) {
