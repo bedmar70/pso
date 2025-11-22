@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión Comercial PSO - Dark Mode</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(0, 255, 200, 0.05) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(100, 50, 255, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .form-container {
+      background: rgba(20, 20, 20, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 48px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(255, 255, 255, 0.03);
+      max-width: 750px;
+      width: 100%;
+      animation: slideIn 0.5s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .header h2 {
+      color: #ffffff;
+      margin-bottom: 12px;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #00ffc8 0%, #00d4aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .security-badge {
+      background: linear-gradient(135deg, #00ffc8 0%, #00d4aa 100%);
+      color: #0a0a0a;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      box-shadow: 0 0 30px rgba(0, 255, 200, 0.3);
+    }
+
+    .security-badge::before {
+      content: "🔒";
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 28px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group.hidden {
+      display: none;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 15px;
+      letter-spacing: -0.2px;
+    }
+    
+    .required::after {
+      content: " *";
+      color: #ff4d6d;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    input:hover, select:hover, textarea:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #00ffc8;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 0 4px rgba(0, 255, 200, 0.1),
+                  0 0 20px rgba(0, 255, 200, 0.2);
+    }
+
+    select option {
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* File upload styling */
+    .file-upload-area {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-upload-area:hover {
+      border-color: #00ffc8;
+      background: rgba(0, 255, 200, 0.05);
+      box-shadow: 0 0 20px rgba(0, 255, 200, 0.15);
+    }
+
+    .file-upload-area.dragover {
+      border-color: #00ffc8;
+      background: rgba(0, 255, 200, 0.1);
+      box-shadow: 0 0 30px rgba(0, 255, 200, 0.3);
+    }
+
+    .file-upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      filter: grayscale(1) brightness(1.5);
+    }
+
+    .file-upload-text {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .file-upload-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #00ffc8 0%, #00d4aa 100%);
+      color: #0a0a0a;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .file-upload-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 30px rgba(0, 255, 200, 0.4);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-list {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .file-list.active {
+      display: block;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(0, 255, 200, 0.08);
+      border: 1px solid rgba(0, 255, 200, 0.2);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .file-icon {
+      font-size: 24px;
+    }
+
+    .file-details {
+      flex: 1;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    .file-size {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+    }
+
+    .file-remove {
+      background: #ff4d6d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .file-remove:hover {
+      background: #ff1744;
+      box-shadow: 0 0 20px rgba(255, 77, 109, 0.4);
+    }
+    
+    .autocomplete-container {
+      position: relative;
+    }
+    
+    .autocomplete-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(20, 20, 20, 0.98);
+      backdrop-filter: blur(20px);
+      border: 1px solid #00ffc8;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      max-height: 320px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(0, 255, 200, 0.2);
+      margin-top: -2px;
+    }
+
+    .autocomplete-results::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .autocomplete-results::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .autocomplete-results::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 200, 0.3);
+      border-radius: 4px;
+    }
+
+    .autocomplete-results::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 255, 200, 0.5);
+    }
+    
+    .autocomplete-item {
+      padding: 16px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.2s ease;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .autocomplete-item:hover {
+      background: rgba(0, 255, 200, 0.1);
+    }
+    
+    .autocomplete-item strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    
+    .autocomplete-item small {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+    }
+    
+    .selected-project {
+      background: rgba(0, 255, 200, 0.08);
+      border: 1px solid rgba(0, 255, 200, 0.3);
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 12px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+      color: #ffffff;
+    }
+    
+    .selected-project strong {
+      color: #00ffc8;
+      font-size: 14px;
+    }
+    
+    .info-box {
+      background: rgba(0, 255, 200, 0.08);
+      border-left: 3px solid #00ffc8;
+      padding: 14px 18px;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .info-box.hidden {
+      display: none;
+    }
+    
+    .info-box.warning {
+      background: rgba(255, 193, 7, 0.1);
+      border-left-color: #ffc107;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin-bottom: 32px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00ffc8 0%, #00d4aa 100%);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 255, 200, 0.5);
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #00ffc8 0%, #00d4aa 100%);
+      color: #0a0a0a;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 255, 200, 0.3);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(0, 255, 200, 0.5);
+    }
+    
+    .submit-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(10, 10, 10, 0.3);
+      border-top-color: #0a0a0a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 20, 0.98);
+      backdrop-filter: blur(20px);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(255, 255, 255, 0.1);
+      z-index: 10000;
+      animation: slideUp 0.3s ease;
+      transition: all 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+    
+    .toast-success {
+      border-left: 3px solid #00ffc8;
+    }
+    
+    .toast-error {
+      border-left: 3px solid #ff4d6d;
+    }
+    
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .toast-success .toast-icon {
+      background: #00ffc8;
+      color: #0a0a0a;
+    }
+    
+    .toast-error .toast-icon {
+      background: #ff4d6d;
+      color: white;
+    }
+    
+    .toast-message {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .form-container {
+        padding: 32px 24px;
+      }
+
+      .header h2 {
+        font-size: 26px;
+      }
+
+      body {
+        padding: 12px;
+      }
+    }
+
+    /* Glow effects for interactive elements */
+    input:focus, select:focus, textarea:focus {
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 0 0 4px rgba(0, 255, 200, 0.1),
+                    0 0 20px rgba(0, 255, 200, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 0 4px rgba(0, 255, 200, 0.15),
+                    0 0 30px rgba(0, 255, 200, 0.3);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="header">
+      <h2>Gestión Comercial PSO</h2>
+      <p class="subtitle">Sistema de solicitudes de diseño y preimpresión</p>
+      <div class="security-badge">Formulario Seguro</div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+    </div>
+
+    <form id="solicitudForm" enctype="multipart/form-data">
+      
+      <!-- Tipo de Gestión -->
+      <div class="form-group">
+        <label for="tipoGestion" class="required">Tipo de Gestión</label>
+        <select id="tipoGestion" name="tipo_gestion_comercial" required>
+          <option value="">Selecciona una opción</option>
+          <option value="8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce">Alta Nueva</option>
+          <option value="bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d">Modificación</option>
+          <option value="4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f">Consultas - Varios</option>
+          <option value="7513d3be-e1fd-401e-a3ae-8dbccf6f4eee">Consulta - Precio Cliché</option>
+          <option value="94f46c5f-0ca7-49e2-85e2-5dfdae638976">Consulta - Diseño Plano</option>
+          <option value="48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2">Consulta - Diseño</option>
+        </select>
+        <div class="info-box" id="infoBox"></div>
+      </div>
+
+      <!-- Nombre del proyecto (solo para Alta Nueva) -->
+      <div class="form-group hidden" id="seccionNombreProyecto">
+        <label for="nombreProyecto" class="required">Nombre del Proyecto</label>
+        <input 
+          type="text" 
+          id="nombreProyecto" 
+          name="nombre_proyecto"
+          placeholder="Ingresa el nombre del nuevo proyecto">
+      </div>
+
+      <!-- Búsqueda de proyecto (para Modificación/Consultas) -->
+      <div class="form-group hidden" id="seccionBusqueda">
+        <label for="searchProyecto" class="required">Buscar Proyecto Existente</label>
+        <div class="autocomplete-container">
+          <input 
+            type="text" 
+            id="searchProyecto"
+            placeholder="Escribe para buscar..."
+            autocomplete="off">
+          <div class="autocomplete-results" id="autocompleteResults"></div>
+        </div>
+        <div class="selected-project" id="selectedProject"></div>
+        <input type="hidden" id="proyectoId" name="proyecto_id">
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group">
+        <label for="descripcion" class="required">Descripción</label>
+        <textarea 
+          id="descripcion" 
+          name="descripcion" 
+          rows="4"
+          placeholder="Describe detalladamente tu solicitud..."
+          required></textarea>
+      </div>
+
+      <!-- Archivos adjuntos -->
+      <div class="form-group">
+        <label for="archivos">Archivos Adjuntos</label>
+        <div class="file-upload-area" id="fileUploadArea">
+          <div class="file-upload-icon">📁</div>
+          <div class="file-upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+          <div class="file-upload-button">Seleccionar archivos</div>
+        </div>
+        <input type="file" id="archivos" name="archivos" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif">
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <!-- Presupuesto -->
+      <div class="form-group">
+        <label for="presupuesto">Presupuesto (€)</label>
+        <input 
+          type="number" 
+          id="presupuesto" 
+          name="presupuesto"
+          step="0.01"
+          min="0"
+          placeholder="0.00">
+      </div>
+
+      <!-- Complejidad -->
+      <div class="form-group">
+        <label for="complejidad">Complejidad (1-4)</label>
+        <select id="complejidad" name="complejidad">
+          <option value="">Sin especificar</option>
+          <option value="1">1 - Baja</option>
+          <option value="2">2 - Media</option>
+          <option value="3">3 - Alta</option>
+          <option value="4">4 - Muy Alta</option>
+        </select>
+      </div>
+
+      <!-- Fecha Prometida -->
+      <div class="form-group">
+        <label for="fechaPrometida">Fecha Prometida</label>
+        <input 
+          type="date" 
+          id="fechaPrometida" 
+          name="fecha_prometida">
+      </div>
+
+      <!-- Email del Solicitante -->
+      <div class="form-group">
+        <label for="emailSolicitante">Email del Solicitante</label>
+        <input 
+          type="email" 
+          id="emailSolicitante" 
+          name="email_solicitante"
+          placeholder="tu@email.com">
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="submit-btn" id="submitBtn">
+        Enviar Solicitud
+      </button>
+
+    </form>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    
+    const CONFIG = {
+      webhooks: {
+        crearTarea: 'https://escueladeeefectividad.webhook.n8n.cloud/webhook-test/pso-crear-tarea-gestion',
+        buscarProyectos: 'https://escueladeeefectividad.webhook.n8n.cloud/webhook/buscar-proyectos-gestion-comercial'
+      },
+      tipos: {
+        ALTA_NUEVA: '8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce',
+        MODIFICACION: 'bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d'
+      }
+    };
+
+    // ============================================
+    // DOM ELEMENTS
+    // ============================================
+
+    const form = document.getElementById('solicitudForm');
+    const tipoGestionSelect = document.getElementById('tipoGestion');
+    const seccionNombreProyecto = document.getElementById('seccionNombreProyecto');
+    const seccionBusqueda = document.getElementById('seccionBusqueda');
+    const nombreProyectoInput = document.getElementById('nombreProyecto');
+    const searchInput = document.getElementById('searchProyecto');
+    const resultsContainer = document.getElementById('autocompleteResults');
+    const selectedProjectDiv = document.getElementById('selectedProject');
+    const proyectoIdInput = document.getElementById('proyectoId');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.getElementById('progressBar');
+    const infoBox = document.getElementById('infoBox');
+    const fileInput = document.getElementById('archivos');
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileList = document.getElementById('fileList');
+
+    let selectedProject = null;
+    let searchTimeout;
+    let selectedFiles = [];
+
+    // ============================================
+    // FILE UPLOAD HANDLERS
+    // ============================================
+
+    fileUploadArea.addEventListener('click', () => fileInput.click());
+
+    fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.add('dragover');
+    });
+
+    fileUploadArea.addEventListener('dragleave', () => {
+      fileUploadArea.classList.remove('dragover');
+    });
+
+    fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('dragover');
+      const files = Array.from(e.dataTransfer.files);
+      handleFiles(files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      handleFiles(files);
+    });
+
+    function handleFiles(files) {
+      selectedFiles = [...selectedFiles, ...files];
+      renderFileList();
+      updateProgress();
+    }
+
+    function renderFileList() {
+      if (selectedFiles.length === 0) {
+        fileList.classList.remove('active');
+        return;
+      }
+
+      fileList.classList.add('active');
+      fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="file-item">
+          <div class="file-info">
+            <div class="file-icon">${getFileIcon(file.name)}</div>
+            <div class="file-details">
+              <div class="file-name">${file.name}</div>
+              <div class="file-size">${formatFileSize(file.size)}</div>
+            </div>
+          </div>
+          <button type="button" class="file-remove" onclick="removeFile(${index})">Eliminar</button>
+        </div>
+      `).join('');
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      renderFileList();
+      updateProgress();
+    }
+
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      const icons = {
+        pdf: '📄',
+        doc: '📝', docx: '📝',
+        xls: '📊', xlsx: '📊',
+        jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️',
+        zip: '📦', rar: '📦',
+        txt: '📃'
+      };
+      return icons[ext] || '📎';
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // ============================================
+    // PROGRESS INDICATOR
+    // ============================================
+
+    function updateProgress() {
+      const fields = form.querySelectorAll('input:not([type="hidden"]):not([type="file"]), select, textarea');
+      let filled = 0;
+      fields.forEach(field => {
+        if (field.value && !field.closest('.hidden')) filled++;
+      });
+      
+      if (selectedFiles.length > 0) filled++;
+      
+      const percent = (filled / (fields.length + 1)) * 100;
+      progressBar.style.width = percent + '%';
+    }
+
+    form.addEventListener('input', updateProgress);
+    form.addEventListener('change', updateProgress);
+
+    // ============================================
+    // TIPO DE GESTION LOGIC
+    // ============================================
+
+    tipoGestionSelect.addEventListener('change', (e) => {
+      const tipo = e.target.value;
+      
+      if (!tipo) {
+        seccionBusqueda.classList.add('hidden');
+        seccionNombreProyecto.classList.add('hidden');
+        infoBox.classList.add('hidden');
+        updateProgress();
+        return;
+      }
+
+      if (tipo === CONFIG.tipos.ALTA_NUEVA) {
+        seccionBusqueda.classList.add('hidden');
+        seccionNombreProyecto.classList.remove('hidden');
+        nombreProyectoInput.required = true;
+        searchInput.required = false;
+        infoBox.className = 'info-box';
+        infoBox.textContent = 'Vas a crear un proyecto completamente nuevo.';
+        infoBox.classList.remove('hidden');
+      } else {
+        seccionNombreProyecto.classList.add('hidden');
+        seccionBusqueda.classList.remove('hidden');
+        nombreProyectoInput.required = false;
+        searchInput.required = true;
+        infoBox.className = 'info-box warning';
+        infoBox.textContent = 'Debes buscar y seleccionar un proyecto existente.';
+        infoBox.classList.remove('hidden');
+      }
+
+      selectedProject = null;
+      proyectoIdInput.value = '';
+      selectedProjectDiv.style.display = 'none';
+      searchInput.value = '';
+      resultsContainer.style.display = 'none';
+      updateProgress();
+    });
+
+    // ============================================
+    // PROJECT SEARCH
+    // ============================================
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      clearTimeout(searchTimeout);
+      
+      if (query.length < 2) {
+        resultsContainer.style.display = 'none';
+        return;
+      }
+
+      searchTimeout = setTimeout(() => searchProjects(query), 300);
+    });
+
+    async function searchProjects(query) {
+      resultsContainer.innerHTML = '<div style="padding: 16px; text-align: center; color: rgba(255, 255, 255, 0.5);">Buscando...</div>';
+      resultsContainer.style.display = 'block';
+
+      try {
+        const response = await fetch(CONFIG.webhooks.buscarProyectos, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+
+        if (!response.ok) throw new Error('Error ' + response.status);
+
+        const data = await response.json();
+        const tasks = data.map(item => item.json);
+        displayResults(tasks, query);
+      } catch (error) {
+        resultsContainer.innerHTML = '<div style="padding: 16px; color: #ff4d6d;">Error al buscar</div>';
+      }
+    }
+
+    function displayResults(tasks, query) {
+      const filtrados = tasks.filter(t => t.name && t.name.toLowerCase().includes(query.toLowerCase()));
+
+      if (filtrados.length === 0) {
+        resultsContainer.innerHTML = '<div style="padding: 16px; color: rgba(255, 255, 255, 0.5);">No se encontraron proyectos</div>';
+        return;
+      }
+
+      resultsContainer.innerHTML = filtrados.map(task => {
+        const statusBadge = task.status && task.status.status ? 
+          '<span style="font-size: 11px; background: rgba(0, 255, 200, 0.2); color: #00ffc8; padding: 3px 10px; border-radius: 12px; margin-left: 8px; font-weight: 500;">' + task.status.status + '</span>' : '';
+        return '<div class="autocomplete-item" onclick=\'selectProject(' + JSON.stringify(task).replace(/'/g, "&apos;") + ')\'>' +
+          '<strong>' + task.name + ' ' + statusBadge + '</strong>' +
+          '<small>ID: ' + task.id + '</small></div>';
+      }).join('');
+
+      resultsContainer.style.display = 'block';
+    }
+
+    function selectProject(project) {
+      selectedProject = project;
+      proyectoIdInput.value = project.id;
+      searchInput.value = project.name;
+      
+      const statusInfo = project.status && project.status.status ? 
+        '<div style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-top: 4px;">Estado: ' + project.status.status + '</div>' : '';
+
+      selectedProjectDiv.innerHTML = 
+        '<strong>Proyecto seleccionado</strong>' +
+        '<div style="margin-top: 8px;">' + project.name + '</div>' +
+        '<div style="font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 4px;">ID: ' + project.id + '</div>' +
+        statusInfo;
+      selectedProjectDiv.style.display = 'block';
+      resultsContainer.style.display = 'none';
+      updateProgress();
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.autocomplete-container')) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+
+    // ============================================
+    // FORM SUBMISSION WITH FILES
+    // ============================================
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const tipoGestion = tipoGestionSelect.value;
+      
+      if (tipoGestion === CONFIG.tipos.ALTA_NUEVA) {
+        if (!nombreProyectoInput.value.trim()) {
+          showToast('Por favor ingresa el nombre del proyecto', 'error');
+          return;
+        }
+      } else {
+        if (!selectedProject) {
+          showToast('Por favor selecciona un proyecto', 'error');
+          return;
+        }
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<div class="spinner"></div>Enviando...';
+
+      try {
+        const formData = new FormData();
+        
+        formData.append('tipo_gestion_comercial', tipoGestion);
+        formData.append('descripcion', document.getElementById('descripcion').value);
+        formData.append('presupuesto', document.getElementById('presupuesto').value || '');
+        formData.append('complejidad', document.getElementById('complejidad').value || '');
+        formData.append('fecha_prometida', document.getElementById('fechaPrometida').value || '');
+        formData.append('email_solicitante', document.getElementById('emailSolicitante').value || '');
+        formData.append('timestamp', new Date().toISOString());
+
+        if (tipoGestion === CONFIG.tipos.ALTA_NUEVA) {
+          formData.append('nombre_proyecto', nombreProyectoInput.value.trim());
+        } else {
+          formData.append('nombre_proyecto', selectedProject.name);
+          formData.append('proyecto_relacionado', JSON.stringify(selectedProject));
+        }
+
+        selectedFiles.forEach((file, index) => {
+          formData.append(`archivo_${index}`, file);
+        });
+        formData.append('total_archivos', selectedFiles.length);
+
+        const response = await fetch(CONFIG.webhooks.crearTarea, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('Error ' + response.status);
+
+        const result = await response.json();
+        let mensaje = 'Solicitud enviada correctamente';
+        
+        if (Array.isArray(result) && result.length > 0 && result[0].json) {
+          const tareaInfo = result[0].json;
+          mensaje = 'Tarea creada: ' + (tareaInfo.taskName || tareaInfo.name || 'Nueva tarea');
+        }
+
+        showToast(mensaje, 'success');
+        
+        setTimeout(() => {
+          form.reset();
+          selectedFiles = [];
+          renderFileList();
+          selectedProjectDiv.style.display = 'none';
+          selectedProject = null;
+          proyectoIdInput.value = '';
+          seccionBusqueda.classList.add('hidden');
+          seccionNombreProyecto.classList.add('hidden');
+          infoBox.classList.add('hidden');
+          progressBar.style.width = '0%';
+        }, 1500);
+        
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Enviar Solicitud';
+      }
+    });
+
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      const icon = type === 'success' ? '✓' : '✗';
+      toast.innerHTML = '<div class="toast-icon">' + icon + '</div><div class="toast-message">' + message + '</div>';
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    updateProgress();
+  </script>
+</body>
+</html>
