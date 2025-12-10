@@ -100,25 +100,30 @@
 </head>
 <body class="font-body min-h-screen flex items-center justify-center p-4">
 
-  <script>
-    (function() {
-      // NOTA: Para probar el diseño, he comentado la redirección obligatoria.
-      // Descoméntalo en producción.
-      const session = localStorage.getItem('pso_user_session');
-      /*
-      if (!session) {
-        window.location.href = 'login-pso.html';
-        return;
-      }
-      */
-      try {
-        const userData = session ? JSON.parse(session) : { nombre: 'Usuario Demo', email: 'demo@pso.com', esVip: true };
-        window.PSO_USER = userData;
-      } catch (e) {
-        console.error('Error sesión');
-      }
-    })();
-  </script>
+<script>
+  (function() {
+    const session = localStorage.getItem('pso_user_session');
+    
+    // 1. BLOQUEO DE SEGURIDAD ACTIVO
+    // Si no hay sesión, expulsamos al usuario al login inmediatamente
+    if (!session) {
+      window.location.href = 'login-pso-dark.html';
+      return;
+    }
+    
+    try {
+      const userData = JSON.parse(session);
+      // Validamos que la sesión tenga datos mínimos
+      if (!userData.nombre || !userData.email) throw new Error('Sesión corrupta');
+      
+      window.PSO_USER = userData;
+    } catch (e) {
+      // Si la sesión no es válida, limpiamos y expulsamos
+      localStorage.removeItem('pso_user_session');
+      window.location.href = 'login-pso-dark.html';
+    }
+  })();
+</script>
 
   <div class="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
     <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neon-cyan opacity-10 blur-[120px] rounded-full animate-pulse-slow"></div>
