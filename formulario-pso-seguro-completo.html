@@ -17,9 +17,6 @@
       background: linear-gradient(135deg, #e8f5f3 0%, #d4efec 100%);
       min-height: 100vh;
       padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     
     .form-container {
@@ -28,7 +25,7 @@
       border-radius: 24px;
       box-shadow: 0 8px 32px rgba(0, 188, 170, 0.08);
       max-width: 750px;
-      width: 100%;
+      margin: 0 auto;
       animation: slideIn 0.5s ease;
     }
 
@@ -292,7 +289,7 @@
       font-size: 13px;
     }
 
-    .selected-project {
+    .selected-project, .selected-client {
       padding: 20px;
       background: linear-gradient(135deg, #e8f5f3 0%, #d4efec 100%);
       border-left: 4px solid #00bca5;
@@ -302,7 +299,7 @@
       animation: fadeIn 0.3s ease;
     }
     
-    .selected-project strong {
+    .selected-project strong, .selected-client strong {
       color: #00897b;
       display: block;
       margin-bottom: 10px;
@@ -310,7 +307,7 @@
       font-weight: 600;
     }
 
-    .selected-project div {
+    .selected-project div, .selected-client div {
       color: #202124;
       font-size: 14px;
       line-height: 1.6;
@@ -468,7 +465,6 @@
       transition: width 0.3s ease;
     }
 
-    /* HEADER MINIMALISTA Y COMPACTO */
     .user-header {
       background: #f8f9fa;
       padding: 8px 16px;
@@ -574,7 +570,6 @@
         }
         
         window.PSO_USER = userData;
-        
         console.log('✅ Sesión válida:', userData.nombre);
         
       } catch (e) {
@@ -592,7 +587,6 @@
       <div class="security-badge">Conexion Segura via N8N</div>
     </div>
 
-    <!-- HEADER COMPACTO SIN VIP -->
     <div class="user-header" id="userHeader" style="display: none;">
       <div class="user-info">
         <span class="user-name" id="userName"></span>
@@ -607,6 +601,7 @@
 
     <form id="gestionForm">
       
+      <!-- TIPO DE GESTIÓN (siempre visible) -->
       <div class="form-group">
         <label for="tipoGestion" class="required">Tipo de Gestion</label>
         <select id="tipoGestion" required>
@@ -614,16 +609,52 @@
           <option value="8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce">Alta Nueva</option>
           <option value="bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d">Modificacion</option>
           <option value="4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f">Consultas Varios</option>
-          <option value="7513d3be-e1fd-401e-a3ae-8dbccf6f4eee">Consulta Precio</option>
+          <option value="7513d3be-e1fd-401e-a3ae-8dbccf6f4eee">Consulta Precio Clichés</option>
           <option value="94f46c5f-0ca7-49e2-85e2-5dfdae638976">Consulta Plano</option>
-          <option value="48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2">Consulta Diseno</option>
+          <option value="48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2">Consulta Diseño</option>
         </select>
       </div>
 
       <div id="infoBox" class="info-box hidden"></div>
 
-      <div id="seccionBusqueda" class="form-group hidden">
-        <label for="searchProyecto" class="required">Buscar Proyecto Existente</label>
+      <!-- NOMBRE DEL SOLICITANTE -->
+      <div class="form-group" id="campo_nombreSolicitante">
+        <label for="nombreSolicitante">Nombre del Solicitante</label>
+        <input type="text" id="nombreSolicitante" placeholder="Ej: Juan Pérez">
+      </div>
+
+      <!-- EMAIL SOLICITANTE -->
+      <div class="form-group" id="campo_emailSolicitante">
+        <label for="emailSolicitante">Email del Solicitante</label>
+        <input type="email" id="emailSolicitante" placeholder="tu@email.com">
+      </div>
+
+      <!-- NOMBRE DEL PROYECTO -->
+      <div class="form-group hidden" id="campo_nombreProyecto">
+        <label for="nombreProyecto">Nombre del Proyecto</label>
+        <input type="text" id="nombreProyecto" placeholder="Ej: Envase 500ml - Cliente ABC">
+      </div>
+
+      <!-- DESCRIPCIÓN (OBLIGATORIO SIEMPRE) -->
+      <div class="form-group">
+        <label for="descripcion" class="required">Descripcion</label>
+        <textarea id="descripcion" rows="4" placeholder="Describe los detalles de la solicitud..." required></textarea>
+      </div>
+
+      <!-- ROLLUP CLIENTE (SOLO VIP) -->
+      <div class="form-group hidden" id="campo_cliente">
+        <label for="searchCliente">Cliente</label>
+        <div class="autocomplete-container">
+          <input type="text" id="searchCliente" placeholder="Buscar cliente..." autocomplete="off">
+          <div id="searchResultsCliente" class="autocomplete-results" style="display: none;"></div>
+        </div>
+        <input type="hidden" id="clienteId">
+        <div id="selectedClient" class="selected-client"></div>
+      </div>
+
+      <!-- ROLLUP PROYECTO (SOLO VIP - ya existente) -->
+      <div class="form-group hidden" id="campo_buscarProyecto">
+        <label for="searchProyecto">Buscar Proyecto Existente</label>
         <div class="autocomplete-container">
           <input type="text" id="searchProyecto" placeholder="Escribe para buscar..." autocomplete="off">
           <div id="searchResults" class="autocomplete-results" style="display: none;"></div>
@@ -632,17 +663,85 @@
         <div id="selectedProject" class="selected-project"></div>
       </div>
 
-      <div id="seccionNombreProyecto" class="form-group hidden">
-        <label for="nombreProyecto" class="required">Nombre del Nuevo Proyecto</label>
-        <input type="text" id="nombreProyecto" placeholder="Ej: Envase 500ml - Cliente ABC">
+      <!-- REFERENCIA PSO -->
+      <div class="form-group hidden" id="campo_referenciaPSO">
+        <label for="referenciaPSO">Referencia PSO</label>
+        <input type="text" id="referenciaPSO" placeholder="Ej: REF-2025-001">
       </div>
 
-      <div class="form-group">
-        <label for="descripcion" class="required">Descripcion</label>
-        <textarea id="descripcion" rows="4" placeholder="Describe los detalles de la solicitud..." required></textarea>
+      <!-- PRIORIDAD DEL BOCETO -->
+      <div class="form-group hidden" id="campo_prioridadBoceto">
+        <label for="prioridadBoceto">Prioridad del Boceto</label>
+        <select id="prioridadBoceto">
+          <option value="">Seleccionar...</option>
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+        </select>
       </div>
 
-      <div class="form-group">
+      <!-- NECESITAS COSTE DE CLICHÉS -->
+      <div class="form-group hidden" id="campo_necesitaCosteCliches">
+        <label for="necesitaCosteCliches">¿Necesitas coste de clichés?</label>
+        <select id="necesitaCosteCliches">
+          <option value="">Seleccionar...</option>
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <!-- TIPO DE IMPRESIÓN -->
+      <div class="form-group hidden" id="campo_tipoImpresion">
+        <label for="tipoImpresion">Tipo de Impresión</label>
+        <select id="tipoImpresion">
+          <option value="">Seleccionar...</option>
+          <option value="interior">Interior</option>
+          <option value="exterior">Exterior</option>
+        </select>
+      </div>
+
+      <!-- MATERIALES -->
+      <div class="form-group hidden" id="campo_materiales">
+        <label for="materiales">Materiales</label>
+        <input type="text" id="materiales" placeholder="Ej: Polietileno, PVC, etc.">
+      </div>
+
+      <!-- ENLACE AL DISEÑO -->
+      <div class="form-group hidden" id="campo_enlaceDiseno">
+        <label for="enlaceDiseno">Enlace al Diseño</label>
+        <input type="url" id="enlaceDiseno" placeholder="https://...">
+      </div>
+
+      <!-- Nº DE CAÍDAS -->
+      <div class="form-group hidden" id="campo_numCaidas">
+        <label for="numCaidas">Nº de Caídas</label>
+        <input type="number" id="numCaidas" placeholder="Ej: 3" min="0">
+      </div>
+
+      <!-- Nº DE REPETICIONES AL DESARROLLO -->
+      <div class="form-group hidden" id="campo_numRepeticiones">
+        <label for="numRepeticiones">Nº de Repeticiones al Desarrollo</label>
+        <input type="number" id="numRepeticiones" placeholder="Ej: 5" min="0">
+      </div>
+
+      <!-- Nº DE COLORES -->
+      <div class="form-group hidden" id="campo_numColores">
+        <label for="numColores">Nº de Colores</label>
+        <input type="number" id="numColores" placeholder="Ej: 4" min="0">
+      </div>
+
+      <!-- BARNICES -->
+      <div class="form-group hidden" id="campo_barnices">
+        <label for="barnices">Barnices</label>
+        <select id="barnices">
+          <option value="">Seleccionar...</option>
+          <option value="a_registro">A registro (cubre algunas zonas)</option>
+          <option value="toda_lamina">En toda la lámina</option>
+        </select>
+      </div>
+
+      <!-- ARCHIVOS ADJUNTOS -->
+      <div class="form-group hidden" id="campo_archivos">
         <label for="archivos">Archivos Adjuntos</label>
         <div class="file-upload-area" id="fileUploadArea">
           <div class="file-upload-icon">📎</div>
@@ -653,12 +752,14 @@
         <div class="file-list" id="fileList"></div>
       </div>
 
-      <div class="form-group">
+      <!-- PRESUPUESTO -->
+      <div class="form-group hidden" id="campo_presupuesto">
         <label for="presupuesto">Presupuesto (EUR)</label>
         <input type="number" id="presupuesto" placeholder="Ej: 5000" step="0.01" min="0">
       </div>
 
-      <div class="form-group">
+      <!-- COMPLEJIDAD -->
+      <div class="form-group hidden" id="campo_complejidad">
         <label for="complejidad">Complejidad</label>
         <select id="complejidad">
           <option value="">Seleccionar...</option>
@@ -668,14 +769,16 @@
         </select>
       </div>
 
-      <div class="form-group">
+      <!-- FECHA PROMETIDA -->
+      <div class="form-group hidden" id="campo_fechaPrometida">
         <label for="fechaPrometida">Fecha Prometida</label>
         <input type="date" id="fechaPrometida">
       </div>
 
-      <div class="form-group">
-        <label for="emailSolicitante">Email del Solicitante</label>
-        <input type="email" id="emailSolicitante" placeholder="tu@email.com">
+      <!-- OBSERVACIONES -->
+      <div class="form-group hidden" id="campo_observaciones">
+        <label for="observaciones">Observaciones</label>
+        <textarea id="observaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
       </div>
 
       <button type="submit" id="submitBtn">Enviar Solicitud</button>
@@ -687,49 +790,169 @@
     const CONFIG = {
       webhooks: {
         buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
+        buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
         crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
       },
-      tipos: { ALTA_NUEVA: '8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce' }
+      tipos: {
+        ALTA_NUEVA: '8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce',
+        MODIFICACION: 'bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d',
+        CONSULTAS_VARIOS: '4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f',
+        CONSULTA_PRECIO: '7513d3be-e1fd-401e-a3ae-8dbccf6f4eee',
+        CONSULTA_PLANO: '94f46c5f-0ca7-49e2-85e2-5dfdae638976',
+        CONSULTA_DISENO: '48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2'
+      }
+    };
+
+    // Mapeo de campos por tipo de solicitud
+    const camposPorTipo = {
+      [CONFIG.tipos.ALTA_NUEVA]: [
+        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
+        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
+        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
+        'presupuesto', 'complejidad', 'fechaPrometida'
+      ],
+      [CONFIG.tipos.MODIFICACION]: [
+        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
+        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
+        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
+        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones',
+        'buscarProyecto'
+      ],
+      [CONFIG.tipos.CONSULTAS_VARIOS]: [
+        'nombreSolicitante', 'emailSolicitante', 'descripcion',
+        'archivos', 'enlaceDiseno', 'observaciones'
+      ],
+      [CONFIG.tipos.CONSULTA_PRECIO]: [
+        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
+        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
+        'tipoImpresion', 'numCaidas', 'numRepeticiones', 'materiales',
+        'numColores', 'barnices', 'archivos', 'enlaceDiseno',
+        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones'
+      ],
+      [CONFIG.tipos.CONSULTA_PLANO]: [
+        'descripcion', 'archivos', 'presupuesto', 'complejidad',
+        'fechaPrometida', 'emailSolicitante'
+      ],
+      [CONFIG.tipos.CONSULTA_DISENO]: [
+        'descripcion', 'archivos', 'presupuesto', 'complejidad',
+        'fechaPrometida', 'emailSolicitante'
+      ]
     };
 
     const form = document.getElementById('gestionForm');
     const tipoGestionSelect = document.getElementById('tipoGestion');
-    const seccionBusqueda = document.getElementById('seccionBusqueda');
-    const seccionNombreProyecto = document.getElementById('seccionNombreProyecto');
-    const searchInput = document.getElementById('searchProyecto');
-    const resultsContainer = document.getElementById('searchResults');
-    const selectedProjectDiv = document.getElementById('selectedProject');
-    const proyectoIdInput = document.getElementById('proyectoId');
-    const nombreProyectoInput = document.getElementById('nombreProyecto');
     const infoBox = document.getElementById('infoBox');
     const submitBtn = document.getElementById('submitBtn');
     const progressBar = document.getElementById('progressBar');
 
+    // File upload
     const fileUploadArea = document.getElementById('fileUploadArea');
     const fileInput = document.getElementById('archivos');
     const fileList = document.getElementById('fileList');
     let selectedFiles = [];
 
+    // Búsqueda proyectos
+    const searchInput = document.getElementById('searchProyecto');
+    const resultsContainer = document.getElementById('searchResults');
+    const selectedProjectDiv = document.getElementById('selectedProject');
+    const proyectoIdInput = document.getElementById('proyectoId');
     let selectedProject = null;
     let searchTimeout = null;
 
-    fileUploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileSelect);
+    // Búsqueda clientes
+    const searchClienteInput = document.getElementById('searchCliente');
+    const resultsClienteContainer = document.getElementById('searchResultsCliente');
+    const selectedClientDiv = document.getElementById('selectedClient');
+    const clienteIdInput = document.getElementById('clienteId');
+    let selectedCliente = null;
+    let searchClienteTimeout = null;
 
-    fileUploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      fileUploadArea.classList.add('dragover');
+    // ============================================
+    // MANEJO DE CAMPOS CONDICIONALES
+    // ============================================
+
+    function mostrarCamposSegunTipo(tipo) {
+      // Ocultar todos los campos primero (excepto tipo y descripción)
+      const todosCampos = document.querySelectorAll('.form-group[id^="campo_"]');
+      todosCampos.forEach(campo => campo.classList.add('hidden'));
+
+      // Obtener los campos para este tipo
+      const campos = camposPorTipo[tipo] || [];
+      
+      // Mostrar solo los campos necesarios
+      campos.forEach(nombreCampo => {
+        const campo = document.getElementById('campo_' + nombreCampo);
+        if (campo) {
+          // Si es rollup y el usuario NO es VIP, no mostrar
+          if ((nombreCampo === 'buscarProyecto' || nombreCampo === 'cliente') && !window.PSO_USER.esVip) {
+            return;
+          }
+          campo.classList.remove('hidden');
+        }
+      });
+
+      updateProgress();
+    }
+
+    tipoGestionSelect.addEventListener('change', (e) => {
+      const tipo = e.target.value;
+      
+      if (!tipo) {
+        // Ocultar todos excepto los básicos
+        const todosCampos = document.querySelectorAll('.form-group[id^="campo_"]');
+        todosCampos.forEach(campo => campo.classList.add('hidden'));
+        infoBox.classList.add('hidden');
+        updateProgress();
+        return;
+      }
+
+      // Mostrar info box
+      infoBox.className = 'info-box';
+      infoBox.textContent = 'Completa los campos necesarios para este tipo de solicitud.';
+      infoBox.classList.remove('hidden');
+
+      // Mostrar campos según tipo
+      mostrarCamposSegunTipo(tipo);
+
+      // Limpiar selecciones previas
+      selectedProject = null;
+      proyectoIdInput.value = '';
+      selectedProjectDiv.style.display = 'none';
+      if (searchInput) searchInput.value = '';
+      if (resultsContainer) resultsContainer.style.display = 'none';
+
+      selectedCliente = null;
+      clienteIdInput.value = '';
+      selectedClientDiv.style.display = 'none';
+      if (searchClienteInput) searchClienteInput.value = '';
+      if (resultsClienteContainer) resultsClienteContainer.style.display = 'none';
+
+      updateProgress();
     });
 
-    fileUploadArea.addEventListener('dragleave', () => {
-      fileUploadArea.classList.remove('dragover');
-    });
+    // ============================================
+    // FILE UPLOAD
+    // ============================================
 
-    fileUploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      fileUploadArea.classList.remove('dragover');
-      handleFileSelect({ target: { files: e.dataTransfer.files } });
-    });
+    if (fileUploadArea && fileInput) {
+      fileUploadArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', handleFileSelect);
+
+      fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+      });
+
+      fileUploadArea.addEventListener('dragleave', () => {
+        fileUploadArea.classList.remove('dragover');
+      });
+
+      fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        handleFileSelect({ target: { files: e.dataTransfer.files } });
+      });
+    }
 
     function handleFileSelect(e) {
       const files = Array.from(e.target.files);
@@ -787,70 +1010,23 @@
       return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
 
-    function updateProgress() {
-      const fields = form.querySelectorAll('input:not([type="hidden"]):not([type="file"]), select, textarea');
-      let filled = 0;
-      fields.forEach(field => {
-        if (field.value && !field.closest('.hidden')) filled++;
+    // ============================================
+    // BÚSQUEDA DE PROYECTOS (SOLO VIP)
+    // ============================================
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+          resultsContainer.style.display = 'none';
+          return;
+        }
+
+        searchTimeout = setTimeout(() => searchProjects(query), 300);
       });
-      
-      if (selectedFiles.length > 0) filled++;
-      
-      const percent = (filled / (fields.length + 1)) * 100;
-      progressBar.style.width = percent + '%';
     }
-
-    form.addEventListener('input', updateProgress);
-    form.addEventListener('change', updateProgress);
-
-    tipoGestionSelect.addEventListener('change', (e) => {
-      const tipo = e.target.value;
-      
-      if (!tipo) {
-        seccionBusqueda.classList.add('hidden');
-        seccionNombreProyecto.classList.add('hidden');
-        infoBox.classList.add('hidden');
-        updateProgress();
-        return;
-      }
-
-      if (tipo === CONFIG.tipos.ALTA_NUEVA) {
-        seccionBusqueda.classList.add('hidden');
-        seccionNombreProyecto.classList.remove('hidden');
-        nombreProyectoInput.required = true;
-        searchInput.required = false;
-        infoBox.className = 'info-box';
-        infoBox.textContent = 'Vas a crear un proyecto completamente nuevo.';
-        infoBox.classList.remove('hidden');
-      } else {
-        seccionNombreProyecto.classList.add('hidden');
-        seccionBusqueda.classList.remove('hidden');
-        nombreProyectoInput.required = false;
-        searchInput.required = true;
-        infoBox.className = 'info-box warning';
-        infoBox.textContent = 'Debes buscar y seleccionar un proyecto existente.';
-        infoBox.classList.remove('hidden');
-      }
-
-      selectedProject = null;
-      proyectoIdInput.value = '';
-      selectedProjectDiv.style.display = 'none';
-      searchInput.value = '';
-      resultsContainer.style.display = 'none';
-      updateProgress();
-    });
-
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.trim();
-      clearTimeout(searchTimeout);
-      
-      if (query.length < 2) {
-        resultsContainer.style.display = 'none';
-        return;
-      }
-
-      searchTimeout = setTimeout(() => searchProjects(query), 300);
-    });
 
     async function searchProjects(query) {
       resultsContainer.innerHTML = '<div style="padding: 16px; text-align: center; color: #5f6368;">Buscando...</div>';
@@ -910,51 +1086,151 @@
       updateProgress();
     }
 
+    // ============================================
+    // BÚSQUEDA DE CLIENTES (SOLO VIP)
+    // ============================================
+
+    if (searchClienteInput) {
+      searchClienteInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchClienteTimeout);
+        
+        if (query.length < 2) {
+          resultsClienteContainer.style.display = 'none';
+          return;
+        }
+
+        searchClienteTimeout = setTimeout(() => searchClientes(query), 300);
+      });
+    }
+
+    async function searchClientes(query) {
+      resultsClienteContainer.innerHTML = '<div style="padding: 16px; text-align: center; color: #5f6368;">Buscando clientes...</div>';
+      resultsClienteContainer.style.display = 'block';
+
+      try {
+        const response = await fetch(CONFIG.webhooks.buscarClientes, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+
+        if (!response.ok) throw new Error('Error ' + response.status);
+
+        const data = await response.json();
+        const clientes = data.map(item => item.json);
+        displayClientesResults(clientes, query);
+      } catch (error) {
+        resultsClienteContainer.innerHTML = '<div style="padding: 16px; color: #ea4335;">Error al buscar clientes</div>';
+        console.error('Error búsqueda clientes:', error);
+      }
+    }
+
+    function displayClientesResults(clientes, query) {
+      const filtrados = clientes.filter(c => c.name && c.name.toLowerCase().includes(query.toLowerCase()));
+
+      if (filtrados.length === 0) {
+        resultsClienteContainer.innerHTML = '<div style="padding: 16px; color: #5f6368;">No se encontraron clientes</div>';
+        return;
+      }
+
+      resultsClienteContainer.innerHTML = filtrados.map(cliente => {
+        return '<div class="autocomplete-item" onclick=\'selectCliente(' + JSON.stringify(cliente).replace(/'/g, "&apos;") + ')\'>' +
+          '<strong>' + cliente.name + '</strong>' +
+          '<small>ID: ' + cliente.id + '</small></div>';
+      }).join('');
+
+      resultsClienteContainer.style.display = 'block';
+    }
+
+    function selectCliente(cliente) {
+      selectedCliente = cliente;
+      clienteIdInput.value = cliente.id;
+      searchClienteInput.value = cliente.name;
+      
+      selectedClientDiv.innerHTML = 
+        '<strong>Cliente seleccionado</strong>' +
+        '<div style="margin-top: 8px;">' + cliente.name + '</div>' +
+        '<div style="font-size: 12px; color: #5f6368; margin-top: 4px;">ID: ' + cliente.id + '</div>';
+      selectedClientDiv.style.display = 'block';
+      resultsClienteContainer.style.display = 'none';
+      updateProgress();
+    }
+
+    // ============================================
+    // CERRAR DROPDOWNS AL HACER CLICK FUERA
+    // ============================================
+
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.autocomplete-container')) {
-        resultsContainer.style.display = 'none';
+        if (resultsContainer) resultsContainer.style.display = 'none';
+        if (resultsClienteContainer) resultsClienteContainer.style.display = 'none';
       }
     });
 
-    // ⚡ CORRECCIÓN DEFINITIVA DEL ERROR JSON ⚡
+    // ============================================
+    // PROGRESS BAR
+    // ============================================
+
+    function updateProgress() {
+      const visibleFields = form.querySelectorAll('.form-group:not(.hidden) input:not([type="hidden"]):not([type="file"]), .form-group:not(.hidden) select, .form-group:not(.hidden) textarea');
+      let filled = 0;
+      visibleFields.forEach(field => {
+        if (field.value) filled++;
+      });
+      
+      if (selectedFiles.length > 0) filled++;
+      
+      const percent = visibleFields.length > 0 ? (filled / (visibleFields.length + 1)) * 100 : 0;
+      progressBar.style.width = percent + '%';
+    }
+
+    form.addEventListener('input', updateProgress);
+    form.addEventListener('change', updateProgress);
+
+    // ============================================
+    // ENVÍO DEL FORMULARIO
+    // ============================================
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const tipoGestion = tipoGestionSelect.value;
-      
-      if (tipoGestion === CONFIG.tipos.ALTA_NUEVA) {
-        if (!nombreProyectoInput.value.trim()) {
-          showToast('Por favor ingresa el nombre del proyecto', 'error');
-          return;
-        }
-      } else {
-        if (!selectedProject) {
-          showToast('Por favor selecciona un proyecto', 'error');
-          return;
-        }
-      }
-
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<div class="spinner"></div>Enviando...';
 
       try {
         const formData = new FormData();
         
-        formData.append('tipo_gestion_comercial', tipoGestion);
-        formData.append('descripcion', document.getElementById('descripcion').value);
-        formData.append('presupuesto', document.getElementById('presupuesto').value || '');
-        formData.append('complejidad', document.getElementById('complejidad').value || '');
-        formData.append('fecha_prometida', document.getElementById('fechaPrometida').value || '');
-        formData.append('email_solicitante', document.getElementById('emailSolicitante').value || '');
+        // Campos base
+        formData.append('tipo_gestion_comercial', tipoGestionSelect.value);
         formData.append('timestamp', new Date().toISOString());
+        
+        // Recolectar TODOS los campos visibles
+        const campos = [
+          'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
+          'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion',
+          'materiales', 'enlaceDiseno', 'numCaidas', 'numRepeticiones', 'numColores',
+          'barnices', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones'
+        ];
 
-        if (tipoGestion === CONFIG.tipos.ALTA_NUEVA) {
-          formData.append('nombre_proyecto', nombreProyectoInput.value.trim());
-        } else {
-          formData.append('nombre_proyecto', selectedProject.name);
+        campos.forEach(campo => {
+          const elemento = document.getElementById(campo);
+          if (elemento && !elemento.closest('.hidden')) {
+            formData.append(campo, elemento.value || '');
+          }
+        });
+
+        // Cliente seleccionado
+        if (selectedCliente) {
+          formData.append('cliente', JSON.stringify(selectedCliente));
+        }
+
+        // Proyecto seleccionado
+        if (selectedProject) {
           formData.append('proyecto_relacionado', JSON.stringify(selectedProject));
         }
 
+        // Archivos
         selectedFiles.forEach((file, index) => {
           formData.append(`archivo_${index}`, file);
         });
@@ -967,19 +1243,17 @@
           body: formData
         });
 
-        console.log('📥 Respuesta recibida - Status:', response.status);
+        console.log('📥 Respuesta - Status:', response.status);
 
         if (!response.ok) {
           throw new Error('Error del servidor: ' + response.status);
         }
 
-        // ⚡ CLAVE: Leer como texto PRIMERO, NUNCA usar .json() directamente
         const responseText = await response.text();
-        console.log('📄 Contenido respuesta:', responseText || '(vacío)');
+        console.log('📄 Contenido:', responseText || '(vacío)');
 
         let mensaje = 'Solicitud enviada correctamente';
         
-        // Solo intentar parsear si realmente hay contenido
         if (responseText && responseText.trim().length > 0) {
           try {
             const result = JSON.parse(responseText);
@@ -992,37 +1266,44 @@
               mensaje = result.message;
             }
           } catch (parseError) {
-            console.warn('⚠️ No se pudo parsear JSON (usando mensaje por defecto)');
+            console.warn('⚠️ No se pudo parsear JSON');
           }
-        } else {
-          console.log('ℹ️ Respuesta vacía - Asumiendo éxito');
         }
 
-        // ✅ SIEMPRE mostrar toast de éxito si llegamos aquí
         showToast(mensaje, 'success');
-        console.log('✅ Proceso completado exitosamente');
+        console.log('✅ Proceso completado');
         
         setTimeout(() => {
           form.reset();
           selectedFiles = [];
           renderFileList();
           selectedProjectDiv.style.display = 'none';
+          selectedClientDiv.style.display = 'none';
           selectedProject = null;
+          selectedCliente = null;
           proyectoIdInput.value = '';
-          seccionBusqueda.classList.add('hidden');
-          seccionNombreProyecto.classList.add('hidden');
+          clienteIdInput.value = '';
+          
+          // Ocultar todos los campos condicionales
+          const todosCampos = document.querySelectorAll('.form-group[id^="campo_"]');
+          todosCampos.forEach(campo => campo.classList.add('hidden'));
+          
           infoBox.classList.add('hidden');
           progressBar.style.width = '0%';
         }, 1500);
         
       } catch (error) {
-        console.error('❌ Error capturado:', error);
+        console.error('❌ Error:', error);
         showToast('Error al enviar: ' + error.message, 'error');
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Enviar Solicitud';
       }
     });
+
+    // ============================================
+    // UTILIDADES
+    // ============================================
 
     function showToast(message, type) {
       const toast = document.createElement('div');
@@ -1049,15 +1330,7 @@
       document.getElementById('userName').textContent = userData.nombre;
       document.getElementById('userEmail').textContent = '(' + userData.email + ')';
       
-      if (!userData.esVip) {
-        const seccionBusqueda = document.getElementById('seccionBusqueda');
-        if (seccionBusqueda) {
-          seccionBusqueda.remove();
-        }
-        console.log('🚫 Usuario NO VIP - Búsqueda oculta');
-      } else {
-        console.log('✅ Usuario VIP - Acceso completo');
-      }
+      console.log('👤 Usuario cargado:', userData.nombre, '| VIP:', userData.esVip);
     }
 
     function cerrarSesion() {
@@ -1067,6 +1340,7 @@
       }
     }
 
+    // Inicializar
     cargarDatosUsuario();
     updateProgress();
   </script>
