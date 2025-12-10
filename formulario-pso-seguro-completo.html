@@ -1109,25 +1109,64 @@
       resultsClienteContainer.style.display = 'block';
 
       try {
+        console.log('🔍 Buscando clientes con query:', query);
+        
         const response = await fetch(CONFIG.webhooks.buscarClientes, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query })
         });
 
+        console.log('📥 Respuesta recibida - Status:', response.status);
+
         if (!response.ok) throw new Error('Error ' + response.status);
 
         const data = await response.json();
-        const clientes = data.map(item => item.json);
+        console.log('📊 Datos recibidos:', data);
+        console.log('📊 Tipo:', Array.isArray(data) ? 'Array' : typeof data);
+        console.log('📊 Cantidad:', Array.isArray(data) ? data.length : 'No es array');
+        
+        // ⚡ DETECCIÓN AUTOMÁTICA: Maneja ambas estructuras
+        let clientes;
+        if (Array.isArray(data) && data.length > 0) {
+          if (data[0].json) {
+            // Estructura con wrapper: data[0].json.name
+            console.log('📦 Estructura con wrapper detectada');
+            clientes = data.map(item => item.json);
+          } else if (data[0].name) {
+            // Estructura plana: data[0].name
+            console.log('📦 Estructura plana detectada');
+            clientes = data;
+          } else {
+            console.warn('⚠️ Estructura desconocida:', data[0]);
+            clientes = [];
+          }
+        } else {
+          console.log('ℹ️ Array vacío o no es array');
+          clientes = [];
+        }
+        
+        console.log('✅ Clientes procesados:', clientes.length);
         displayClientesResults(clientes, query);
       } catch (error) {
+        console.error('❌ Error en búsqueda de clientes:', error);
         resultsClienteContainer.innerHTML = '<div style="padding: 16px; color: #ea4335;">Error al buscar clientes</div>';
-        console.error('Error búsqueda clientes:', error);
       }
     }
 
     function displayClientesResults(clientes, query) {
-      const filtrados = clientes.filter(c => c.name && c.name.toLowerCase().includes(query.toLowerCase()));
+      console.log('🎨 Mostrando resultados - Clientes recibidos:', clientes.length);
+      
+      // Filtrar clientes válidos y que coincidan con la búsqueda
+      const filtrados = clientes.filter(c => {
+        if (!c || !c.name) {
+          console.warn('⚠️ Cliente sin nombre:', c);
+          return false;
+        }
+        return c.name.toLowerCase().includes(query.toLowerCase());
+      });
+
+      console.log('🎯 Clientes filtrados (coinciden con "' + query + '"):', filtrados.length);
 
       if (filtrados.length === 0) {
         resultsClienteContainer.innerHTML = '<div style="padding: 16px; color: #5f6368;">No se encontraron clientes</div>';
@@ -1141,6 +1180,7 @@
       }).join('');
 
       resultsClienteContainer.style.display = 'block';
+      console.log('✅ Resultados renderizados en pantalla');
     }
 
     function selectCliente(cliente) {
