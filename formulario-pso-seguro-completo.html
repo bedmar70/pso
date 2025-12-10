@@ -130,7 +130,6 @@
       box-shadow: 0 0 0 4px rgba(0, 188, 165, 0.08);
     }
 
-    /* File upload styling */
     .file-upload-area {
       border: 2px dashed #e8eaed;
       border-radius: 12px;
@@ -469,97 +468,46 @@
       transition: width 0.3s ease;
     }
 
+    /* HEADER MINIMALISTA Y COMPACTO */
     .user-header {
-      background: linear-gradient(135deg, #e8f5f3 0%, #d4efec 100%);
-      padding: 16px 24px;
-      border-radius: 16px;
-      margin-bottom: 24px;
+      background: #f8f9fa;
+      padding: 8px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 2px solid #00bca5;
-      animation: fadeIn 0.3s ease;
+      border: 1px solid #e0e0e0;
+      font-size: 13px;
     }
 
     .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .user-avatar {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, #00bca5 0%, #00a896 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0, 188, 165, 0.3);
-    }
-
-    .user-details {
-      display: flex;
-      flex-direction: column;
+      color: #5f6368;
     }
 
     .user-name {
-      font-weight: 600;
+      font-weight: 500;
       color: #202124;
-      font-size: 16px;
+      margin-right: 4px;
     }
 
-    .user-role {
-      font-size: 13px;
+    .logout-link {
       color: #5f6368;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .vip-badge {
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-      color: #000;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .vip-badge::before {
-      content: "👑";
-    }
-
-    .logout-btn {
-      background: linear-gradient(135deg, #ea4335 0%, #d32f2f 100%);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      transition: all 0.2s;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: auto;
+      background: transparent;
+      border: 1px solid #dadce0;
+      font-family: inherit;
     }
 
-    .logout-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
-    }
-
-    .logout-btn::before {
-      content: "🚪";
-      font-size: 16px;
+    .logout-link:hover {
+      background: #f1f3f4;
+      color: #202124;
+      border-color: #bdc1c6;
     }
 
     @media (max-width: 600px) {
@@ -588,18 +536,8 @@
 
       .user-header {
         flex-direction: column;
-        gap: 16px;
+        gap: 8px;
         text-align: center;
-      }
-      
-      .user-info {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .logout-btn {
-        width: 100%;
-        justify-content: center;
       }
     }
 
@@ -637,7 +575,7 @@
         
         window.PSO_USER = userData;
         
-        console.log('✅ Sesión válida:', userData.nombre, '| VIP:', userData.esVip);
+        console.log('✅ Sesión válida:', userData.nombre);
         
       } catch (e) {
         console.error('❌ Error en sesión:', e);
@@ -654,18 +592,13 @@
       <div class="security-badge">Conexion Segura via N8N</div>
     </div>
 
+    <!-- HEADER COMPACTO SIN VIP -->
     <div class="user-header" id="userHeader" style="display: none;">
       <div class="user-info">
-        <div class="user-avatar" id="userAvatar"></div>
-        <div class="user-details">
-          <div class="user-name" id="userName"></div>
-          <div class="user-role">
-            <span id="userEmail"></span>
-            <span class="vip-badge" id="vipBadge" style="display: none;">VIP</span>
-          </div>
-        </div>
+        <span class="user-name" id="userName"></span>
+        <span id="userEmail"></span>
       </div>
-      <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+      <button class="logout-link" onclick="cerrarSesion()">Salir</button>
     </div>
 
     <div class="progress-indicator">
@@ -983,6 +916,7 @@
       }
     });
 
+    // ⚡ CORRECCIÓN DEFINITIVA DEL ERROR JSON ⚡
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -1026,26 +960,30 @@
         });
         formData.append('total_archivos', selectedFiles.length);
 
+        console.log('📤 Enviando formulario...');
+
         const response = await fetch(CONFIG.webhooks.crearTarea, {
           method: 'POST',
           body: formData
         });
 
+        console.log('📥 Respuesta recibida - Status:', response.status);
+
         if (!response.ok) {
-          throw new Error('Error ' + response.status);
+          throw new Error('Error del servidor: ' + response.status);
         }
 
-        // MANEJO ROBUSTO DE RESPUESTA JSON
-        let result = null;
+        // ⚡ CLAVE: Leer como texto PRIMERO, NUNCA usar .json() directamente
+        const responseText = await response.text();
+        console.log('📄 Contenido respuesta:', responseText || '(vacío)');
+
         let mensaje = 'Solicitud enviada correctamente';
         
-        try {
-          const responseText = await response.text();
-          
-          console.log('📥 Respuesta del servidor:', responseText);
-          
-          if (responseText && responseText.trim().length > 0) {
-            result = JSON.parse(responseText);
+        // Solo intentar parsear si realmente hay contenido
+        if (responseText && responseText.trim().length > 0) {
+          try {
+            const result = JSON.parse(responseText);
+            console.log('✅ JSON parseado:', result);
             
             if (Array.isArray(result) && result.length > 0 && result[0].json) {
               const tareaInfo = result[0].json;
@@ -1053,17 +991,16 @@
             } else if (result.message) {
               mensaje = result.message;
             }
-          } else {
-            console.log('✅ Respuesta vacía pero exitosa - Tarea creada en ClickUp');
-            mensaje = 'Solicitud enviada correctamente a ClickUp';
+          } catch (parseError) {
+            console.warn('⚠️ No se pudo parsear JSON (usando mensaje por defecto)');
           }
-          
-        } catch (parseError) {
-          console.warn('⚠️ No se pudo parsear JSON, pero la petición fue exitosa:', parseError);
-          mensaje = 'Solicitud enviada correctamente';
+        } else {
+          console.log('ℹ️ Respuesta vacía - Asumiendo éxito');
         }
 
+        // ✅ SIEMPRE mostrar toast de éxito si llegamos aquí
         showToast(mensaje, 'success');
+        console.log('✅ Proceso completado exitosamente');
         
         setTimeout(() => {
           form.reset();
@@ -1079,8 +1016,8 @@
         }, 1500);
         
       } catch (error) {
-        console.error('❌ Error al enviar:', error);
-        showToast('Error: ' + error.message, 'error');
+        console.error('❌ Error capturado:', error);
+        showToast('Error al enviar: ' + error.message, 'error');
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Enviar Solicitud';
@@ -1109,30 +1046,22 @@
       }
       
       document.getElementById('userHeader').style.display = 'flex';
-      
-      const inicial = userData.nombre.charAt(0).toUpperCase();
-      document.getElementById('userAvatar').textContent = inicial;
-      
       document.getElementById('userName').textContent = userData.nombre;
-      document.getElementById('userEmail').textContent = userData.email;
-      
-      if (userData.esVip) {
-        document.getElementById('vipBadge').style.display = 'inline-flex';
-      }
+      document.getElementById('userEmail').textContent = '(' + userData.email + ')';
       
       if (!userData.esVip) {
         const seccionBusqueda = document.getElementById('seccionBusqueda');
         if (seccionBusqueda) {
           seccionBusqueda.remove();
         }
-        console.log('🚫 Usuario NO VIP - Búsqueda de proyectos oculta');
+        console.log('🚫 Usuario NO VIP - Búsqueda oculta');
       } else {
         console.log('✅ Usuario VIP - Acceso completo');
       }
     }
 
     function cerrarSesion() {
-      if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      if (confirm('¿Cerrar sesión?')) {
         localStorage.removeItem('pso_user_session');
         window.location.href = 'login-pso.html';
       }
