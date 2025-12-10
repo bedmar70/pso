@@ -606,12 +606,12 @@
         <label for="tipoGestion" class="required">Tipo de Gestion</label>
         <select id="tipoGestion" required>
           <option value="">Selecciona un tipo...</option>
-          <option value="8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce">Alta Nueva</option>
-          <option value="bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d">Modificacion</option>
-          <option value="4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f">Consultas Varios</option>
-          <option value="7513d3be-e1fd-401e-a3ae-8dbccf6f4eee">Consulta Precio Clichés</option>
-          <option value="94f46c5f-0ca7-49e2-85e2-5dfdae638976">Consulta Plano</option>
-          <option value="48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2">Consulta Diseño</option>
+          <option value="Alta nueva">Alta Nueva</option>
+          <option value="Modificación">Modificación</option>
+          <option value="Consultas - Varios">Consultas Varios</option>
+          <option value="Consulta - Precio Cliché">Consulta Precio Clichés</option>
+          <option value="Consulta - Diseño Plano">Consulta Plano</option>
+          <option value="Consulta - Diseño">Consulta Diseño</option>
         </select>
       </div>
 
@@ -674,9 +674,9 @@
         <label for="prioridadBoceto">Prioridad del Boceto</label>
         <select id="prioridadBoceto">
           <option value="">Seleccionar...</option>
-          <option value="baja">Baja</option>
-          <option value="media">Media</option>
-          <option value="alta">Alta</option>
+          <option value="Normal">Normal</option>
+          <option value="Prioritario">Prioritario</option>
+          <option value="Urgente">Urgente</option>
         </select>
       </div>
 
@@ -685,8 +685,8 @@
         <label for="necesitaCosteCliches">¿Necesitas coste de clichés?</label>
         <select id="necesitaCosteCliches">
           <option value="">Seleccionar...</option>
-          <option value="si">Sí</option>
-          <option value="no">No</option>
+          <option value="SI">SI</option>
+          <option value="NO">NO</option>
         </select>
       </div>
 
@@ -695,8 +695,8 @@
         <label for="tipoImpresion">Tipo de Impresión</label>
         <select id="tipoImpresion">
           <option value="">Seleccionar...</option>
-          <option value="interior">Interior</option>
-          <option value="exterior">Exterior</option>
+          <option value="Interior">Interior</option>
+          <option value="Exterior">Exterior</option>
         </select>
       </div>
 
@@ -735,22 +735,11 @@
         <label for="barnices">Barnices</label>
         <select id="barnices">
           <option value="">Seleccionar...</option>
-          <option value="a_registro">A registro (cubre algunas zonas)</option>
-          <option value="toda_lamina">En toda la lámina</option>
+          <option value="SI">SI</option>
+          <option value="NO">NO</option>
         </select>
       </div>
 
-      <!-- ARCHIVOS ADJUNTOS -->
-      <div class="form-group hidden" id="campo_archivos">
-        <label for="archivos">Archivos Adjuntos</label>
-        <div class="file-upload-area" id="fileUploadArea">
-          <div class="file-upload-icon">📎</div>
-          <div class="file-upload-text">Arrastra archivos aqui o haz clic para seleccionar</div>
-          <div class="file-upload-button">Seleccionar archivos</div>
-          <input type="file" id="archivos" multiple>
-        </div>
-        <div class="file-list" id="fileList"></div>
-      </div>
 
       <!-- PRESUPUESTO -->
       <div class="form-group hidden" id="campo_presupuesto">
@@ -763,9 +752,10 @@
         <label for="complejidad">Complejidad</label>
         <select id="complejidad">
           <option value="">Seleccionar...</option>
-          <option value="1">Baja</option>
-          <option value="2">Media</option>
-          <option value="3">Alta</option>
+          <option value="1">⏱️ 1</option>
+          <option value="2">⏱️⏱️ 2</option>
+          <option value="3">⏱️⏱️⏱️ 3</option>
+          <option value="4">⏱️⏱️⏱️⏱️ 4</option>
         </select>
       </div>
 
@@ -781,6 +771,18 @@
         <textarea id="observaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
       </div>
 
+      <!-- ARCHIVOS ADJUNTOS -->
+      <div class="form-group hidden" id="campo_archivos">
+        <label for="archivos">Archivos Adjuntos</label>
+        <div class="file-upload-area" id="fileUploadArea">
+          <div class="file-upload-icon">📎</div>
+          <div class="file-upload-text">Arrastra archivos aqui o haz clic para seleccionar</div>
+          <div class="file-upload-button">Seleccionar archivos</div>
+          <input type="file" id="archivos" multiple>
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+
       <button type="submit" id="submitBtn">Enviar Solicitud</button>
 
     </form>
@@ -794,12 +796,12 @@
         crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
       },
       tipos: {
-        ALTA_NUEVA: '8b3e6d80-c764-45d9-aec4-1c7f83d8c8ce',
-        MODIFICACION: 'bd1af6b2-a19c-4c1d-9de2-b71e45a45b6d',
-        CONSULTAS_VARIOS: '4c37e77e-10f7-4d4a-b5bb-d56a3a28b20f',
-        CONSULTA_PRECIO: '7513d3be-e1fd-401e-a3ae-8dbccf6f4eee',
-        CONSULTA_PLANO: '94f46c5f-0ca7-49e2-85e2-5dfdae638976',
-        CONSULTA_DISENO: '48a9c35a-cc78-4f98-8e51-9a8cdf00a1c2'
+        ALTA_NUEVA: 'Alta nueva',
+        MODIFICACION: 'Modificación',
+        CONSULTAS_VARIOS: 'Consultas - Varios',
+        CONSULTA_PRECIO: 'Consulta - Precio Cliché',
+        CONSULTA_PLANO: 'Consulta - Diseño Plano',
+        CONSULTA_DISENO: 'Consulta - Diseño'
       }
     };
 
