@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Gestión Comercial PSO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #e8f5f3 0%, #d4efec 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .login-container {
+      background: white;
+      padding: 48px;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 188, 170, 0.08);
+      max-width: 450px;
+      width: 100%;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e8f5f3;
+    }
+
+    .header h2 {
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    
+    .subtitle {
+      color: #5f6368;
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+
+    .security-badge {
+      background: linear-gradient(135deg, #00bca5 0%, #00a896 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 188, 165, 0.25);
+    }
+
+    .security-badge::before {
+      content: "🔒";
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #202124;
+      font-size: 15px;
+      letter-spacing: -0.2px;
+    }
+    
+    .required::after {
+      content: " *";
+      color: #ea4335;
+    }
+    
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e8eaed;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      color: #202124;
+      background: #fafafa;
+    }
+
+    input:hover {
+      background: white;
+      border-color: #dadce0;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #00bca5;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(0, 188, 165, 0.08);
+    }
+    
+    button {
+      background: linear-gradient(135deg, #00bca5 0%, #00a896 100%);
+      color: white;
+      padding: 16px 32px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0, 188, 165, 0.3);
+      letter-spacing: 0.3px;
+    }
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 188, 165, 0.4);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      background: linear-gradient(135deg, #dadce0 0%, #bdc1c6 100%);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .message {
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+      border-left: 4px solid #ea4335;
+      color: #c62828;
+    }
+
+    .message.success {
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-left: 4px solid #00bca5;
+      color: #2e7d32;
+    }
+
+    .info-text {
+      text-align: center;
+      color: #5f6368;
+      font-size: 13px;
+      margin-top: 24px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+
+      .login-container {
+        padding: 28px 20px;
+        border-radius: 20px;
+      }
+
+      .header h2 {
+        font-size: 26px;
+      }
+
+      button {
+        padding: 14px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="header">
+      <h2>Gestión Comercial</h2>
+      <div class="subtitle">Plásticos Sierra del Oro</div>
+      <div class="security-badge">Acceso Seguro</div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email" class="required">Email Comercial</label>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="tu@psdoro.es" 
+          required
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="required">Contraseña</label>
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="••••••••" 
+          required
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" id="loginBtn">Iniciar Sesión</button>
+    </form>
+
+    <div class="info-text">
+      Acceso exclusivo para comerciales de PSO.<br>
+      Si no tienes credenciales, contacta con administración.
+    </div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      webhookLogin: 'https://n8n.escueladeefectividad.com/webhook/pso-login-comerciales',
+      formularioUrl: 'formulario-pso-seguro.html' // Ajusta el nombre de tu archivo
+    };
+
+    const form = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const messageDiv = document.getElementById('message');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    // Verificar si ya hay sesión activa
+    const sessionExistente = localStorage.getItem('pso_user_session');
+    if (sessionExistente) {
+      try {
+        const session = JSON.parse(sessionExistente);
+        // Redirigir directamente al formulario
+        window.location.href = CONFIG.formularioUrl;
+      } catch (e) {
+        // Si hay error parseando, limpiar sesión corrupta
+        localStorage.removeItem('pso_user_session');
+      }
+    }
+
+    // Función para mostrar mensajes
+    function showMessage(text, type) {
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type} show`;
+    }
+
+    function hideMessage() {
+      messageDiv.className = 'message';
+    }
+
+    // Manejar submit del formulario
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      // Validaciones básicas
+      if (!email || !password) {
+        showMessage('Por favor completa todos los campos', 'error');
+        return;
+      }
+
+      // Deshabilitar botón y mostrar loading
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<div class="spinner"></div>Verificando...';
+      hideMessage();
+
+      try {
+        // Llamar al webhook de N8N
+        const response = await fetch(CONFIG.webhookLogin, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Login exitoso
+          showMessage(`¡Bienvenido ${data.usuario.nombre}!`, 'success');
+
+          // Guardar sesión en localStorage
+          const session = {
+            nombre: data.usuario.nombre,
+            email: data.usuario.email,
+            esVip: data.usuario.esVip,
+            esComercial: data.usuario.esComercial,
+            loginTimestamp: new Date().toISOString()
+          };
+
+          localStorage.setItem('pso_user_session', JSON.stringify(session));
+
+          // Esperar 1 segundo y redirigir al formulario
+          setTimeout(() => {
+            window.location.href = CONFIG.formularioUrl;
+          }, 1000);
+
+        } else {
+          // Login fallido
+          showMessage(data.mensaje || 'Credenciales incorrectas', 'error');
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = 'Iniciar Sesión';
+          
+          // Limpiar password
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+
+      } catch (error) {
+        console.error('Error en login:', error);
+        showMessage('Error de conexión. Verifica tu internet e intenta de nuevo.', 'error');
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Iniciar Sesión';
+      }
+    });
+
+    // Limpiar mensaje de error al escribir
+    emailInput.addEventListener('input', hideMessage);
+    passwordInput.addEventListener('input', hideMessage);
+  </script>
+</body>
+</html>
