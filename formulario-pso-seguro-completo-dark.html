@@ -277,7 +277,7 @@
           <input type="url" id="enlaceDiseno" class="cyber-input w-full rounded-lg p-3 text-blue-400" placeholder="https://drive/dropbox...">
         </div>
 
-        <div class="form-group hidden col-span-1 md:col-span-2 grid grid-cols-3 gap-4 bg-white/5 p-4 rounded-lg border border-white/10">
+       <div class="form-group hidden col-span-1 md:col-span-2 grid grid-cols-3 gap-4 bg-white/5 p-4 rounded-lg border border-white/10" id="campo_metricasTecnicas">
            <div class="col-span-3 text-xs text-neon-cyan font-bold uppercase mb-2 border-b border-white/10 pb-1">Métricas Técnicas</div>
            
            <div id="campo_numCaidas" class="hidden col-span-1">
@@ -424,9 +424,9 @@
       [CONFIG.tipos.CONSULTA_PRECIO]: [
         'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
         'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
-        'tipoImpresion', 'numCaidas', 'numRepeticiones', 'materiales',
-        'numColores', 'barnices', 'archivos', 'enlaceDiseno',
-        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones'
+        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
+        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones',
+        'metricasTecnicas' // <--- AÑADIDO: Activa el contenedor principal
       ],
       [CONFIG.tipos.CONSULTA_PLANO]: [
         'descripcion', 'archivos', 'presupuesto', 'complejidad',
