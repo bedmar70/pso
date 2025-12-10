@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSO Command Center | Gestión Comercial</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            'display': ['Orbitron', 'sans-serif'],
+            'body': ['Rajdhani', 'sans-serif'],
+          },
+          colors: {
+            neon: {
+              cyan: '#00f3ff',
+              pink: '#bc13fe',
+              bg: '#050505',
+              panel: 'rgba(20, 20, 25, 0.7)'
+            }
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3)',
+            'neon-pink': '0 0 10px rgba(188, 19, 254, 0.5), 0 0 20px rgba(188, 19, 254, 0.3)',
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'spin-slow': 'spin 3s linear infinite',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos base futuristas */
+    body {
+      background-color: #020204;
+      background-image: 
+        linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: #e2e8f0;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+    /* Efecto Glassmorphism */
+    .glass-panel {
+      background: rgba(10, 10, 15, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Inputs futuristas */
+    .cyber-input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid #333;
+      color: #00f3ff;
+      transition: all 0.3s ease;
+    }
+    .cyber-input:focus {
+      border-color: #00f3ff;
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+      outline: none;
+    }
+    .cyber-input::placeholder { color: #4a5568; }
+
+    /* Animación de carga */
+    .loader-ring {
+      border: 3px solid rgba(0,0,0,0.1);
+      border-left-color: #00f3ff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Ocultar elementos */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="font-body min-h-screen flex items-center justify-center p-4">
+
+  <script>
+    (function() {
+      // NOTA: Para probar el diseño, he comentado la redirección obligatoria.
+      // Descoméntalo en producción.
+      const session = localStorage.getItem('pso_user_session');
+      /*
+      if (!session) {
+        window.location.href = 'login-pso.html';
+        return;
+      }
+      */
+      try {
+        const userData = session ? JSON.parse(session) : { nombre: 'Usuario Demo', email: 'demo@pso.com', esVip: true };
+        window.PSO_USER = userData;
+      } catch (e) {
+        console.error('Error sesión');
+      }
+    })();
+  </script>
+
+  <div class="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neon-cyan opacity-10 blur-[120px] rounded-full animate-pulse-slow"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon-pink opacity-10 blur-[120px] rounded-full animate-pulse-slow"></div>
+  </div>
+
+  <div class="glass-panel w-full max-w-4xl rounded-2xl p-8 relative z-10 shadow-2xl border-t border-white/10">
+    
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-800 pb-6">
+      <div class="mb-4 md:mb-0 text-center md:text-left">
+        <h1 class="font-display text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white tracking-wider">
+          PSO <span class="text-neon-pink">SYSTEM</span>
+        </h1>
+        <p class="text-gray-400 text-sm tracking-widest mt-1">INTERFAZ DE GESTIÓN COMERCIAL v2.0</p>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <div class="glass-panel px-4 py-2 rounded-lg flex items-center gap-3 border border-neon-cyan/20">
+          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <div class="text-xs text-right">
+            <div id="userName" class="font-bold text-neon-cyan">Invitado</div>
+            <div id="userEmail" class="text-gray-500 text-[10px]">Sin conexión</div>
+          </div>
+          <button onclick="cerrarSesion()" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+              <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="w-full bg-gray-800 h-1 rounded-full mb-8 overflow-hidden relative">
+      <div id="progressBar" class="h-full bg-gradient-to-r from-neon-cyan to-blue-500 shadow-neon-cyan transition-all duration-500 ease-out w-0 relative">
+        <div class="absolute right-0 top-0 h-full w-2 bg-white blur-[2px]"></div>
+      </div>
+    </div>
+
+    <form id="gestionForm" class="space-y-6">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="col-span-1 md:col-span-2 form-group">
+          <label for="tipoGestion" class="block text-neon-cyan text-xs font-bold uppercase tracking-widest mb-2">
+            Protocolo de Solicitud <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <select id="tipoGestion" required class="cyber-input w-full rounded-lg p-3 appearance-none cursor-pointer font-bold text-lg">
+              <option value="" class="bg-gray-900 text-gray-500">SELECCIONAR TIPO DE OPERACIÓN...</option>
+              <option value="Alta nueva" class="bg-gray-900">🚀 ALTA NUEVA</option>
+              <option value="Modificación" class="bg-gray-900">📝 MODIFICACIÓN</option>
+              <option value="Consultas - Varios" class="bg-gray-900">❓ CONSULTAS VARIOS</option>
+              <option value="Consulta - Precio Cliché" class="bg-gray-900">💰 CONSULTA PRECIO CLICHÉS</option>
+              <option value="Consulta - Diseño Plano" class="bg-gray-900">📐 CONSULTA PLANO</option>
+              <option value="Consulta - Diseño" class="bg-gray-900">🎨 CONSULTA DISEÑO</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-neon-cyan">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div id="infoBox" class="col-span-1 md:col-span-2 hidden p-4 border-l-4 border-neon-cyan bg-neon-cyan/10 text-cyan-200 text-sm rounded-r-lg flex items-center gap-3 animate-fadeIn">
+          <span class="text-xl">ℹ️</span>
+          <span class="info-text">Inicializando protocolo...</span>
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_nombreSolicitante">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Solicitante</label>
+          <input type="text" id="nombreSolicitante" class="cyber-input w-full rounded-lg p-3" placeholder="Nombre Agente">
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_emailSolicitante">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Comunicación (Email)</label>
+          <input type="email" id="emailSolicitante" class="cyber-input w-full rounded-lg p-3" placeholder="correo@pso.com">
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2" id="campo_nombreProyecto">
+          <label class="block text-neon-pink text-xs font-bold uppercase mb-2">Identificador Proyecto</label>
+          <input type="text" id="nombreProyecto" class="cyber-input w-full rounded-lg p-3 font-bold" placeholder="EJ: PROYECTO ALPHA - ENVASE 500ML">
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2" id="campo_cliente">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Vincular Cliente (Base de Datos)</label>
+          <div class="relative autocomplete-container">
+            <input type="text" id="searchCliente" class="cyber-input w-full rounded-lg p-3 pl-10" placeholder="Buscar en servidor..." autocomplete="off">
+            <span class="absolute left-3 top-3.5 text-gray-500">🔍</span>
+            <div id="searchResultsCliente" class="absolute z-50 w-full bg-gray-900 border border-neon-cyan mt-1 rounded-lg shadow-xl max-h-60 overflow-y-auto hidden"></div>
+          </div>
+          <input type="hidden" id="clienteId">
+          <div id="selectedClient" class="mt-2 p-3 bg-neon-cyan/20 border border-neon-cyan rounded text-sm text-cyan-300 hidden"></div>
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2" id="campo_buscarProyecto">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Vincular Proyecto Existente</label>
+          <div class="relative autocomplete-container">
+            <input type="text" id="searchProyecto" class="cyber-input w-full rounded-lg p-3 pl-10" placeholder="Buscar ID de tarea..." autocomplete="off">
+            <span class="absolute left-3 top-3.5 text-gray-500">📂</span>
+            <div id="searchResults" class="absolute z-50 w-full bg-gray-900 border border-neon-cyan mt-1 rounded-lg shadow-xl max-h-60 overflow-y-auto hidden"></div>
+          </div>
+          <input type="hidden" id="proyectoId">
+          <div id="selectedProject" class="mt-2 p-3 bg-neon-cyan/20 border border-neon-cyan rounded text-sm text-cyan-300 hidden"></div>
+        </div>
+
+        <div class="col-span-1 md:col-span-2">
+          <label class="block text-gray-400 text-xs uppercase mb-2 required">Detalles de Operación</label>
+          <textarea id="descripcion" rows="4" class="cyber-input w-full rounded-lg p-3" placeholder="Especificaciones técnicas, requerimientos..." required></textarea>
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_referenciaPSO">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Ref. Interna PSO</label>
+          <input type="text" id="referenciaPSO" class="cyber-input w-full rounded-lg p-3">
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_prioridadBoceto">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Nivel de Prioridad</label>
+          <select id="prioridadBoceto" class="cyber-input w-full rounded-lg p-3">
+            <option value="" class="bg-gray-900">Estándar</option>
+            <option value="Normal" class="bg-gray-900">Normal</option>
+            <option value="Prioritario" class="bg-gray-900 text-yellow-400">⚠️ Prioritario</option>
+            <option value="Urgente" class="bg-gray-900 text-red-500">🚨 URGENTE</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_necesitaCosteCliches">
+          <label class="block text-gray-400 text-xs uppercase mb-2">¿Coste Clichés?</label>
+          <select id="necesitaCosteCliches" class="cyber-input w-full rounded-lg p-3">
+            <option value="" class="bg-gray-900">-</option>
+            <option value="SI" class="bg-gray-900">SI</option>
+            <option value="NO" class="bg-gray-900">NO</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_tipoImpresion">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Modo Impresión</label>
+          <select id="tipoImpresion" class="cyber-input w-full rounded-lg p-3">
+            <option value="" class="bg-gray-900">-</option>
+            <option value="Interior" class="bg-gray-900">Interior</option>
+            <option value="Exterior" class="bg-gray-900">Exterior</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2" id="campo_materiales">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Materiales / Sustrato</label>
+          <input type="text" id="materiales" class="cyber-input w-full rounded-lg p-3" placeholder="Polietileno, PVC...">
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2" id="campo_enlaceDiseno">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Enlace Nube (Diseño)</label>
+          <input type="url" id="enlaceDiseno" class="cyber-input w-full rounded-lg p-3 text-blue-400" placeholder="https://drive/dropbox...">
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2 grid grid-cols-3 gap-4 bg-white/5 p-4 rounded-lg border border-white/10">
+           <div class="col-span-3 text-xs text-neon-cyan font-bold uppercase mb-2 border-b border-white/10 pb-1">Métricas Técnicas</div>
+           
+           <div id="campo_numCaidas" class="hidden col-span-1">
+             <label class="block text-gray-500 text-[10px] uppercase">Caídas</label>
+             <input type="number" id="numCaidas" class="cyber-input w-full rounded p-2 text-center" min="0">
+           </div>
+           
+           <div id="campo_numRepeticiones" class="hidden col-span-1">
+             <label class="block text-gray-500 text-[10px] uppercase">Repeticiones</label>
+             <input type="number" id="numRepeticiones" class="cyber-input w-full rounded p-2 text-center" min="0">
+           </div>
+           
+           <div id="campo_numColores" class="hidden col-span-1">
+             <label class="block text-gray-500 text-[10px] uppercase">Colores</label>
+             <input type="number" id="numColores" class="cyber-input w-full rounded p-2 text-center" min="0">
+           </div>
+
+           <div id="campo_barnices" class="hidden col-span-3">
+             <label class="block text-gray-500 text-[10px] uppercase mb-1">Barnices</label>
+             <select id="barnices" class="cyber-input w-full rounded p-2">
+                <option value="" class="bg-gray-900">-</option>
+                <option value="SI" class="bg-gray-900">SI</option>
+                <option value="NO" class="bg-gray-900">NO</option>
+             </select>
+           </div>
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_presupuesto">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Presupuesto (€)</label>
+          <input type="number" id="presupuesto" class="cyber-input w-full rounded-lg p-3 text-right font-mono" placeholder="0.00" step="0.01">
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_complejidad">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Nivel Complejidad</label>
+          <input type="range" id="complejidad" min="1" max="4" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-neon-pink">
+          <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+            <span>Baja</span><span>Media</span><span>Alta</span><span>Extrema</span>
+          </div>
+        </div>
+
+        <div class="form-group hidden col-span-1" id="campo_fechaPrometida">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Deadline (Fecha Límite)</label>
+          <input type="date" id="fechaPrometida" class="cyber-input w-full rounded-lg p-3 text-gray-300">
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2" id="campo_observaciones">
+          <label class="block text-gray-400 text-xs uppercase mb-2">Notas Adicionales</label>
+          <textarea id="observaciones" rows="2" class="cyber-input w-full rounded-lg p-3"></textarea>
+        </div>
+
+        <div class="form-group hidden col-span-1 md:col-span-2" id="campo_archivos">
+          <label class="block text-neon-cyan text-xs font-bold uppercase mb-2">Carga de Datos Adjuntos</label>
+          <div id="fileUploadArea" class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-neon-cyan hover:bg-neon-cyan/5 transition-all cursor-pointer group relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-neon-cyan/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">📎</div>
+            <p class="text-gray-400 text-sm mb-2 group-hover:text-white">Arrastra archivos al núcleo o haz clic para inicializar</p>
+            <span class="inline-block bg-gray-800 text-neon-cyan px-3 py-1 rounded text-xs border border-gray-700">Explorar Sistema</span>
+            <input type="file" id="archivos" multiple class="hidden">
+          </div>
+          <div id="fileList" class="mt-4 space-y-2"></div>
+        </div>
+
+      </div>
+
+      <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-neon-cyan to-blue-600 text-black font-display font-black text-lg py-4 rounded-xl shadow-neon-cyan hover:scale-[1.01] hover:shadow-lg transition-all flex justify-center items-center gap-3 mt-8 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
+        <span>Transmitir Datos</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+        </svg>
+      </button>
+
+    </form>
+  </div>
+
+  <div class="fixed bottom-4 text-gray-600 text-[10px] font-mono">
+    SECURE CONNECTION :: N8N GATEWAY ACTIVE :: v2.5.0
+  </div>
+
+
+  <script>
+    // CONFIGURACIÓN (NO TOCAR)
+    const CONFIG = {
+      webhooks: {
+        buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
+        buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
+        crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
+      },
+      tipos: {
+        ALTA_NUEVA: 'Alta nueva',
+        MODIFICACION: 'Modificación',
+        CONSULTAS_VARIOS: 'Consultas - Varios',
+        CONSULTA_PRECIO: 'Consulta - Precio Cliché',
+        CONSULTA_PLANO: 'Consulta - Diseño Plano',
+        CONSULTA_DISENO: 'Consulta - Diseño'
+      }
+    };
+
+    const camposPorTipo = {
+      [CONFIG.tipos.ALTA_NUEVA]: [
+        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
+        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
+        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
+        'presupuesto', 'complejidad', 'fechaPrometida'
+      ],
+      [CONFIG.tipos.MODIFICACION]: [
+        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
+        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
+        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
+        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones',
+        'buscarProyecto'
+      ],
+      [CONFIG.tipos.CONSULTAS_VARIOS]: [
+        'nombreSolicitante', 'emailSolicitante', 'descripcion',
+        'archivos', 'enlaceDiseno', 'observaciones'
+      ],
+      [CONFIG.tipos.CONSULTA_PRECIO]: [
+        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
+        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
+        'tipoImpresion', 'numCaidas', 'numRepeticiones', 'materiales',
+        'numColores', 'barnices', 'archivos', 'enlaceDiseno',
+        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones'
+      ],
+      [CONFIG.tipos.CONSULTA_PLANO]: [
+        'descripcion', 'archivos', 'presupuesto', 'complejidad',
+        'fechaPrometida', 'emailSolicitante'
+      ],
+      [CONFIG.tipos.CONSULTA_DISENO]: [
+        'descripcion', 'archivos', 'presupuesto', 'complejidad',
+        'fechaPrometida', 'emailSolicitante'
+      ]
+    };
+
+    const form = document.getElementById('gestionForm');
+    const tipoGestionSelect = document.getElementById('tipoGestion');
+    const infoBox = document.getElementById('infoBox');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.getElementById('progressBar');
+    
+    // File upload
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('archivos');
+    const fileList = document.getElementById('fileList');
+    let selectedFiles = [];
+
+    // Search vars
+    const searchInput = document.getElementById('searchProyecto');
+    const resultsContainer = document.getElementById('searchResults');
+    const selectedProjectDiv = document.getElementById('selectedProject');
+    const proyectoIdInput = document.getElementById('proyectoId');
+    let selectedProject = null;
+    let searchTimeout = null;
+
+    const searchClienteInput = document.getElementById('searchCliente');
+    const resultsClienteContainer = document.getElementById('searchResultsCliente');
+    const selectedClientDiv = document.getElementById('selectedClient');
+    const clienteIdInput = document.getElementById('clienteId');
+    let selectedCliente = null;
+    let searchClienteTimeout = null;
+
+    // --- LOGIC: SHOW/HIDE FIELDS ---
+    function mostrarCamposSegunTipo(tipo) {
+      // Ocultar todos
+      const todosCampos = document.querySelectorAll('.form-group[id^="campo_"], div[id^="campo_"]');
+      todosCampos.forEach(campo => campo.classList.add('hidden'));
+
+      const campos = camposPorTipo[tipo] || [];
+      
+      campos.forEach(nombreCampo => {
+        const campo = document.getElementById('campo_' + nombreCampo);
+        if (campo) {
+          // Check VIP (Si existe el objeto window.PSO_USER)
+          if ((nombreCampo === 'buscarProyecto' || nombreCampo === 'cliente') && window.PSO_USER && !window.PSO_USER.esVip) {
+            return;
+          }
+          campo.classList.remove('hidden');
+          // Animación de entrada
+          campo.classList.add('animate-fadeIn'); 
+        }
+      });
+      updateProgress();
+    }
+
+    tipoGestionSelect.addEventListener('change', (e) => {
+      const tipo = e.target.value;
+      if (!tipo) {
+        infoBox.classList.add('hidden');
+        mostrarCamposSegunTipo(''); // Hide all
+        return;
+      }
+      infoBox.querySelector('.info-text').textContent = 'Configurando parámetros para: ' + tipo;
+      infoBox.classList.remove('hidden');
+      mostrarCamposSegunTipo(tipo);
+      updateProgress();
+    });
+
+    // --- LOGIC: FILES ---
+    if (fileUploadArea && fileInput) {
+      fileUploadArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', handleFileSelect);
+      fileUploadArea.addEventListener('dragover', (e) => { e.preventDefault(); fileUploadArea.classList.add('border-neon-cyan'); });
+      fileUploadArea.addEventListener('dragleave', () => { fileUploadArea.classList.remove('border-neon-cyan'); });
+      fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('border-neon-cyan');
+        handleFileSelect({ target: { files: e.dataTransfer.files } });
+      });
+    }
+
+    function handleFileSelect(e) {
+      const files = Array.from(e.target.files);
+      selectedFiles = [...selectedFiles, ...files];
+      renderFileList();
+      updateProgress();
+    }
+
+    function renderFileList() {
+      if (selectedFiles.length === 0) { fileList.innerHTML = ''; return; }
+      fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded border border-gray-700">
+          <div class="flex items-center gap-3">
+            <span class="text-neon-cyan">📄</span>
+            <div>
+              <div class="text-sm font-bold text-gray-200">${file.name}</div>
+              <div class="text-xs text-gray-500">${(file.size/1024).toFixed(1)} KB</div>
+            </div>
+          </div>
+          <button type="button" class="text-red-500 hover:text-red-400 text-xs uppercase" onclick="removeFile(${index})">Eliminar</button>
+        </div>
+      `).join('');
+    }
+    
+    window.removeFile = function(index) { // Expose to window for onclick
+      selectedFiles.splice(index, 1);
+      renderFileList();
+      updateProgress();
+    }
+
+    // --- LOGIC: SEARCH PROJECTS ---
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout);
+        if (query.length < 2) { resultsContainer.classList.add('hidden'); return; }
+        searchTimeout = setTimeout(() => searchProjects(query), 300);
+      });
+    }
+
+    async function searchProjects(query) {
+      resultsContainer.innerHTML = '<div class="p-4 text-center text-neon-cyan"><div class="loader-ring mx-auto"></div></div>';
+      resultsContainer.classList.remove('hidden');
+      try {
+        const response = await fetch(CONFIG.webhooks.buscarProyectos, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query })
+        });
+        if (!response.ok) throw new Error('Error');
+        const data = await response.json();
+        const tasks = data.map(item => item.json);
+        
+        if (tasks.length === 0) {
+          resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-sm">No hay coincidencias</div>';
+          return;
+        }
+        
+        resultsContainer.innerHTML = tasks.map(task => 
+          `<div class="p-3 hover:bg-neon-cyan/10 cursor-pointer border-b border-gray-800 transition-colors" onclick='selectProject(${JSON.stringify(task).replace(/'/g, "&apos;")})'>
+             <div class="font-bold text-white text-sm">${task.name}</div>
+             <div class="text-xs text-neon-cyan">ID: ${task.id}</div>
+           </div>`
+        ).join('');
+      } catch (e) {
+        resultsContainer.innerHTML = '<div class="p-3 text-red-400 text-sm">Error de conexión</div>';
+      }
+    }
+
+    window.selectProject = function(project) {
+      selectedProject = project;
+      proyectoIdInput.value = project.id;
+      searchInput.value = '';
+      resultsContainer.classList.add('hidden');
+      selectedProjectDiv.innerHTML = `<div><span class="text-white font-bold">${project.name}</span> <span class="text-xs text-gray-500">(${project.id})</span></div>`;
+      selectedProjectDiv.classList.remove('hidden');
+    }
+
+    // --- LOGIC: SEARCH CLIENTS ---
+    if (searchClienteInput) {
+      searchClienteInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchClienteTimeout);
+        if (query.length < 2) { resultsClienteContainer.classList.add('hidden'); return; }
+        searchClienteTimeout = setTimeout(() => searchClientes(query), 300);
+      });
+    }
+
+    async function searchClientes(query) {
+      resultsClienteContainer.innerHTML = '<div class="p-4 text-center"><div class="loader-ring mx-auto"></div></div>';
+      resultsClienteContainer.classList.remove('hidden');
+      try {
+        const response = await fetch(CONFIG.webhooks.buscarClientes, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query })
+        });
+        if (!response.ok) throw new Error('Error');
+        const data = await response.json();
+        
+        // Handle wrapper vs flat structure logic from original
+        let clientes = [];
+        if (Array.isArray(data) && data.length > 0) {
+           clientes = data[0].json ? data.map(item => item.json) : data;
+        }
+
+        if (clientes.length === 0) {
+          resultsClienteContainer.innerHTML = '<div class="p-3 text-gray-500 text-sm">No encontrado</div>';
+          return;
+        }
+
+        resultsClienteContainer.innerHTML = clientes.map(c => 
+          `<div class="p-3 hover:bg-neon-cyan/10 cursor-pointer border-b border-gray-800" onclick='selectCliente(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
+             <div class="font-bold text-white text-sm">${c.name}</div>
+             <div class="text-xs text-gray-500">${c.id}</div>
+           </div>`
+        ).join('');
+      } catch (e) {
+        resultsClienteContainer.innerHTML = '<div class="p-3 text-red-400">Error</div>';
+      }
+    }
+
+    window.selectCliente = function(cliente) {
+      selectedCliente = cliente;
+      clienteIdInput.value = cliente.id;
+      searchClienteInput.value = '';
+      resultsClienteContainer.classList.add('hidden');
+      selectedClientDiv.innerHTML = `<div><span class="text-white font-bold">${cliente.name}</span></div>`;
+      selectedClientDiv.classList.remove('hidden');
+    }
+
+    // Close dropdowns on click outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.autocomplete-container')) {
+        resultsContainer.classList.add('hidden');
+        resultsClienteContainer.classList.add('hidden');
+      }
+    });
+
+    // --- PROGRESS BAR ---
+    function updateProgress() {
+      const visibleFields = form.querySelectorAll('.form-group:not(.hidden) input:not([type="hidden"]):not([type="file"]), .form-group:not(.hidden) select, .form-group:not(.hidden) textarea');
+      let filled = 0;
+      visibleFields.forEach(f => { if(f.value) filled++; });
+      if(selectedFiles.length > 0) filled++;
+      
+      const percent = visibleFields.length > 0 ? (filled / visibleFields.length) * 100 : 0;
+      progressBar.style.width = percent + '%';
+      
+      if(percent === 100) progressBar.classList.add('shadow-[0_0_15px_#00f3ff]');
+      else progressBar.classList.remove('shadow-[0_0_15px_#00f3ff]');
+    }
+    form.addEventListener('input', updateProgress);
+    form.addEventListener('change', updateProgress);
+
+    // --- SUBMIT ---
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<div class="loader-ring border-white"></div> TRANSMITIENDO...';
+
+      try {
+        const formData = new FormData();
+        // Collect standard fields
+        formData.append('tipo_gestion_comercial', tipoGestionSelect.value);
+        
+        // Collect visible inputs
+        const inputs = form.querySelectorAll('input:not(.hidden), select:not(.hidden), textarea:not(.hidden)');
+        inputs.forEach(el => {
+           if(el.id && el.id !== 'searchProyecto' && el.id !== 'searchCliente' && el.type !== 'file') {
+             formData.append(el.id, el.value);
+           }
+        });
+
+        // Append Complex Objects
+        if(selectedCliente) formData.append('cliente', JSON.stringify(selectedCliente));
+        if(selectedProject) formData.append('proyecto_relacionado', JSON.stringify(selectedProject));
+        
+        // Files
+        selectedFiles.forEach((file, i) => formData.append(`archivo_${i}`, file));
+        formData.append('total_archivos', selectedFiles.length);
+
+        // SEND
+        const response = await fetch(CONFIG.webhooks.crearTarea, { method: 'POST', body: formData });
+        
+        if (!response.ok) throw new Error('Status ' + response.status);
+        
+        // Success SweetAlert
+        Swal.fire({
+          title: '¡ÉXITO!',
+          text: 'La solicitud ha sido inyectada en el sistema PSO correctamente.',
+          icon: 'success',
+          background: '#0a0a0a',
+          color: '#ffffff',
+          confirmButtonColor: '#00f3ff',
+          confirmButtonText: '<span style="color:black; font-weight:bold">ENTENDIDO</span>'
+        });
+
+        // Reset
+        form.reset();
+        selectedFiles = [];
+        renderFileList();
+        selectedProject = null;
+        selectedCliente = null;
+        selectedProjectDiv.classList.add('hidden');
+        selectedClientDiv.classList.add('hidden');
+        mostrarCamposSegunTipo('');
+        progressBar.style.width = '0';
+
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: 'ERROR CRÍTICO',
+          text: 'Fallo en la transmisión de datos. Verifique consola.',
+          icon: 'error',
+          background: '#0a0a0a',
+          color: '#ffffff'
+        });
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    });
+
+    // Cargar datos usuario visualmente
+    if(window.PSO_USER) {
+       document.getElementById('userName').textContent = window.PSO_USER.nombre;
+       document.getElementById('userEmail').textContent = window.PSO_USER.email;
+    }
+    
+    // Función salir simulada
+    window.cerrarSesion = function() {
+      Swal.fire({
+        title: '¿DESCONECTAR?',
+        icon: 'warning',
+        showCancelButton: true,
+        background: '#0a0a0a',
+        color: '#fff',
+        confirmButtonColor: '#bc13fe',
+        cancelButtonColor: '#333',
+        confirmButtonText: 'Sí, Salir'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          localStorage.removeItem('pso_user_session');
+          window.location.reload();
+        }
+      });
+    }
+
+  </script>
+</body>
+</html>
