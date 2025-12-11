@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>22 PSO Gestión: Modo Seguro</title>
+  <title>4.0. PSO Gestión: Modo Seguro v4</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
@@ -23,15 +23,13 @@
       font-size: 0.95rem;
     }
     .cyber-input:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
-    
-    /* Placeholder Color Force */
     .cyber-input::placeholder { color: #6b7280; opacity: 1; }
     
     .hidden-force { display: none !important; }
     label { font-size: 0.75rem; text-transform: uppercase; color: #9ca3af; margin-bottom: 0.25rem; display: block; letter-spacing: 0.05em; }
     label.required { color: #00f3ff; font-weight: bold; }
     
-    /* Scrollbar para resultados */
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #111; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -45,11 +43,11 @@
     <div class="border-b border-gray-700 pb-4 mb-6 flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
-        <p class="text-xs text-gray-400 mt-1">MODO ACCESO DIRECTO v3.0</p>
+        <p class="text-xs text-gray-400 mt-1">MODO ACCESO DIRECTO v4.0</p>
       </div>
       <div class="text-right text-xs">
-        <div class="text-[#00f3ff] font-bold">USUARIO ACTIVO</div>
-        <div class="text-gray-500">Permisos VIP Habilitados</div>
+        <div class="text-[#00f3ff] font-bold">ESTADO</div>
+        <div class="text-gray-500">Sistema Operativo</div>
       </div>
     </div>
 
@@ -71,12 +69,12 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <div id="campo_nombreSolicitante" class="hidden-force col-span-1">
-          <label>Solicitante</label>
-          <input type="text" name="nombreSolicitante" class="cyber-input text-gray-500 cursor-not-allowed" value="USUARIO COMERCIAL" readonly>
+          <label class="required">Solicitante</label>
+          <input type="text" name="nombreSolicitante" class="cyber-input" placeholder="Nombre del agente..." required>
         </div>
         <div id="campo_emailSolicitante" class="hidden-force col-span-1">
-          <label>Email de Contacto</label>
-          <input type="email" name="emailSolicitante" class="cyber-input text-gray-500 cursor-not-allowed" value="comercial@pso.com" readonly>
+          <label class="required">Email de Contacto</label>
+          <input type="email" name="emailSolicitante" class="cyber-input" placeholder="correo@pso.com" required>
         </div>
 
         <div id="campo_nombreProyecto" class="hidden-force col-span-1 md:col-span-2">
@@ -217,7 +215,7 @@
   </div>
 
   <div class="fixed bottom-2 right-2 text-[10px] text-gray-700 font-mono">
-    SECURE MODE :: v3.0
+    SECURE MODE :: v4.0
   </div>
 
   <script>
@@ -282,14 +280,14 @@
            document.getElementById('resCliente').classList.add('hidden');
            document.getElementById('selClienteText').textContent = item.name;
            document.getElementById('selCliente').classList.remove('hidden');
-           document.getElementById('inputCliente').value = item.name; // ENVÍA NOMBRE
+           document.getElementById('inputCliente').value = item.name;
            window.clienteSeleccionado = item;
        } else {
            document.getElementById('searchProyecto').value = '';
            document.getElementById('resProyecto').classList.add('hidden');
            document.getElementById('selProyectoText').textContent = item.name;
            document.getElementById('selProyecto').classList.remove('hidden');
-           document.getElementById('inputProyecto').value = item.id; // ENVÍA ID
+           document.getElementById('inputProyecto').value = item.id;
            window.proyectoSeleccionado = item;
        }
     };
@@ -328,13 +326,29 @@
 
         try {
             const formData = new FormData(e.target);
-            // Datos fijos usuario
-            formData.append('nombreSolicitante', 'USUARIO COMERCIAL');
-            formData.append('emailSolicitante', 'comercial@pso.com');
+            
+            // --- CAMBIO 2: INYECTAR ROLLUPS EN DESCRIPCIÓN (CONTENT) ---
+            let descFinal = formData.get('descripcion') || "";
+            let infoRollup = "";
 
-            // Asegurar Cliente y Proyecto
-            if(window.clienteSeleccionado) formData.append('cliente', window.clienteSeleccionado.name);
-            if(window.proyectoSeleccionado) formData.append('proyecto_relacionado', window.proyectoSeleccionado.id);
+            if(window.clienteSeleccionado) {
+                 // Enviamos el campo normal para el Custom Field
+                 formData.set('cliente', window.clienteSeleccionado.name);
+                 // Añadimos al texto para el Content
+                 infoRollup += `\n\n📌 CLIENTE VINCULADO: ${window.clienteSeleccionado.name}`;
+            }
+
+            if(window.proyectoSeleccionado) {
+                 // Enviamos el ID para la relación
+                 formData.set('proyecto_relacionado', window.proyectoSeleccionado.id);
+                 // Añadimos al texto para el Content
+                 infoRollup += `\n🔗 PROYECTO RELACIONADO: ${window.proyectoSeleccionado.name} (ID: ${window.proyectoSeleccionado.id})`;
+            }
+
+            // Actualizamos la descripción que se enviará
+            if(infoRollup) {
+                formData.set('descripcion', descFinal + infoRollup);
+            }
 
             // Archivos
             archivosSeleccionados.forEach((f, i) => formData.append(`archivo_${i}`, f));
