@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PSO Command Center | Acceso y Gestión</title>
+  <title>PSO Gestión: Acceso Directo</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,66 +98,21 @@
 
   <div id="mainContainer" class="glass-panel w-full max-w-4xl rounded-2xl p-8 relative z-10 shadow-2xl border-t border-white/10">
 
-    <div id="loginView" class="view" style="display: none;">
-      <div class="max-w-md mx-auto">
-        <div class="text-center mb-10 mt-4">
-          <div class="inline-block p-4 rounded-full border border-neon-cyan/30 bg-neon-cyan/5 mb-4 shadow-neon-cyan">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h1 class="font-display text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-wider">
-            PSO <span class="text-neon-cyan">ACCESS</span>
-          </h1>
-          <p class="text-neon-pink text-xs tracking-[0.2em] mt-2 uppercase opacity-80">Terminal de Gestión Comercial</p>
-        </div>
-
-        <form id="loginForm" class="space-y-6">
-          <div class="space-y-2">
-            <label for="email" class="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Identificador (Email)</label>
-            <div class="relative group">
-              <input type="email" id="email" required autocomplete="email" class="cyber-input w-full rounded-lg py-3 pl-10 pr-4 text-sm focus:bg-black/50" placeholder="agente@pso.com">
-            </div>
-          </div>
-          <div class="space-y-2">
-            <label for="password" class="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Clave de Acceso</label>
-            <div class="relative group">
-              <input type="password" id="password" required autocomplete="current-password" class="cyber-input w-full rounded-lg py-3 pl-10 pr-4 text-sm focus:bg-black/50" placeholder="••••••••">
-            </div>
-          </div>
-          <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-neon-cyan to-blue-600 text-black font-display font-black text-sm py-4 rounded-xl shadow-neon-cyan hover:scale-[1.02] hover:shadow-lg transition-all mt-8 uppercase tracking-widest group relative overflow-hidden">
-            <span class="relative z-10 flex items-center justify-center gap-2">
-              Inicializar Sesión
-              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </span>
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <div id="formView" class="view" style="display: none;">
-      
-      <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-800 pb-6">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-800 pb-6">
         <div class="mb-4 md:mb-0 text-center md:text-left">
           <h1 class="font-display text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white tracking-wider">
             PSO <span class="text-neon-pink">SYSTEM</span>
           </h1>
-          <p class="text-gray-400 text-sm tracking-widest mt-1">INTERFAZ DE GESTIÓN COMERCIAL</p>
+          <p class="text-gray-400 text-sm tracking-widest mt-1">INTERFAZ DE GESTIÓN COMERCIAL (ACCESO DIRECTO)</p>
         </div>
         
         <div class="flex items-center gap-4">
           <div class="glass-panel px-4 py-2 rounded-lg flex items-center gap-3 border border-neon-cyan/20">
             <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <div class="text-xs text-right">
-              <div id="userName" class="font-bold text-neon-cyan">...</div>
-              <div id="userEmail" class="text-gray-500 text-[10px]">...</div>
+              <div id="userName" class="font-bold text-neon-cyan">ADMINISTRADOR</div>
+              <div id="userEmail" class="text-gray-500 text-[10px]">Acceso VIP Activado</div>
             </div>
-            <button onclick="cerrarSesion()" class="text-gray-400 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
-                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5A.5.5 0 0 0 5.5 8.5h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-              </svg>
-            </button>
           </div>
         </div>
       </header>
@@ -348,6 +303,7 @@
   <script>
     const CONFIG = {
       webhooks: {
+        // Mantenemos los webhooks aunque el login ya no se usa
         login: 'https://n8n.escueladeefectividad.com/webhook/pso-login-comerciales',
         buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
         buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
@@ -399,19 +355,21 @@
       ]
     };
 
+    // HARDCODEO: Creamos el usuario VIP directamente
+    const PSO_USER = {
+        nombre: 'ADMINISTRADOR',
+        email: 'admin@pso.com',
+        esVip: true, // Siempre es VIP para ver todos los campos
+        esComercial: true
+    };
+    
     // --- VARIABLES GLOBALES ---
-    let PSO_USER = null;
     let selectedFiles = [];
     let selectedProject = null;
     let selectedCliente = null;
     let searchTimeout = null;
 
-    const loginView = document.getElementById('loginView');
-    const formView = document.getElementById('formView');
-    const mainContainer = document.getElementById('mainContainer');
-    const loginForm = document.getElementById('loginForm');
     const gestionForm = document.getElementById('gestionForm');
-    const loginBtn = document.getElementById('loginBtn');
     const tipoGestionSelect = document.getElementById('tipoGestion');
     const infoBox = document.getElementById('infoBox');
     
@@ -421,126 +379,15 @@
     const resultsContainer = document.getElementById('searchResults');
     const resultsClienteContainer = document.getElementById('searchResultsCliente');
 
-    // --- FUNCIONES DE VISTA Y SESIÓN ---
 
-    function showView(viewId) {
-      document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-      document.getElementById(viewId).style.display = 'block';
-
-      if (viewId === 'loginView') {
-        mainContainer.classList.remove('max-w-4xl');
-        mainContainer.classList.add('max-w-md');
-        mainContainer.classList.add('animate-float');
-      } else {
-        mainContainer.classList.remove('max-w-md');
-        mainContainer.classList.add('max-w-4xl');
-        mainContainer.classList.remove('animate-float');
-        
-        // Inicializar datos del formulario
-        if (PSO_USER) {
-          document.getElementById('userName').textContent = PSO_USER.nombre;
-          document.getElementById('userEmail').textContent = PSO_USER.email;
-        }
-      }
-    }
-
-    // CIERRE DE SESIÓN LIMPIO (Usa sessionStorage)
-    window.cerrarSesion = function() {
-      Swal.fire({
-        title: '¿DESCONECTAR?',
-        icon: 'warning',
-        showCancelButton: true,
-        background: '#0a0a0a',
-        color: '#fff',
-        confirmButtonColor: '#bc13fe',
-        cancelButtonColor: '#333',
-        confirmButtonText: 'Sí, Salir'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          sessionStorage.removeItem('pso_user_session'); // <--- AHORA USA SESSION STORAGE
-          PSO_USER = null;
-          showView('loginView');
-        }
-      });
-    }
-
-    // INICIALIZACIÓN DE LA APLICACIÓN (SIN PERSISTENCIA DE CACHÉ)
-    (function init() {
-      // LIMPIEZA AGRESIVA: Eliminamos la clave antigua de localStorage
-      localStorage.removeItem('pso_user_session'); 
-
-      // Leemos de sessionStorage (memoria RAM)
-      const session = sessionStorage.getItem('pso_user_session'); 
-      if (session) {
-        try {
-          PSO_USER = JSON.parse(session);
-          if (PSO_USER.nombre && PSO_USER.email) {
-            // RETRASO CRÍTICO: Mostramos la vista del formulario con un pequeño delay
-            setTimeout(() => showView('formView'), 50); 
-            return;
-          }
-        } catch (e) {
-          sessionStorage.removeItem('pso_user_session'); // Limpiamos la memoria si es corrupta
-        }
-      }
-      showView('loginView'); // Siempre mostramos el login si no hay sesión activa en RAM
-    })();
-    
-    // --- LÓGICA DE LOGIN (USA SESSION STORAGE) ---
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      loginBtn.disabled = true;
-      const originalBtnContent = loginBtn.innerHTML;
-      loginBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><div class="loader-ring"></div> VERIFICANDO...</span>';
-
-      try {
-        const response = await fetch(CONFIG.webhooks.login, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await response.json();
-
-        if (data.success) {
-          PSO_USER = {
-            nombre: data.usuario.nombre,
-            email: data.usuario.email,
-            esVip: data.usuario.esVip,
-            esComercial: data.usuario.esComercial,
-            loginTimestamp: new Date().toISOString()
-          };
-          // GUARDAMOS LA SESIÓN EN SESSION STORAGE (SE PIERDE AL CERRAR LA PESTAÑA)
-          sessionStorage.setItem('pso_user_session', JSON.stringify(PSO_USER)); 
-          
-          Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true, background: '#0a0a0a', color: '#00f3ff', iconColor: '#00f3ff', icon: 'success', title: `Bienvenido, ${PSO_USER.nombre}` });
-          
-          // Redirección interna a la vista
-          setTimeout(() => showView('formView'), 1500); 
-
-        } else {
-          throw new Error(data.mensaje || 'Credenciales inválidas');
-        }
-      } catch (error) {
-        Swal.fire({ title: 'ACCESO DENEGADO', text: error.message || 'Error de conexión con el servidor.', icon: 'error', background: '#0a0a0a', color: '#fff', confirmButtonColor: '#e11d48', confirmButtonText: 'REINTENTAR' });
-      } finally {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = originalBtnContent;
-      }
-    });
-
-    // --- LÓGICA DE FORMULARIO (VISIBILIDAD Y ENVÍO) ---
-
+    // --- FUNCIÓN DE VISIBILIDAD DE CAMPOS ---
     function mostrarCamposSegunTipo(tipo) {
-      const isVip = PSO_USER && PSO_USER.esVip;
+      const isVip = PSO_USER.esVip;
       
       // 1. OCULTAR TODOS LOS CAMPOS
       const todosCampos = document.querySelectorAll('.form-group[id^="campo_"]');
       todosCampos.forEach(campo => {
         campo.classList.add('hidden');
-        // Ocultamos el contenido anidado de Métricas si es necesario
         if (campo.id === 'campo_metricasTecnicas') {
             const hijos = campo.querySelectorAll('div[id^="campo_"]');
             hijos.forEach(hijo => hijo.classList.add('hidden'));
@@ -553,11 +400,12 @@
         const campo = document.getElementById('campo_' + nombreCampo);
         if (!campo) return; 
 
-        // LÓGICA DE VISIBILIDAD VIP ESTRICTA
+        // LÓGICA DE VISIBILIDAD VIP ESTRICTA (Activa el filtro)
         const esCampoVIP = (nombreCampo === 'cliente' || 
                             nombreCampo === 'buscarProyecto' ||
                             nombreCampo === 'metricasTecnicas');
         
+        // El usuario es VIP (esVip: true), por lo que SIEMPRE se mostrarán si el tipo lo requiere.
         if (esCampoVIP && !isVip) {
           return;
         }
@@ -575,22 +423,31 @@
       
       infoBox.querySelector('.info-text').textContent = 'Parámetros cargados para: ' + tipo;
       infoBox.classList.remove('hidden');
-      // updateProgress(); // Dejamos la actualización del progreso desactivada para simplificar
     }
+    
+    // --- INICIALIZACIÓN AUTOMÁTICA ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar datos del formulario (Hardcodeados)
+        document.getElementById('userName').textContent = PSO_USER.nombre;
+        document.getElementById('userEmail').textContent = 'Acceso VIP';
+        
+        // Limpiamos cualquier rastro de sesiones antiguas
+        localStorage.removeItem('pso_user_session');
+        sessionStorage.removeItem('pso_user_session');
 
-    tipoGestionSelect.addEventListener('change', (e) => {
-      const tipo = e.target.value;
-      if (!tipo) {
-        infoBox.classList.add('hidden');
-        mostrarCamposSegunTipo('');
-        return;
-      }
-      mostrarCamposSegunTipo(tipo);
+        // Activamos la visibilidad al cargar
+        tipoGestionSelect.addEventListener('change', (e) => {
+          const tipo = e.target.value;
+          if (!tipo) {
+            infoBox.classList.add('hidden');
+            mostrarCamposSegunTipo('');
+            return;
+          }
+          mostrarCamposSegunTipo(tipo);
+        });
     });
 
     // --- LÓGICA DE BÚSQUEDA (Cliente y Proyecto) ---
-
-    // Función genérica de búsqueda
     async function searchData(query, webhookUrl, container, selectFn, type) {
         container.innerHTML = '<div class="p-4 text-center text-neon-cyan"><div class="loader-ring mx-auto"></div></div>';
         container.classList.remove('hidden');
@@ -635,7 +492,6 @@
             document.getElementById('selectedClient').innerHTML = `<div><span class="text-white font-bold">${item.name}</span></div>`;
             document.getElementById('selectedClient').classList.remove('hidden');
         }
-        // updateProgress(); // Desactivado
     }
 
     // Busca Proyectos
@@ -644,7 +500,7 @@
         const query = e.target.value.trim();
         clearTimeout(searchTimeout);
         if (query.length < 2) { resultsContainer.classList.add('hidden'); return; }
-        searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarProyectos, resultsContainer, selectProject, 'proyecto'), 300);
+        searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarProyectos, resultsContainer, window.selectItem, 'proyecto'), 300);
       });
     }
 
@@ -654,7 +510,7 @@
         const query = e.target.value.trim();
         clearTimeout(searchTimeout);
         if (query.length < 2) { resultsClienteContainer.classList.add('hidden'); return; }
-        searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarClientes, resultsClienteContainer, selectCliente, 'cliente'), 300);
+        searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarClientes, resultsClienteContainer, window.selectItem, 'cliente'), 300);
       });
     }
 
@@ -668,7 +524,6 @@
       fileInput.addEventListener('change', (e) => {
         selectedFiles = [...selectedFiles, ...Array.from(e.target.files)];
         renderFileList();
-        // updateProgress(); // Desactivado
       });
     }
 
@@ -686,7 +541,7 @@
         </div>
       `).join('');
     }
-    window.removeFile = function(index) { selectedFiles.splice(index, 1); renderFileList(); /* updateProgress(); */ }
+    window.removeFile = function(index) { selectedFiles.splice(index, 1); renderFileList(); }
 
 
     gestionForm.addEventListener('submit', async (e) => {
@@ -705,6 +560,10 @@
              formData.append(el.name, el.value);
            }
         });
+
+        // Hardcodeamos los datos del administrador
+        formData.append('nombreSolicitante', PSO_USER.nombre);
+        formData.append('emailSolicitante', PSO_USER.email);
 
         // Adjuntar datos complejos
         if (selectedCliente) formData.append('cliente', JSON.stringify(selectedCliente));
