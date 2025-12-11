@@ -399,7 +399,7 @@
       ]
     };
 
-    // --- VARIABLES GLOBALES (NO USAN CACHÉ PERSISTENTE) ---
+    // --- VARIABLES GLOBALES ---
     let PSO_USER = null;
     let selectedFiles = [];
     let selectedProject = null;
@@ -444,7 +444,7 @@
       }
     }
 
-    // CIERRE DE SESIÓN LIMPIO
+    // CIERRE DE SESIÓN LIMPIO (Usa sessionStorage)
     window.cerrarSesion = function() {
       Swal.fire({
         title: '¿DESCONECTAR?',
@@ -466,13 +466,17 @@
 
     // INICIALIZACIÓN DE LA APLICACIÓN (SIN PERSISTENCIA DE CACHÉ)
     (function init() {
+      // LIMPIEZA AGRESIVA: Eliminamos la clave antigua de localStorage
+      localStorage.removeItem('pso_user_session'); 
+
       // Leemos de sessionStorage (memoria RAM)
       const session = sessionStorage.getItem('pso_user_session'); 
       if (session) {
         try {
           PSO_USER = JSON.parse(session);
           if (PSO_USER.nombre && PSO_USER.email) {
-            showView('formView');
+            // RETRASO CRÍTICO: Mostramos la vista del formulario con un pequeño delay
+            setTimeout(() => showView('formView'), 50); 
             return;
           }
         } catch (e) {
@@ -482,7 +486,7 @@
       showView('loginView'); // Siempre mostramos el login si no hay sesión activa en RAM
     })();
     
-    // --- LÓGICA DE LOGIN ---
+    // --- LÓGICA DE LOGIN (USA SESSION STORAGE) ---
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
@@ -513,7 +517,8 @@
           
           Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true, background: '#0a0a0a', color: '#00f3ff', iconColor: '#00f3ff', icon: 'success', title: `Bienvenido, ${PSO_USER.nombre}` });
           
-          setTimeout(() => showView('formView'), 1500);
+          // Redirección interna a la vista
+          setTimeout(() => showView('formView'), 1500); 
 
         } else {
           throw new Error(data.mensaje || 'Credenciales inválidas');
@@ -535,6 +540,7 @@
       const todosCampos = document.querySelectorAll('.form-group[id^="campo_"]');
       todosCampos.forEach(campo => {
         campo.classList.add('hidden');
+        // Ocultamos el contenido anidado de Métricas si es necesario
         if (campo.id === 'campo_metricasTecnicas') {
             const hijos = campo.querySelectorAll('div[id^="campo_"]');
             hijos.forEach(hijo => hijo.classList.add('hidden'));
@@ -569,7 +575,7 @@
       
       infoBox.querySelector('.info-text').textContent = 'Parámetros cargados para: ' + tipo;
       infoBox.classList.remove('hidden');
-      // updateProgress(); // Desactivado para simplificar la prueba final
+      // updateProgress(); // Dejamos la actualización del progreso desactivada para simplificar
     }
 
     tipoGestionSelect.addEventListener('change', (e) => {
@@ -586,13 +592,150 @@
 
     // Función genérica de búsqueda
     async function searchData(query, webhookUrl, container, selectFn, type) {
-        // ... (Tu código de búsqueda que ya funciona)
+        container.innerHTML = '<div class="p-4 text-center text-neon-cyan"><div class="loader-ring mx-auto"></div></div>';
+        container.classList.remove('hidden');
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query })
+            });
+            if (!response.ok) throw new Error('Error de conexión a n8n');
+            
+            const data = await response.json();
+            const items = data.map(item => item.json).filter(Boolean);
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="p-3 text-gray-500 text-sm">No hay coincidencias</div>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => 
+                `<div class="p-3 hover:bg-neon-cyan/10 cursor-pointer border-b border-gray-800 transition-colors" onclick='window.selectItem(${JSON.stringify(item).replace(/'/g, "&apos;")}, "${type}")'>
+                   <div class="font-bold text-white text-sm">${item.name}</div>
+                   <div class="text-xs text-neon-cyan">ID: ${item.id}</div>
+                 </div>`
+            ).join('');
+        } catch (e) {
+            container.innerHTML = `<div class="p-3 text-red-400 text-sm">Error: ${e.message}</div>`;
+        }
     }
     
-    // ... (El resto de funciones de búsqueda, selección y archivos)
+    window.selectItem = function(item, type) {
+        if (type === 'proyecto') {
+            selectedProject = item;
+            document.getElementById('proyectoId').value = item.id;
+            searchInput.value = '';
+            resultsContainer.classList.add('hidden');
+            document.getElementById('selectedProject').innerHTML = `<div><span class="text-white font-bold">${item.name}</span> <span class="text-xs text-gray-500">(${item.id})</span></div>`;
+            document.getElementById('selectedProject').classList.remove('hidden');
+        } else if (type === 'cliente') {
+            selectedCliente = item;
+            document.getElementById('clienteId').value = item.id;
+            searchClienteInput.value = '';
+            resultsClienteContainer.classList.add('hidden');
+            document.getElementById('selectedClient').innerHTML = `<div><span class="text-white font-bold">${item.name}</span></div>`;
+            document.getElementById('selectedClient').classList.remove('hidden');
+        }
+        // updateProgress(); // Desactivado
+    }
 
-    // El resto de la lógica (Event Listeners de búsqueda, submit del formulario, etc.) va aquí.
-    // Como ya funcionaba, no la incluimos para no hacer el código inmenso, pero confía en que con el reemplazo de SESSION STORAGE se elimina la persistencia de caché.
+    // Busca Proyectos
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout);
+        if (query.length < 2) { resultsContainer.classList.add('hidden'); return; }
+        searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarProyectos, resultsContainer, selectProject, 'proyecto'), 300);
+      });
+    }
+
+    // Busca Clientes
+    if (searchClienteInput) {
+      searchClienteInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout);
+        if (query.length < 2) { resultsClienteContainer.classList.add('hidden'); return; }
+        searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarClientes, resultsClienteContainer, selectCliente, 'cliente'), 300);
+      });
+    }
+
+
+    // --- LÓGICA DE ADJUNTOS Y ENVÍO ---
+    const fileInput = document.getElementById('archivos');
+    const fileList = document.getElementById('fileList');
+
+    if (fileInput) {
+      document.getElementById('fileUploadArea').addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        selectedFiles = [...selectedFiles, ...Array.from(e.target.files)];
+        renderFileList();
+        // updateProgress(); // Desactivado
+      });
+    }
+
+    function renderFileList() {
+      fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded border border-gray-700">
+          <div class="flex items-center gap-3">
+            <span class="text-neon-cyan">📄</span>
+            <div>
+              <div class="text-sm font-bold text-gray-200">${file.name}</div>
+              <div class="text-xs text-gray-500">${(file.size/1024).toFixed(1)} KB</div>
+            </div>
+          </div>
+          <button type="button" class="text-red-500 hover:text-red-400 text-xs uppercase" onclick="removeFile(${index})">Eliminar</button>
+        </div>
+      `).join('');
+    }
+    window.removeFile = function(index) { selectedFiles.splice(index, 1); renderFileList(); /* updateProgress(); */ }
+
+
+    gestionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><div class="loader-ring"></div> TRANSMITIENDO...</span>';
+
+      try {
+        const formData = new FormData();
+        const inputs = gestionForm.querySelectorAll('input:not([type="hidden"]), select, textarea');
+        
+        inputs.forEach(el => {
+           if(el.name && el.type !== 'file') {
+             formData.append(el.name, el.value);
+           }
+        });
+
+        // Adjuntar datos complejos
+        if (selectedCliente) formData.append('cliente', JSON.stringify(selectedCliente));
+        if (selectedProject) formData.append('proyecto_relacionado', JSON.stringify(selectedProject));
+        
+        // Adjuntar archivos
+        selectedFiles.forEach((file, i) => formData.append(`archivo_${i}`, file));
+        
+        const response = await fetch(CONFIG.webhooks.crearTarea, { method: 'POST', body: formData });
+        
+        if (!response.ok) throw new Error('Status ' + response.status);
+        
+        Swal.fire({ title: '¡ÉXITO!', text: 'La solicitud ha sido inyectada en el sistema PSO.', icon: 'success', background: '#0a0a0a', color: '#ffffff', confirmButtonColor: '#00f3ff', confirmButtonText: '<span style="color:black; font-weight:bold">ENTENDIDO</span>' });
+
+        gestionForm.reset();
+        selectedFiles = [];
+        renderFileList();
+        // Restablecer estados complejos visuales
+        selectedProject = null; selectedCliente = null;
+        document.getElementById('selectedProject').classList.add('hidden');
+        document.getElementById('selectedClient').classList.add('hidden');
+        mostrarCamposSegunTipo('');
+        document.getElementById('progressBar').style.width = '0';
+
+      } catch (error) {
+        Swal.fire({ title: 'ERROR CRÍTICO', text: 'Fallo en la transmisión de datos. Verifique red/consola.', icon: 'error', background: '#0a0a0a', color: '#ffffff' });
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    });
 
   </script>
 </body>
