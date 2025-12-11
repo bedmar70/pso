@@ -243,10 +243,12 @@
             title: `Bienvenido, ${data.usuario.nombre}`
           });
 
-          // Redirección tras la animación
-          setTimeout(() => {
-            window.location.href = CONFIG.formularioUrl;
-          }, 1500);
+// Redirección tras el éxito - MODIFICADO para no redirigir a un nuevo archivo
+setTimeout(() => {
+  // En lugar de redirigir, simplemente recargamos la página actual.
+  // La función init() detectará la sesión y mostrará el formulario.
+  window.location.reload(); 
+}, 1500);
 
         } else {
           // LOGIN FALLIDO (Password incorrecto)
