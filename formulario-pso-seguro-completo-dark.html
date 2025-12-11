@@ -277,7 +277,7 @@
           <input type="url" id="enlaceDiseno" class="cyber-input w-full rounded-lg p-3 text-blue-400" placeholder="https://drive/dropbox...">
         </div>
 
-<div id="campo_metricasTecnicas" class="form-group col-span-1 md:col-span-2">
+<div id="campo_metricasTecnicas" class="form-group hidden col-span-1 md:col-span-2">
             <div class="grid grid-cols-3 gap-4 bg-white/5 p-4 rounded-lg border border-white/10 mt-6">
               <div class="col-span-3 text-xs text-neon-cyan font-bold uppercase mb-4 border-b border-white/10 pb-1">Métricas Técnicas</div>
               
@@ -400,7 +400,12 @@
         'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
         'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
         'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones',
-        'metricasTecnicas' // <--- AÑADIDO: Activa el contenedor principal
+        
+        'metricasTecnicas',   // Activa el contenedor principal
+        'numCaidas',          // Activa los hijos (por si acaso)
+        'numRepeticiones', 
+        'numColores', 
+        'barnices' 
       ],
       [CONFIG.tipos.CONSULTA_PLANO]: [
         'descripcion', 'archivos', 'presupuesto', 'complejidad',
@@ -443,10 +448,55 @@
 // Variable global para acceder al estado VIP fácilmente
 const isVip = window.PSO_USER && window.PSO_USER.esVip;
 
+// Variable global para acceder al estado VIP fácilmente
+const isVip = window.PSO_USER && window.PSO_USER.esVip;
+
 function mostrarCamposSegunTipo(tipo) {
-  // Ocultar todos los campos para el nuevo tipo
+  // 1. OCULTAR TODOS LOS CAMPOS (PREPARAR LA PANTALLA)
   const todosCampos = document.querySelectorAll('.form-group[id^="campo_"], div[id^="campo_"]');
-  todosCampos.forEach(campo => campo.classList.add('hidden'));
+  todosCampos.forEach(campo => {
+    // Aseguramos que TODO esté oculto antes de empezar
+    campo.classList.add('hidden');
+    // Forzamos la ocultación del contenido anidado de la métrica (si ya estuviera visible)
+    if (campo.id === 'campo_metricasTecnicas') {
+        const hijos = campo.querySelectorAll('div[id^="campo_"]');
+        hijos.forEach(hijo => hijo.classList.add('hidden'));
+    }
+  });
+
+
+  const campos = camposPorTipo[tipo] || [];
+  
+  campos.forEach(nombreCampo => {
+    const campo = document.getElementById('campo_' + nombreCampo);
+    if (!campo) return; 
+
+    // LÓGICA DE VISIBILIDAD VIP APLICADA:
+    const esCampoRollupOVIP = (nombreCampo === 'cliente' || 
+                               nombreCampo === 'buscarProyecto' ||
+                               nombreCampo === 'metricasTecnicas');
+    
+    // Si el campo es Rollup/Métricas (VIP) y el usuario NO es VIP, saltamos (no se muestra)
+    if (esCampoRollupOVIP && !isVip) {
+      return; 
+    }
+    // Fin Lógica VIP
+
+    // 2. ACTIVAR EL CAMPO CORRESPONDIENTE
+    
+    // Si pasamos el filtro VIP, lo mostramos
+    campo.classList.remove('hidden');
+    campo.classList.add('animate-fadeIn'); 
+    
+    // Si el campo activado es el contenedor de métricas, activamos también su contenido anidado.
+    if (nombreCampo === 'metricasTecnicas') {
+        const hijos = campo.querySelectorAll('div[id^="campo_"]');
+        hijos.forEach(hijo => hijo.classList.remove('hidden'));
+    }
+    
+  });
+  updateProgress();
+}
 
   const campos = camposPorTipo[tipo] || [];
   
