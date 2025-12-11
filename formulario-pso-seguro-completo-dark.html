@@ -440,27 +440,38 @@
     let searchClienteTimeout = null;
 
     // --- LOGIC: SHOW/HIDE FIELDS ---
-    function mostrarCamposSegunTipo(tipo) {
-      // Ocultar todos
-      const todosCampos = document.querySelectorAll('.form-group[id^="campo_"], div[id^="campo_"]');
-      todosCampos.forEach(campo => campo.classList.add('hidden'));
+// Variable global para acceder al estado VIP fácilmente
+const isVip = window.PSO_USER && window.PSO_USER.esVip;
 
-      const campos = camposPorTipo[tipo] || [];
-      
-      campos.forEach(nombreCampo => {
-        const campo = document.getElementById('campo_' + nombreCampo);
-        if (campo) {
-          // Check VIP (Si existe el objeto window.PSO_USER)
-          if ((nombreCampo === 'buscarProyecto' || nombreCampo === 'cliente') && window.PSO_USER && !window.PSO_USER.esVip) {
-            return;
-          }
-          campo.classList.remove('hidden');
-          // Animación de entrada
-          campo.classList.add('animate-fadeIn'); 
-        }
-      });
-      updateProgress();
+function mostrarCamposSegunTipo(tipo) {
+  // Ocultar todos los campos para el nuevo tipo
+  const todosCampos = document.querySelectorAll('.form-group[id^="campo_"], div[id^="campo_"]');
+  todosCampos.forEach(campo => campo.classList.add('hidden'));
+
+  const campos = camposPorTipo[tipo] || [];
+  
+  campos.forEach(nombreCampo => {
+    const campo = document.getElementById('campo_' + nombreCampo);
+    if (!campo) return; 
+
+    // LÓGICA DE VISIBILIDAD VIP APLICADA:
+    const esCampoRollupOVIP = (nombreCampo === 'cliente' || 
+                               nombreCampo === 'buscarProyecto' ||
+                               nombreCampo === 'metricasTecnicas'); // El bloque de métricas también es 'VIP'
+    
+    // Si el campo es Rollup/Métricas (VIP) y el usuario NO es VIP, saltamos (no se muestra)
+    if (esCampoRollupOVIP && !isVip) {
+      console.log(`Campo ${nombreCampo} omitido: Usuario no VIP`);
+      return; 
     }
+    // Fin Lógica VIP
+
+    // Si pasamos el filtro VIP, lo mostramos
+    campo.classList.remove('hidden');
+    campo.classList.add('animate-fadeIn'); 
+  });
+  updateProgress();
+}
 
     tipoGestionSelect.addEventListener('change', (e) => {
       const tipo = e.target.value;
