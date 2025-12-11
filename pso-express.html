@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4.0. PSO Gestión: Modo Seguro v4</title>
+  <title>5.0. PSO Gestión: Acceso Seguro</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
@@ -21,8 +21,9 @@
       border-radius: 0.5rem; 
       padding: 0.75rem; 
       font-size: 0.95rem;
+      transition: all 0.3s;
     }
-    .cyber-input:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+    .cyber-input:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
     .cyber-input::placeholder { color: #6b7280; opacity: 1; }
     
     .hidden-force { display: none !important; }
@@ -34,20 +35,46 @@
     ::-webkit-scrollbar-track { background: #111; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+    /* Animación simple */
+    .fade-in { animation: fadeIn 0.5s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
-<body class="p-4 flex justify-center min-h-screen">
+<body class="p-4 flex justify-center items-center min-h-screen bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
 
-  <div class="w-full max-w-4xl bg-gray-900/80 p-6 rounded-xl border border-gray-700 shadow-2xl">
+  <div id="viewLogin" class="w-full max-w-md bg-gray-900/90 p-8 rounded-2xl border border-[#00f3ff]/30 shadow-[0_0_30px_rgba(0,243,255,0.1)] backdrop-blur-sm fade-in">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">PSO <span class="text-[#00f3ff]">ACCESS</span></h1>
+      <p class="text-gray-400 text-xs tracking-widest">IDENTIFICACIÓN REQUERIDA</p>
+    </div>
+
+    <form id="loginForm" class="space-y-6">
+      <div>
+        <label>Email Corporativo</label>
+        <input type="email" id="loginEmail" class="cyber-input text-center" placeholder="usuario@pso.com" required>
+      </div>
+      <div>
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" class="cyber-input text-center" placeholder="••••••••" required>
+      </div>
+      <button type="submit" id="btnLogin" class="w-full bg-[#00f3ff] text-black font-bold py-3 rounded hover:bg-white transition-all shadow-lg hover:shadow-[#00f3ff]/50">
+        INICIAR SESIÓN
+      </button>
+    </form>
+  </div>
+
+
+  <div id="viewApp" class="w-full max-w-4xl bg-gray-900/90 p-6 rounded-xl border border-gray-700 shadow-2xl hidden-force fade-in">
     
     <div class="border-b border-gray-700 pb-4 mb-6 flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
-        <p class="text-xs text-gray-400 mt-1">MODO ACCESO DIRECTO v4.0</p>
+        <p class="text-xs text-gray-400 mt-1">PANEL DE GESTIÓN v5.0</p>
       </div>
       <div class="text-right text-xs">
-        <div class="text-[#00f3ff] font-bold">ESTADO</div>
-        <div class="text-gray-500">Sistema Operativo</div>
+        <div class="text-[#00f3ff] font-bold" id="displayUser">USUARIO</div>
+        <button onclick="logout()" class="text-red-400 hover:text-white underline mt-1">Cerrar Sesión</button>
       </div>
     </div>
 
@@ -70,11 +97,11 @@
 
         <div id="campo_nombreSolicitante" class="hidden-force col-span-1">
           <label class="required">Solicitante</label>
-          <input type="text" name="nombreSolicitante" class="cyber-input" placeholder="Nombre del agente..." required>
+          <input type="text" name="nombreSolicitante" id="inputNombreSolicitante" class="cyber-input" required>
         </div>
         <div id="campo_emailSolicitante" class="hidden-force col-span-1">
           <label class="required">Email de Contacto</label>
-          <input type="email" name="emailSolicitante" class="cyber-input" placeholder="correo@pso.com" required>
+          <input type="email" name="emailSolicitante" id="inputEmailSolicitante" class="cyber-input" required>
         </div>
 
         <div id="campo_nombreProyecto" class="hidden-force col-span-1 md:col-span-2">
@@ -172,20 +199,11 @@
         </div>
 
         <div id="campo_metricasTecnicas" class="hidden-force col-span-1 md:col-span-2 bg-white/5 p-5 rounded border border-white/10">
-           <div class="text-[#00f3ff] font-bold text-sm mb-4 border-b border-white/10 pb-2">PARÁMETROS TÉCNICOS (VIP)</div>
+           <div class="text-[#00f3ff] font-bold text-sm mb-4 border-b border-white/10 pb-2">PARÁMETROS TÉCNICOS</div>
            <div class="grid grid-cols-3 gap-6">
-              <div>
-                <label>Nº Caídas</label>
-                <input type="number" name="numCaidas" class="cyber-input text-center" placeholder="0">
-              </div>
-              <div>
-                <label>Repeticiones</label>
-                <input type="number" name="numRepeticiones" class="cyber-input text-center" placeholder="0">
-              </div>
-              <div>
-                <label>Nº Colores</label>
-                <input type="number" name="numColores" class="cyber-input text-center" placeholder="0">
-              </div>
+              <div><label>Nº Caídas</label><input type="number" name="numCaidas" class="cyber-input text-center" placeholder="0"></div>
+              <div><label>Repeticiones</label><input type="number" name="numRepeticiones" class="cyber-input text-center" placeholder="0"></div>
+              <div><label>Nº Colores</label><input type="number" name="numColores" class="cyber-input text-center" placeholder="0"></div>
               <div class="col-span-3">
                 <label>Aplicación de Barnices</label>
                 <select name="barnices" class="cyber-input">
@@ -214,18 +232,60 @@
     </form>
   </div>
 
-  <div class="fixed bottom-2 right-2 text-[10px] text-gray-700 font-mono">
-    SECURE MODE :: v4.0
-  </div>
-
   <script>
+    // URLS N8N
     const WEBHOOKS = {
+      login: 'https://n8n.escueladeefectividad.com/webhook/pso-login-comerciales', // <--- TU WEBHOOK DE LOGIN
       buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
       buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
       crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
     };
 
-    // VISIBILIDAD DE CAMPOS
+    // --- LÓGICA DE LOGIN (NUEVA) ---
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPass').value;
+      const btn = document.getElementById('btnLogin');
+      
+      btn.disabled = true;
+      btn.innerText = 'VERIFICANDO...';
+
+      try {
+        const res = await fetch(WEBHOOKS.login, { 
+          method: 'POST', 
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email, password: pass }) 
+        });
+        const data = await res.json();
+
+        if(data.success) {
+          // 1. Ocultar Login / Mostrar App
+          document.getElementById('viewLogin').classList.add('hidden-force');
+          document.getElementById('viewApp').classList.remove('hidden-force');
+          
+          // 2. Pre-rellenar datos (PERO EDITABLES)
+          document.getElementById('inputNombreSolicitante').value = data.nombre || data.email;
+          document.getElementById('inputEmailSolicitante').value = data.email;
+          document.getElementById('displayUser').textContent = data.nombre || 'USUARIO';
+
+        } else {
+          Swal.fire('Acceso Denegado', 'Credenciales incorrectas.', 'error');
+        }
+      } catch (err) {
+        Swal.fire('Error', 'No se pudo conectar con el servidor de seguridad.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'INICIAR SESIÓN';
+      }
+    });
+
+    // Función Logout (Solo recarga la página)
+    window.logout = function() {
+      window.location.reload();
+    }
+
+    // --- LÓGICA DE FORMULARIO (EXISTENTE) ---
     const TIPOS = {
       'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida'],
       'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'buscarProyecto'],
@@ -249,10 +309,9 @@
       });
     });
 
-    // BÚSQUEDA ROLLUP
     let debounceTimer;
     async function buscarEnN8N(query, url, contenedorResultados, tipo) {
-      contenedorResultados.innerHTML = '<div class="p-3 text-[#00f3ff] text-xs">Conectando con base de datos...</div>';
+      contenedorResultados.innerHTML = '<div class="p-3 text-[#00f3ff] text-xs">Conectando...</div>';
       contenedorResultados.classList.remove('hidden');
       try {
         const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ query }) });
@@ -260,7 +319,7 @@
         const items = datos.map(d => d.json ? d.json : d).filter(Boolean);
 
         if(items.length === 0) {
-            contenedorResultados.innerHTML = '<div class="p-3 text-gray-500 text-xs">No se encontraron coincidencias</div>';
+            contenedorResultados.innerHTML = '<div class="p-3 text-gray-500 text-xs">Sin resultados</div>';
             return;
         }
 
@@ -271,7 +330,7 @@
                <div class="text-[10px] text-[#00f3ff] mt-1">ID: ${item.id || 'N/A'}</div>
             </div>
         `).join('');
-      } catch (err) { contenedorResultados.innerHTML = '<div class="p-3 text-red-500 text-xs">Error de conexión</div>'; }
+      } catch (err) { contenedorResultados.innerHTML = '<div class="p-3 text-red-500 text-xs">Error</div>'; }
     }
 
     window.seleccionarItem = function(item, tipo) {
@@ -280,7 +339,7 @@
            document.getElementById('resCliente').classList.add('hidden');
            document.getElementById('selClienteText').textContent = item.name;
            document.getElementById('selCliente').classList.remove('hidden');
-           document.getElementById('inputCliente').value = item.name;
+           document.getElementById('inputCliente').value = item.name; 
            window.clienteSeleccionado = item;
        } else {
            document.getElementById('searchProyecto').value = '';
@@ -303,7 +362,6 @@
         debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarProyectos, document.getElementById('resProyecto'), 'proyecto'), 300);
     });
 
-    // ARCHIVOS
     const fileInput = document.getElementById('archivos');
     let archivosSeleccionados = [];
     document.getElementById('campo_archivos').addEventListener('click', () => fileInput.click());
@@ -317,40 +375,30 @@
         `).join('');
     });
 
-    // ENVÍO
     document.getElementById('gestionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
         btn.disabled = true;
-        btn.innerHTML = '<span class="animate-pulse">TRANSMITIENDO DATOS...</span>';
+        btn.innerHTML = '<span class="animate-pulse">TRANSMITIENDO...</span>';
 
         try {
             const formData = new FormData(e.target);
             
-            // --- CAMBIO 2: INYECTAR ROLLUPS EN DESCRIPCIÓN (CONTENT) ---
+            // LOGICA INYECCIÓN CONTENT
             let descFinal = formData.get('descripcion') || "";
             let infoRollup = "";
-
             if(window.clienteSeleccionado) {
-                 // Enviamos el campo normal para el Custom Field
                  formData.set('cliente', window.clienteSeleccionado.name);
-                 // Añadimos al texto para el Content
                  infoRollup += `\n\n📌 CLIENTE VINCULADO: ${window.clienteSeleccionado.name}`;
             }
-
             if(window.proyectoSeleccionado) {
-                 // Enviamos el ID para la relación
                  formData.set('proyecto_relacionado', window.proyectoSeleccionado.id);
-                 // Añadimos al texto para el Content
                  infoRollup += `\n🔗 PROYECTO RELACIONADO: ${window.proyectoSeleccionado.name} (ID: ${window.proyectoSeleccionado.id})`;
             }
-
-            // Actualizamos la descripción que se enviará
             if(infoRollup) {
                 formData.set('descripcion', descFinal + infoRollup);
             }
 
-            // Archivos
             archivosSeleccionados.forEach((f, i) => formData.append(`archivo_${i}`, f));
 
             const res = await fetch(WEBHOOKS.crearTarea, { method: 'POST', body: formData });
@@ -358,7 +406,7 @@
             if(res.ok) {
                 Swal.fire({
                     title: '¡SOLICITUD ENVIADA!',
-                    text: 'Los datos han sido registrados correctamente en el sistema.',
+                    text: 'Datos registrados correctamente.',
                     icon: 'success',
                     background: '#111',
                     color: '#fff',
@@ -377,7 +425,7 @@
                 throw new Error('Error en servidor');
             }
         } catch (err) {
-            Swal.fire('Error de Conexión', 'No se pudo contactar con el servidor. Inténtalo de nuevo.', 'error');
+            Swal.fire('Error', 'No se pudo contactar con el servidor.', 'error');
         } finally {
             btn.disabled = false;
             btn.innerText = 'TRANSMITIR DATOS AL SISTEMA';
