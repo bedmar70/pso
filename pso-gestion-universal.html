@@ -14,318 +14,39 @@
   <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
- <script>
-    // HARDCODEO del usuario para acceso universal (Todos son VIP/Comercial)
-    const PSO_USER = {
-        nombre: 'USUARIO COMERCIAL',
-        email: 'comercial@pso.com',
-        esVip: true, // Deja esta variable hardcodeada a true para asegurar visibilidad de Rollups
-        esComercial: true
-    };
-    
-    // CONFIGURACIÓN (NO TOCAR)
-    const CONFIG = {
-      webhooks: {
-        buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
-        buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
-        crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
-      },
-      tipos: {
-        ALTA_NUEVA: 'Alta nueva',
-        MODIFICACION: 'Modificación',
-        CONSULTAS_VARIOS: 'Consultas - Varios',
-        CONSULTA_PRECIO: 'Consulta - Precio Cliché',
-        CONSULTA_PLANO: 'Consulta - Diseño Plano',
-        CONSULTA_DISENO: 'Consulta - Diseño'
-      }
-    };
-
-    const camposPorTipo = {
-      [CONFIG.tipos.ALTA_NUEVA]: [
-        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
-        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
-        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
-        'presupuesto', 'complejidad', 'fechaPrometida'
-      ],
-      [CONFIG.tipos.MODIFICACION]: [
-        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
-        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
-        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
-        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones',
-        'buscarProyecto'
-      ],
-      [CONFIG.tipos.CONSULTAS_VARIOS]: [
-        'nombreSolicitante', 'emailSolicitante', 'descripcion',
-        'archivos', 'enlaceDiseno', 'observaciones'
-      ],
-      [CONFIG.tipos.CONSULTA_PRECIO]: [
-        'nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion',
-        'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches',
-        'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos',
-        'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones',
-        
-        'metricasTecnicas', 'numCaidas', 'numRepeticiones', 'numColores', 'barnices' 
-      ],
-      [CONFIG.tipos.CONSULTA_PLANO]: [
-        'descripcion', 'archivos', 'presupuesto', 'complejidad',
-        'fechaPrometida', 'emailSolicitante'
-      ],
-      [CONFIG.tipos.CONSULTA_DISENO]: [
-        'descripcion', 'archivos', 'presupuesto', 'complejidad',
-        'fechaPrometida', 'emailSolicitante'
-      ]
-    };
-
-    const form = document.getElementById('gestionForm');
-    const tipoGestionSelect = document.getElementById('tipoGestion');
-    const infoBox = document.getElementById('infoBox');
-    const submitBtn = document.getElementById('submitBtn');
-    const progressBar = document.getElementById('progressBar');
-    
-    // File upload
-    const fileUploadArea = document.getElementById('fileUploadArea');
-    const fileInput = document.getElementById('archivos');
-    const fileList = document.getElementById('fileList');
-    let selectedFiles = [];
-
-    // Search vars
-    const searchInput = document.getElementById('searchProyecto');
-    const resultsContainer = document.getElementById('searchResults');
-    const selectedProjectDiv = document.getElementById('selectedProject');
-    const proyectoIdInput = document.getElementById('proyectoId');
-    let selectedProject = null;
-    let searchTimeout = null;
-
-    const searchClienteInput = document.getElementById('searchCliente');
-    const resultsClienteContainer = document.getElementById('searchResultsCliente');
-    const selectedClientDiv = document.getElementById('selectedClient');
-    const clienteIdInput = document.getElementById('clienteId');
-    let selectedCliente = null;
-    let searchClienteTimeout = null;
-
-
-    // ===========================================
-    // FUNCIONES GLOBALES (DECLARADAS PRIMERO)
-    // ===========================================
-
-    // --- PROGRESS BAR ---
-    function updateProgress() {
-      const visibleFields = form.querySelectorAll('.form-group:not(.hidden) input:not([type="hidden"]):not([type="file"]), .form-group:not(.hidden) select, .form-group:not(.hidden) textarea');
-      let filled = 0;
-      visibleFields.forEach(f => { if(f.value) filled++; });
-      if(selectedFiles.length > 0) filled++;
-      
-      const percent = visibleFields.length > 0 ? (filled / visibleFields.length) * 100 : 0;
-      progressBar.style.width = percent + '%';
-      
-      if(percent === 100) progressBar.classList.add('shadow-[0_0_15px_#00f3ff]');
-      else progressBar.classList.remove('shadow-[0_0_15px_#00f3ff]');
-    }
-
-    // --- FUNCIÓN DE VISIBILIDAD DE CAMPOS ---
-    function mostrarCamposSegunTipo(tipo) {
-      // 1. OCULTAR TODOS LOS CAMPOS
-      const todosCampos = document.querySelectorAll('.form-group[id^="campo_"]');
-      todosCampos.forEach(campo => {
-        campo.classList.add('hidden');
-        if (campo.id === 'campo_metricasTecnicas') {
-            const hijos = campo.querySelectorAll('div[id^="campo_"]');
-            hijos.forEach(hijo => hijo.classList.add('hidden'));
-        }
-      });
-
-      const campos = camposPorTipo[tipo] || [];
-      
-      campos.forEach(nombreCampo => {
-        const campo = document.getElementById('campo_' + nombreCampo);
-        if (!campo) return; 
-        
-        // ACTIVAR EL CAMPO CORRESPONDIENTE
-        campo.classList.remove('hidden');
-        campo.classList.add('animate-fadeIn'); 
-
-        // Si el campo activado es el contenedor de métricas, activamos también su contenido
-        if (nombreCampo === 'metricasTecnicas') {
-            const hijos = campo.querySelectorAll('div[id^="campo_"]');
-            hijos.forEach(hijo => hijo.classList.remove('hidden'));
-        }
-      });
-      
-      infoBox.querySelector('.info-text').textContent = 'Parámetros cargados para: ' + tipo;
-      infoBox.classList.remove('hidden');
-      updateProgress(); // Ahora updateProgress está definido.
-    }
-
-    // --- LOGIC: SEARCH (Común y Corregido para Clientes) ---
-    async function searchData(query, webhookUrl, container, type) {
-        container.innerHTML = '<div class="p-4 text-center text-neon-cyan"><div class="loader-ring mx-auto"></div></div>';
-        container.classList.remove('hidden');
-        try {
-            const response = await fetch(webhookUrl, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query })
-            });
-            if (!response.ok) throw new Error('Error de conexión a n8n');
-            
-            const data = await response.json();
-            const items = data.map(item => item.json).filter(Boolean);
-            
-            if (items.length === 0) {
-                container.innerHTML = '<div class="p-3 text-gray-500 text-sm">No hay coincidencias</div>';
-                return;
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            'display': ['Orbitron', 'sans-serif'],
+            'body': ['Rajdhani', 'sans-serif'],
+          },
+          colors: {
+            neon: {
+              cyan: '#00f3ff',
+              pink: '#bc13fe',
+              bg: '#050505',
+              panel: 'rgba(10, 10, 15, 0.7)'
             }
-            
-            container.innerHTML = items.map(item => 
-                `<div class="p-3 hover:bg-neon-cyan/10 cursor-pointer border-b border-gray-800 transition-colors" onclick='window.selectItem(${JSON.stringify(item).replace(/'/g, "&apos;")}, "${type}")'>
-                   <div class="font-bold text-white text-sm">${item.name}</div>
-                   <div class="text-xs text-neon-cyan">ID: ${item.id || item.name}</div>
-                 </div>`
-            ).join('');
-        } catch (e) {
-            container.innerHTML = `<div class="p-3 text-red-400 text-sm">Error en la búsqueda: ${e.message}</div>`;
-        }
-    }
-    
-    window.selectItem = function(item, type) {
-        if (type === 'proyecto') {
-            selectedProject = item;
-            proyectoIdInput.value = item.id;
-            searchInput.value = '';
-            resultsContainer.classList.add('hidden');
-            selectedProjectDiv.innerHTML = `<div><span class="text-white font-bold">${item.name}</span> <span class="text-xs text-gray-500">(${item.id})</span></div>`;
-            selectedProjectDiv.classList.remove('hidden');
-        } else if (type === 'cliente') {
-            selectedCliente = item;
-            clienteIdInput.value = item.id;
-            searchClienteInput.value = '';
-            resultsClienteContainer.classList.add('hidden');
-            selectedClientDiv.innerHTML = `<div><span class="text-white font-bold">${item.name}</span></div>`;
-            selectedClientDiv.classList.remove('hidden');
-        }
-    }
-
-    // --- LÓGICA DE ARCHIVOS ---
-    function renderFileList() {
-      fileList.innerHTML = selectedFiles.map((file, index) => `
-        <div class="flex items-center justify-between p-3 bg-gray-800 rounded border border-gray-700">
-          <div class="flex items-center gap-3">
-            <span class="text-neon-cyan">📄</span>
-            <div>
-              <div class="text-sm font-bold text-gray-200">${file.name}</div>
-              <div class="text-xs text-gray-500">${(file.size/1024).toFixed(1)} KB</div>
-            </div>
-          </div>
-          <button type="button" class="text-red-500 hover:text-red-400 text-xs uppercase" onclick="removeFile(${index})">Eliminar</button>
-        </div>
-      `).join('');
-    }
-    window.removeFile = function(index) { selectedFiles.splice(index, 1); renderFileList(); updateProgress(); }
-
-
-    // ===========================================
-    // INICIALIZACIÓN Y EVENT LISTENERS
-    // ===========================================
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Limpiamos cualquier rastro de sesiones antiguas (FINAL)
-        localStorage.removeItem('pso_user_session');
-        sessionStorage.removeItem('pso_user_session');
-
-        // ASIGNACIÓN DE EVENTO (EL PROBLEMA PRINCIPAL ESTABA AQUÍ)
-        tipoGestionSelect.addEventListener('change', (e) => {
-          const tipo = e.target.value;
-          if (!tipo) {
-            infoBox.classList.add('hidden');
-            mostrarCamposSegunTipo('');
-            return;
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3)',
+            'neon-pink': '0 0 10px rgba(188, 19, 254, 0.5), 0 0 20px rgba(188, 19, 254, 0.3)',
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'fadeIn': 'fadeIn 0.5s ease-out'
+          },
+          keyframes: {
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+            fadeIn: { 'from': { opacity: 0, transform: 'translateY(10px)' }, 'to': { opacity: 1, transform: 'translateY(0)' } }
           }
-          mostrarCamposSegunTipo(tipo);
-        });
-
-        // --- EVENT LISTENERS DE BÚSQUEDA ---
-        if (searchInput) {
-          searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            clearTimeout(searchTimeout);
-            if (query.length < 2) { resultsContainer.classList.add('hidden'); return; }
-            searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarProyectos, resultsContainer, 'proyecto'), 300);
-          });
         }
-
-        if (searchClienteInput) {
-          searchClienteInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            clearTimeout(searchClienteTimeout); // <-- Se limpia la variable local
-            if (query.length < 2) { resultsClienteContainer.classList.add('hidden'); return; }
-            searchClienteTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarClientes, resultsClienteContainer, 'cliente'), 300);
-          });
-        }
-
-        // --- LISTENERS DE ARCHIVOS ---
-        if (fileInput) {
-          document.getElementById('fileUploadArea').addEventListener('click', () => fileInput.click());
-          fileInput.addEventListener('change', (e) => {
-            selectedFiles = [...selectedFiles, ...Array.from(e.target.files)];
-            renderFileList();
-            updateProgress();
-          });
-        }
-        
-        // Asignar listeners de progreso a inputs visibles
-        form.addEventListener('input', updateProgress);
-        form.addEventListener('change', updateProgress);
-    });
-
-    // --- SUBMIT ---
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      const originalBtnText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><div class="loader-ring"></div> TRANSMITIENDO...</span>';
-
-      try {
-        const formData = new FormData();
-        const inputs = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
-        
-        inputs.forEach(el => {
-           if(el.name && el.type !== 'file') {
-             formData.append(el.name, el.value);
-           }
-        });
-
-        // AÑADIR DATOS HARDCODEADOS DEL ADMINISTRADOR
-        formData.append('nombreSolicitante', PSO_USER.nombre);
-        formData.append('emailSolicitante', PSO_USER.email);
-
-        // Adjuntar datos complejos
-        if (selectedCliente) formData.append('cliente', JSON.stringify(selectedCliente));
-        if (selectedProject) formData.append('proyecto_relacionado', JSON.stringify(selectedProject));
-        
-        // Adjuntar archivos
-        selectedFiles.forEach((file, i) => formData.append(`archivo_${i}`, file));
-        
-        const response = await fetch(CONFIG.webhooks.crearTarea, { method: 'POST', body: formData });
-        
-        if (!response.ok) throw new Error('Status ' + response.status);
-        
-        Swal.fire({ title: '¡ÉXITO!', text: 'La solicitud ha sido inyectada en el sistema PSO.', icon: 'success', background: '#0a0a0a', color: '#ffffff', confirmButtonColor: '#00f3ff', confirmButtonText: '<span style="color:black; font-weight:bold">ENTENDIDO</span>' });
-
-        form.reset();
-        selectedFiles = [];
-        renderFileList();
-        selectedProject = null; selectedCliente = null;
-        document.getElementById('selectedProject').classList.add('hidden');
-        document.getElementById('selectedClient').classList.add('hidden');
-        mostrarCamposSegunTipo('');
-        document.getElementById('progressBar').style.width = '0';
-
-      } catch (error) {
-        Swal.fire({ title: 'ERROR CRÍTICO', text: 'Fallo en la transmisión de datos. Verifique red/consola.', icon: 'error', background: '#0a0a0a', color: '#ffffff' });
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
       }
-    });
-
+    }
   </script>
 
   <style>
@@ -582,7 +303,7 @@
 
 
   <script>
-    // HARDCODEO del usuario para acceso universal (Todos son VIP/Comercial)
+    // HARDCODEO del usuario para acceso universal
     const PSO_USER = {
         nombre: 'USUARIO COMERCIAL',
         email: 'comercial@pso.com',
@@ -671,13 +392,30 @@
     let searchClienteTimeout = null;
 
 
+    // ===========================================
+    // FUNCIONES GLOBALES
+    // ===========================================
+
+    // --- PROGRESS BAR ---
+    function updateProgress() {
+      const visibleFields = form.querySelectorAll('.form-group:not(.hidden) input:not([type="hidden"]):not([type="file"]), .form-group:not(.hidden) select, .form-group:not(.hidden) textarea');
+      let filled = 0;
+      visibleFields.forEach(f => { if(f.value) filled++; });
+      if(selectedFiles.length > 0) filled++;
+      
+      const percent = visibleFields.length > 0 ? (filled / visibleFields.length) * 100 : 0;
+      progressBar.style.width = percent + '%';
+      
+      if(percent === 100) progressBar.classList.add('shadow-[0_0_15px_#00f3ff]');
+      else progressBar.classList.remove('shadow-[0_0_15px_#00f3ff]');
+    }
+
     // --- FUNCIÓN DE VISIBILIDAD DE CAMPOS ---
     function mostrarCamposSegunTipo(tipo) {
       // 1. OCULTAR TODOS LOS CAMPOS
       const todosCampos = document.querySelectorAll('.form-group[id^="campo_"]');
       todosCampos.forEach(campo => {
         campo.classList.add('hidden');
-        // Ocultamos el contenido anidado de Métricas si es necesario
         if (campo.id === 'campo_metricasTecnicas') {
             const hijos = campo.querySelectorAll('div[id^="campo_"]');
             hijos.forEach(hijo => hijo.classList.add('hidden'));
@@ -703,24 +441,8 @@
       
       infoBox.querySelector('.info-text').textContent = 'Parámetros cargados para: ' + tipo;
       infoBox.classList.remove('hidden');
+      updateProgress();
     }
-    
-    // --- INICIALIZACIÓN AUTOMÁTICA ---
-    document.addEventListener('DOMContentLoaded', () => {
-        // Limpiamos cualquier rastro de sesiones antiguas (FINAL)
-        localStorage.removeItem('pso_user_session');
-        sessionStorage.removeItem('pso_user_session');
-
-        tipoGestionSelect.addEventListener('change', (e) => {
-          const tipo = e.target.value;
-          if (!tipo) {
-            infoBox.classList.add('hidden');
-            mostrarCamposSegunTipo('');
-            return;
-          }
-          mostrarCamposSegunTipo(tipo);
-        });
-    });
 
     // --- LOGIC: SEARCH (Común y Corregido para Clientes) ---
     async function searchData(query, webhookUrl, container, type) {
@@ -733,9 +455,6 @@
             if (!response.ok) throw new Error('Error de conexión a n8n');
             
             const data = await response.json();
-
-            // APLANA LA RESPUESTA DE N8N (Funciona para Proyectos y Clientes)
-            // Asume el formato de ClickUp: array de objetos con una propiedad 'json' interna.
             const items = data.map(item => item.json).filter(Boolean);
             
             if (items.length === 0) {
@@ -770,40 +489,10 @@
             selectedClientDiv.innerHTML = `<div><span class="text-white font-bold">${item.name}</span></div>`;
             selectedClientDiv.classList.remove('hidden');
         }
+        updateProgress();
     }
 
-    // --- EVENT LISTENERS DE BÚSQUEDA ---
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        clearTimeout(searchTimeout);
-        if (query.length < 2) { resultsContainer.classList.add('hidden'); return; }
-        searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarProyectos, resultsContainer, 'proyecto'), 300);
-      });
-    }
-
-    if (searchClienteInput) {
-      searchClienteInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        clearTimeout(searchClienteTimeout);
-        if (query.length < 2) { resultsClienteContainer.classList.add('hidden'); return; }
-        searchClienteTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarClientes, resultsClienteContainer, 'cliente'), 300);
-      });
-    }
-
-
-    // --- LÓGICA DE ADJUNTOS Y ENVÍO ---
-    const fileInput = document.getElementById('archivos');
-    const fileList = document.getElementById('fileList');
-
-    if (fileInput) {
-      document.getElementById('fileUploadArea').addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => {
-        selectedFiles = [...selectedFiles, ...Array.from(e.target.files)];
-        renderFileList();
-      });
-    }
-
+    // --- LÓGICA DE ARCHIVOS ---
     function renderFileList() {
       fileList.innerHTML = selectedFiles.map((file, index) => `
         <div class="flex items-center justify-between p-3 bg-gray-800 rounded border border-gray-700">
@@ -818,11 +507,65 @@
         </div>
       `).join('');
     }
-    window.removeFile = function(index) { selectedFiles.splice(index, 1); renderFileList(); }
+    window.removeFile = function(index) { selectedFiles.splice(index, 1); renderFileList(); updateProgress(); }
 
+
+    // ===========================================
+    // INICIALIZACIÓN Y EVENT LISTENERS
+    // ===========================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Limpiamos cualquier rastro de sesiones antiguas (FINAL)
+        localStorage.removeItem('pso_user_session');
+        sessionStorage.removeItem('pso_user_session');
+
+        tipoGestionSelect.addEventListener('change', (e) => {
+          const tipo = e.target.value;
+          if (!tipo) {
+            infoBox.classList.add('hidden');
+            mostrarCamposSegunTipo('');
+            return;
+          }
+          mostrarCamposSegunTipo(tipo);
+        });
+
+        // --- EVENT LISTENERS DE BÚSQUEDA ---
+        if (searchInput) {
+          searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(searchTimeout);
+            if (query.length < 2) { resultsContainer.classList.add('hidden'); return; }
+            searchTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarProyectos, resultsContainer, 'proyecto'), 300);
+          });
+        }
+
+        if (searchClienteInput) {
+          searchClienteInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(searchClienteTimeout); 
+            if (query.length < 2) { resultsClienteContainer.classList.add('hidden'); return; }
+            searchClienteTimeout = setTimeout(() => searchData(query, CONFIG.webhooks.buscarClientes, resultsClienteContainer, 'cliente'), 300);
+          });
+        }
+
+        // --- LISTENERS DE ARCHIVOS ---
+        if (fileInput) {
+          fileUploadArea.addEventListener('click', () => fileInput.click());
+          fileInput.addEventListener('change', (e) => {
+            selectedFiles = [...selectedFiles, ...Array.from(e.target.files)];
+            renderFileList();
+            updateProgress();
+          });
+        }
+        
+        // Asignar listeners de progreso a inputs visibles
+        form.addEventListener('input', updateProgress);
+        form.addEventListener('change', updateProgress);
+    });
+
+    // --- SUBMIT ---
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><div class="loader-ring"></div> TRANSMITIENDO...</span>';
@@ -872,5 +615,3 @@
     });
 
   </script>
-</body>
-</html>
