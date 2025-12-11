@@ -192,7 +192,17 @@
   </div>
 
   <script>
-    // --- 1. DEFINICIÓN DE CAMPOS POR TIPO ---
+    // HARDCODEO del usuario
+    const PSO_USER = { nombre: 'USUARIO COMERCIAL', email: 'comercial@pso.com' };
+    
+    // CONFIGURACIÓN DE WEBHOOKS
+    const WEBHOOKS = {
+      buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
+      buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
+      crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
+    };
+
+    // VISIBILIDAD DE CAMPOS
     const TIPOS = {
       'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida'],
       'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'buscarProyecto'],
@@ -202,60 +212,34 @@
       'Consulta - Diseño': ['descripcion', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'emailSolicitante']
     };
 
-    const WEBHOOKS = {
-      buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
-      buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
-      crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
-    };
-
-    // --- 2. CONTROL DE VISIBILIDAD (MÉTODO BRUTO) ---
+    // --- VISIBILIDAD ---
     document.getElementById('tipoGestion').addEventListener('change', function(e) {
       const seleccion = e.target.value;
-      console.log('Selección cambiada a:', seleccion);
-
-      // A. Ocultar TODO primero
+      // Ocultar todo
       document.querySelectorAll('[id^="campo_"]').forEach(el => {
-        el.classList.add('hidden-force'); // Usamos !important para asegurar ocultación
-        el.style.display = 'none'; // Doble seguridad
+        el.classList.add('hidden-force');
+        el.style.display = 'none';
       });
-
       if (!seleccion) return;
-
-      // B. Mostrar solo los necesarios
-      const camposAMostrar = TIPOS[seleccion] || [];
-      camposAMostrar.forEach(idCampo => {
-        const elemento = document.getElementById('campo_' + idCampo);
-        if (elemento) {
-          elemento.classList.remove('hidden-force');
-          elemento.style.display = 'block'; // Forzamos display block
-          
-          // Corrección visual para grids (si ocupa 2 columnas)
-          if(elemento.classList.contains('md:col-span-2') && window.innerWidth >= 768) {
-             elemento.style.gridColumn = 'span 2 / span 2';
-          }
-        } else {
-          console.warn('Campo no encontrado en HTML:', idCampo);
-        }
+      // Mostrar selección
+      (TIPOS[seleccion] || []).forEach(id => {
+        const el = document.getElementById('campo_' + id);
+        if(el) { el.classList.remove('hidden-force'); el.style.display = 'block'; }
+        if(el && el.classList.contains('md:col-span-2') && window.innerWidth >= 768) el.style.gridColumn = 'span 2 / span 2';
       });
     });
 
-    // --- 3. LÓGICA DE BÚSQUEDA ROLLUP (APLANADO JSON) ---
+    // --- BÚSQUEDA ROLLUP (LÓGICA SIMPLE) ---
     let debounceTimer;
     async function buscarEnN8N(query, url, contenedorResultados, tipo) {
       contenedorResultados.innerHTML = '<div class="p-2 text-[#00f3ff]">Buscando...</div>';
       contenedorResultados.classList.remove('hidden');
-      
       try {
         const res = await fetch(url, { 
-            method: 'POST', 
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ query }) 
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ query }) 
         });
-        const datosCrudos = await res.json();
-        
-        // APLANADO DE JSON: Crucial para que funcione Clientes y Proyectos
-        // Intentamos mapear .json si existe, si no, usamos el objeto directo
-        const items = datosCrudos.map(d => d.json ? d.json : d).filter(Boolean);
+        const datos = await res.json();
+        const items = datos.map(d => d.json ? d.json : d).filter(Boolean);
 
         if(items.length === 0) {
             contenedorResultados.innerHTML = '<div class="p-2 text-gray-500">Sin resultados</div>';
@@ -269,10 +253,8 @@
                <div class="text-xs text-[#00f3ff]">${item.id || ''}</div>
             </div>
         `).join('');
-
       } catch (err) {
-        console.error(err);
-        contenedorResultados.innerHTML = '<div class="p-2 text-red-500">Error conexión</div>';
+        contenedorResultados.innerHTML = '<div class="p-2 text-red-500">Error</div>';
       }
     }
 
@@ -282,48 +264,38 @@
            document.getElementById('resCliente').classList.add('hidden');
            document.getElementById('selCliente').innerHTML = `Cliente: <b>${item.name}</b>`;
            document.getElementById('selCliente').classList.remove('hidden');
-           document.getElementById('clienteId').value = item.id;
-           window.clienteSeleccionado = item; // Guardar objeto completo
+           window.clienteSeleccionado = item;
        } else {
            document.getElementById('searchProyecto').value = '';
            document.getElementById('resProyecto').classList.add('hidden');
            document.getElementById('selProyecto').innerHTML = `Proyecto: <b>${item.name}</b>`;
            document.getElementById('selProyecto').classList.remove('hidden');
-           document.getElementById('proyectoId').value = item.id;
            window.proyectoSeleccionado = item;
        }
     };
 
-    // Listeners Búsqueda
+    // Listeners Inputs
     document.getElementById('searchCliente').addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
         if(e.target.value.length < 2) return;
         debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarClientes, document.getElementById('resCliente'), 'cliente'), 300);
     });
-
     document.getElementById('searchProyecto').addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
         if(e.target.value.length < 2) return;
         debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarProyectos, document.getElementById('resProyecto'), 'proyecto'), 300);
     });
 
-    // --- 4. ARCHIVOS Y ENVÍO ---
+    // --- ARCHIVOS ---
     const fileInput = document.getElementById('archivos');
     let archivosSeleccionados = [];
-    
     document.getElementById('campo_archivos').addEventListener('click', () => fileInput.click());
-    
     fileInput.addEventListener('change', (e) => {
         archivosSeleccionados = [...archivosSeleccionados, ...Array.from(e.target.files)];
-        mostrarArchivos();
+        document.getElementById('listaArchivos').innerHTML = archivosSeleccionados.map(f => `<div>📄 ${f.name}</div>`).join('');
     });
 
-    function mostrarArchivos() {
-        document.getElementById('listaArchivos').innerHTML = archivosSeleccionados.map(f => 
-            `<div>📄 ${f.name} <span class="text-xs text-gray-500">(${(f.size/1024).toFixed(0)}KB)</span></div>`
-        ).join('');
-    }
-
+    // --- ENVÍO (CORREGIDO PARA ENVIAR DATOS SIMPLES Y EVITAR EL ERROR) ---
     document.getElementById('gestionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
@@ -332,14 +304,20 @@
 
         try {
             const formData = new FormData(e.target);
-            
-            // Adjuntar datos hardcodeados usuario
             formData.append('nombreSolicitante', 'USUARIO COMERCIAL');
             formData.append('emailSolicitante', 'comercial@pso.com');
+
+            // --- CORRECCIÓN AQUÍ: ENVIAMOS SOLO EL NOMBRE O EL ID ---
             
-            // Adjuntar objetos JSON completos
-            if(window.clienteSeleccionado) formData.append('cliente', JSON.stringify(window.clienteSeleccionado));
-            if(window.proyectoSeleccionado) formData.append('proyecto_relacionado', JSON.stringify(window.proyectoSeleccionado));
+            // 1. Cliente: Enviamos el NOMBRE para satisfacer la validación de texto de ClickUp
+            if(window.clienteSeleccionado) {
+                formData.append('cliente', window.clienteSeleccionado.name); 
+            }
+
+            // 2. Proyecto: Enviamos el ID para el enlace técnico
+            if(window.proyectoSeleccionado) {
+                formData.append('proyecto_relacionado', window.proyectoSeleccionado.id);
+            }
 
             // Archivos
             archivosSeleccionados.forEach((f, i) => formData.append(`archivo_${i}`, f));
@@ -350,13 +328,11 @@
                 Swal.fire('¡Enviado!', 'Datos transmitidos correctamente', 'success');
                 e.target.reset();
                 archivosSeleccionados = [];
-                mostrarArchivos();
-                // Limpiar selecciones visuales
-                document.getElementById('selCliente').innerHTML = '';
+                document.getElementById('listaArchivos').innerHTML = '';
                 document.getElementById('selCliente').classList.add('hidden');
-                document.getElementById('selProyecto').innerHTML = '';
                 document.getElementById('selProyecto').classList.add('hidden');
-                // Resetear visibilidad
+                window.clienteSeleccionado = null;
+                window.proyectoSeleccionado = null;
                 document.getElementById('tipoGestion').dispatchEvent(new Event('change'));
             } else {
                 throw new Error('Error en servidor');
@@ -368,7 +344,6 @@
             btn.innerText = 'TRANSMITIR DATOS';
         }
     });
-
   </script>
 </body>
 </html>
