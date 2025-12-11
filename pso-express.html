@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5.0. PSO Gestión: Acceso Seguro</title>
+  <title>5.1. PSO Gestión: Acceso Seguro</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
@@ -70,7 +70,7 @@
     <div class="border-b border-gray-700 pb-4 mb-6 flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
-        <p class="text-xs text-gray-400 mt-1">PANEL DE GESTIÓN v5.0</p>
+        <p class="text-xs text-gray-400 mt-1">PANEL DE GESTIÓN v5.1</p>
       </div>
       <div class="text-right text-xs">
         <div class="text-[#00f3ff] font-bold" id="displayUser">USUARIO</div>
@@ -233,15 +233,15 @@
   </div>
 
   <script>
-    // URLS N8N
+    // URLS N8N - ASEGÚRATE DE QUE SEAN CORRECTAS
     const WEBHOOKS = {
-      login: 'https://n8n.escueladeefectividad.com/webhook/pso-login-comerciales', // <--- TU WEBHOOK DE LOGIN
+      login: 'https://n8n.escueladeefectividad.com/webhook/pso-login-comerciales',
       buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
       buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
       crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
     };
 
-    // --- LÓGICA DE LOGIN (NUEVA) ---
+    // --- LÓGICA DE LOGIN ---
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value;
@@ -258,34 +258,41 @@
           body: JSON.stringify({ email, password: pass }) 
         });
         const data = await res.json();
+        
+        console.log('Respuesta Login:', data); // Ver en consola F12
 
         if(data.success) {
-          // 1. Ocultar Login / Mostrar App
+          // Ocultar Login / Mostrar App
           document.getElementById('viewLogin').classList.add('hidden-force');
           document.getElementById('viewApp').classList.remove('hidden-force');
           
-          // 2. Pre-rellenar datos (PERO EDITABLES)
-          document.getElementById('inputNombreSolicitante').value = data.nombre || data.email;
-          document.getElementById('inputEmailSolicitante').value = data.email;
-          document.getElementById('displayUser').textContent = data.nombre || 'USUARIO';
+          // RESCATAR DATOS: Lee 'nombre' O 'usuario.nombre'
+          const nombreUsuario = data.nombre || (data.usuario && data.usuario.nombre) || "Usuario";
+          const emailUsuario = data.email || (data.usuario && data.usuario.email) || email;
+
+          // Rellenar campos (AHORA EDITABLES)
+          document.getElementById('inputNombreSolicitante').value = nombreUsuario;
+          document.getElementById('inputEmailSolicitante').value = emailUsuario;
+          document.getElementById('displayUser').textContent = nombreUsuario.toUpperCase();
 
         } else {
           Swal.fire('Acceso Denegado', 'Credenciales incorrectas.', 'error');
         }
       } catch (err) {
-        Swal.fire('Error', 'No se pudo conectar con el servidor de seguridad.', 'error');
+        console.error(err);
+        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
       } finally {
         btn.disabled = false;
         btn.innerText = 'INICIAR SESIÓN';
       }
     });
 
-    // Función Logout (Solo recarga la página)
+    // Función Logout
     window.logout = function() {
       window.location.reload();
     }
 
-    // --- LÓGICA DE FORMULARIO (EXISTENTE) ---
+    // --- VISIBILIDAD ---
     const TIPOS = {
       'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida'],
       'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'buscarProyecto'],
@@ -309,6 +316,7 @@
       });
     });
 
+    // --- BÚSQUEDA ---
     let debounceTimer;
     async function buscarEnN8N(query, url, contenedorResultados, tipo) {
       contenedorResultados.innerHTML = '<div class="p-3 text-[#00f3ff] text-xs">Conectando...</div>';
@@ -362,6 +370,7 @@
         debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarProyectos, document.getElementById('resProyecto'), 'proyecto'), 300);
     });
 
+    // --- ARCHIVOS ---
     const fileInput = document.getElementById('archivos');
     let archivosSeleccionados = [];
     document.getElementById('campo_archivos').addEventListener('click', () => fileInput.click());
@@ -375,6 +384,7 @@
         `).join('');
     });
 
+    // --- ENVÍO ---
     document.getElementById('gestionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
@@ -384,7 +394,7 @@
         try {
             const formData = new FormData(e.target);
             
-            // LOGICA INYECCIÓN CONTENT
+            // INYECTAR ROLLUPS EN DESCRIPCIÓN
             let descFinal = formData.get('descripcion') || "";
             let infoRollup = "";
             if(window.clienteSeleccionado) {
