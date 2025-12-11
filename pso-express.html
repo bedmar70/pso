@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PSO Gestión: Modo Seguro</title>
+  <title>11 PSO Gestión: Modo Seguro</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
@@ -13,7 +13,9 @@
     body { background-color: #050505; color: #e2e8f0; font-family: sans-serif; }
     .cyber-input { background: rgba(255, 255, 255, 0.05); border: 1px solid #333; color: #00f3ff; width: 100%; border-radius: 0.5rem; padding: 0.75rem; }
     .cyber-input:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
-    .hidden-force { display: none !important; } /* Clase de seguridad para ocultar */
+    .hidden-force { display: none !important; }
+    label { font-size: 0.75rem; text-transform: uppercase; color: #9ca3af; margin-bottom: 0.25rem; display: block; }
+    label.required { color: #00f3ff; font-weight: bold; }
   </style>
 </head>
 <body class="p-4 flex justify-center min-h-screen">
@@ -21,21 +23,15 @@
   <div class="w-full max-w-4xl bg-gray-900/80 p-6 rounded-xl border border-gray-700 shadow-2xl">
     
     <div class="border-b border-gray-700 pb-4 mb-6 flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
-        <p class="text-xs text-gray-400">MODO ACCESO DIRECTO</p>
-      </div>
-      <div class="text-right text-xs">
-        <div class="text-[#00f3ff] font-bold">USUARIO ACTIVO</div>
-        <div class="text-gray-500">Permisos VIP Habilitados</div>
-      </div>
+      <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
+      <div class="text-right text-xs text-gray-500">CONEXIÓN DIRECTA</div>
     </div>
 
     <form id="gestionForm" class="space-y-6">
       
       <div class="col-span-1 md:col-span-2">
-        <label class="block text-[#00f3ff] text-xs font-bold uppercase mb-2">TIPO DE GESTIÓN</label>
-        <select id="tipoGestion" class="cyber-input text-lg font-bold bg-black">
+        <label class="required">TIPO DE GESTIÓN</label>
+        <select id="tipoGestion" name="tipo_gestion_comercial" class="cyber-input text-lg font-bold bg-black" required>
           <option value="">SELECCIONAR OPERACIÓN...</option>
           <option value="Alta nueva">🚀 ALTA NUEVA</option>
           <option value="Modificación">📝 MODIFICACIÓN</option>
@@ -49,131 +45,114 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <div id="campo_nombreSolicitante" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Solicitante</label>
-          <input type="text" name="nombreSolicitante" class="cyber-input" placeholder="Nombre Agente">
+          <label>Solicitante</label>
+          <input type="text" name="nombreSolicitante" class="cyber-input" value="USUARIO COMERCIAL" readonly>
         </div>
         <div id="campo_emailSolicitante" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Email</label>
-          <input type="email" name="emailSolicitante" class="cyber-input" placeholder="email@pso.com">
+          <label>Email</label>
+          <input type="email" name="emailSolicitante" class="cyber-input" value="comercial@pso.com" readonly>
         </div>
 
         <div id="campo_nombreProyecto" class="hidden-force col-span-1 md:col-span-2">
-          <label class="block text-purple-400 text-xs font-bold uppercase mb-1">Nombre Proyecto</label>
-          <input type="text" name="nombreProyecto" class="cyber-input" placeholder="Ej: Proyecto Alpha">
+          <label class="required">Identificador Proyecto</label>
+          <input type="text" name="nombreProyecto" class="cyber-input">
         </div>
 
         <div id="campo_cliente" class="hidden-force col-span-1 md:col-span-2">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Vincular Cliente (Base de Datos)</label>
+          <label>Vincular Cliente</label>
           <div class="relative">
-            <input type="text" id="searchCliente" class="cyber-input pl-10" placeholder="Buscar cliente..." autocomplete="off">
-            <span class="absolute left-3 top-3 text-gray-500">🔍</span>
+            <input type="text" id="searchCliente" class="cyber-input pl-10" placeholder="Escribe para buscar..." autocomplete="off">
             <div id="resCliente" class="absolute z-50 w-full bg-black border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden"></div>
           </div>
           <div id="selCliente" class="mt-2 p-2 bg-[#00f3ff]/20 text-[#00f3ff] text-sm rounded hidden"></div>
-          <input type="hidden" name="clienteId" id="clienteId">
+          <input type="hidden" name="cliente" id="inputCliente"> 
         </div>
 
         <div id="campo_buscarProyecto" class="hidden-force col-span-1 md:col-span-2">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Vincular Proyecto Existente</label>
+          <label>Vincular Proyecto Existente</label>
           <div class="relative">
-            <input type="text" id="searchProyecto" class="cyber-input pl-10" placeholder="Buscar ID de tarea..." autocomplete="off">
-            <span class="absolute left-3 top-3 text-gray-500">📂</span>
+            <input type="text" id="searchProyecto" class="cyber-input pl-10" placeholder="Buscar ID..." autocomplete="off">
             <div id="resProyecto" class="absolute z-50 w-full bg-black border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden"></div>
           </div>
           <div id="selProyecto" class="mt-2 p-2 bg-[#00f3ff]/20 text-[#00f3ff] text-sm rounded hidden"></div>
-          <input type="hidden" name="proyectoId" id="proyectoId">
+          <input type="hidden" name="proyecto_relacionado" id="inputProyecto">
         </div>
 
         <div id="campo_descripcion" class="hidden-force col-span-1 md:col-span-2">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Descripción</label>
+          <label class="required">Descripción</label>
           <textarea name="descripcion" rows="4" class="cyber-input"></textarea>
         </div>
 
-        <div id="campo_referenciaPSO" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Ref. PSO</label>
-          <input type="text" name="referenciaPSO" class="cyber-input">
-        </div>
-
         <div id="campo_prioridadBoceto" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Prioridad</label>
+          <label>Prioridad</label>
           <select name="prioridadBoceto" class="cyber-input">
             <option value="Normal">Normal</option>
-            <option value="Urgente">URGENTE</option>
+            <option value="Prioritario">Prioritario</option> <option value="Urgente">URGENTE</option>
           </select>
         </div>
 
         <div id="campo_necesitaCosteCliches" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">¿Coste Clichés?</label>
+          <label>¿Coste Clichés?</label>
           <select name="necesitaCosteCliches" class="cyber-input">
-            <option value="-">-</option>
+            <option value="">-</option>
             <option value="SI">SI</option>
             <option value="NO">NO</option>
           </select>
         </div>
 
         <div id="campo_tipoImpresion" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Impresión</label>
+          <label>Modo Impresión</label>
           <select name="tipoImpresion" class="cyber-input">
-            <option value="-">-</option>
+            <option value="">-</option>
             <option value="Interior">Interior</option>
             <option value="Exterior">Exterior</option>
           </select>
         </div>
 
+        <div id="campo_referenciaPSO" class="hidden-force col-span-1">
+          <label>Ref. PSO</label>
+          <input type="text" name="referenciaPSO" class="cyber-input">
+        </div>
         <div id="campo_materiales" class="hidden-force col-span-1 md:col-span-2">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Materiales</label>
+          <label>Materiales</label>
           <input type="text" name="materiales" class="cyber-input">
         </div>
-
         <div id="campo_enlaceDiseno" class="hidden-force col-span-1 md:col-span-2">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Enlace Diseño</label>
+          <label>Enlace Diseño</label>
           <input type="url" name="enlaceDiseno" class="cyber-input">
+        </div>
+        <div id="campo_presupuesto" class="hidden-force col-span-1">
+          <label>Presupuesto</label>
+          <input type="number" name="presupuesto" class="cyber-input" step="0.01">
+        </div>
+        <div id="campo_complejidad" class="hidden-force col-span-1">
+          <label>Complejidad</label>
+          <input type="range" name="complejidad" min="1" max="4" class="w-full">
+        </div>
+        <div id="campo_fechaPrometida" class="hidden-force col-span-1">
+          <label>Deadline</label>
+          <input type="date" name="fechaPrometida" class="cyber-input">
+        </div>
+        <div id="campo_observaciones" class="hidden-force col-span-1 md:col-span-2">
+          <label>Notas Adicionales</label>
+          <textarea name="observaciones" rows="2" class="cyber-input"></textarea>
         </div>
 
         <div id="campo_metricasTecnicas" class="hidden-force col-span-1 md:col-span-2 bg-white/5 p-4 rounded border border-white/10">
-           <div class="text-[#00f3ff] font-bold text-sm mb-3 border-b border-white/10 pb-1">MÉTRICAS TÉCNICAS</div>
+           <div class="text-[#00f3ff] font-bold text-sm mb-3">MÉTRICAS TÉCNICAS</div>
            <div class="grid grid-cols-3 gap-4">
-              <div>
-                <label class="text-[10px] text-gray-400">Caídas</label>
-                <input type="number" name="numCaidas" class="cyber-input text-center">
-              </div>
-              <div>
-                <label class="text-[10px] text-gray-400">Repeticiones</label>
-                <input type="number" name="numRepeticiones" class="cyber-input text-center">
-              </div>
-              <div>
-                <label class="text-[10px] text-gray-400">Colores</label>
-                <input type="number" name="numColores" class="cyber-input text-center">
-              </div>
+              <div><label>Caídas</label><input type="number" name="numCaidas" class="cyber-input text-center"></div>
+              <div><label>Repeticiones</label><input type="number" name="numRepeticiones" class="cyber-input text-center"></div>
+              <div><label>Colores</label><input type="number" name="numColores" class="cyber-input text-center"></div>
               <div class="col-span-3">
-                <label class="text-[10px] text-gray-400">Barnices</label>
+                <label>Barnices</label>
                 <select name="barnices" class="cyber-input">
-                  <option value="-">-</option>
+                  <option value="">-</option>
                   <option value="SI">SI</option>
                   <option value="NO">NO</option>
                 </select>
               </div>
            </div>
-        </div>
-
-        <div id="campo_presupuesto" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Presupuesto</label>
-          <input type="number" name="presupuesto" class="cyber-input">
-        </div>
-
-        <div id="campo_complejidad" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Complejidad</label>
-          <input type="range" name="complejidad" min="1" max="4" class="w-full">
-        </div>
-
-        <div id="campo_fechaPrometida" class="hidden-force col-span-1">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Deadline</label>
-          <input type="date" name="fechaPrometida" class="cyber-input">
-        </div>
-
-        <div id="campo_observaciones" class="hidden-force col-span-1 md:col-span-2">
-          <label class="block text-gray-400 text-xs uppercase mb-1">Observaciones</label>
-          <textarea name="observaciones" rows="2" class="cyber-input"></textarea>
         </div>
 
         <div id="campo_archivos" class="hidden-force col-span-1 md:col-span-2 border-2 border-dashed border-gray-600 p-6 text-center rounded cursor-pointer hover:border-[#00f3ff]">
@@ -192,17 +171,13 @@
   </div>
 
   <script>
-    // HARDCODEO del usuario
-    const PSO_USER = { nombre: 'USUARIO COMERCIAL', email: 'comercial@pso.com' };
-    
-    // CONFIGURACIÓN DE WEBHOOKS
     const WEBHOOKS = {
       buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
       buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
       crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
     };
 
-    // VISIBILIDAD DE CAMPOS
+    // MAPA DE VISIBILIDAD (IDÉNTICO AL ORIGINAL)
     const TIPOS = {
       'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida'],
       'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'buscarProyecto'],
@@ -212,7 +187,7 @@
       'Consulta - Diseño': ['descripcion', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'emailSolicitante']
     };
 
-    // --- VISIBILIDAD ---
+    // VISIBILIDAD DE CAMPOS
     document.getElementById('tipoGestion').addEventListener('change', function(e) {
       const seleccion = e.target.value;
       // Ocultar todo
@@ -229,15 +204,13 @@
       });
     });
 
-    // --- BÚSQUEDA ROLLUP (LÓGICA SIMPLE) ---
+    // BÚSQUEDA ROLLUP (SIMPLE Y ROBUSTA)
     let debounceTimer;
     async function buscarEnN8N(query, url, contenedorResultados, tipo) {
       contenedorResultados.innerHTML = '<div class="p-2 text-[#00f3ff]">Buscando...</div>';
       contenedorResultados.classList.remove('hidden');
       try {
-        const res = await fetch(url, { 
-            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ query }) 
-        });
+        const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ query }) });
         const datos = await res.json();
         const items = datos.map(d => d.json ? d.json : d).filter(Boolean);
 
@@ -253,9 +226,7 @@
                <div class="text-xs text-[#00f3ff]">${item.id || ''}</div>
             </div>
         `).join('');
-      } catch (err) {
-        contenedorResultados.innerHTML = '<div class="p-2 text-red-500">Error</div>';
-      }
+      } catch (err) { contenedorResultados.innerHTML = '<div class="p-2 text-red-500">Error</div>'; }
     }
 
     window.seleccionarItem = function(item, tipo) {
@@ -264,17 +235,20 @@
            document.getElementById('resCliente').classList.add('hidden');
            document.getElementById('selCliente').innerHTML = `Cliente: <b>${item.name}</b>`;
            document.getElementById('selCliente').classList.remove('hidden');
-           window.clienteSeleccionado = item;
+           // AQUÍ ESTÁ LA CLAVE: Guardamos el NOMBRE directamente en el input oculto
+           // Esto es lo que se envía a n8n, evitando el error de objeto vs string
+           document.getElementById('inputCliente').value = item.name; 
        } else {
            document.getElementById('searchProyecto').value = '';
            document.getElementById('resProyecto').classList.add('hidden');
            document.getElementById('selProyecto').innerHTML = `Proyecto: <b>${item.name}</b>`;
            document.getElementById('selProyecto').classList.remove('hidden');
-           window.proyectoSeleccionado = item;
+           // Para proyecto enviamos ID
+           document.getElementById('inputProyecto').value = item.id;
        }
     };
 
-    // Listeners Inputs
+    // Listeners
     document.getElementById('searchCliente').addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
         if(e.target.value.length < 2) return;
@@ -286,7 +260,7 @@
         debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarProyectos, document.getElementById('resProyecto'), 'proyecto'), 300);
     });
 
-    // --- ARCHIVOS ---
+    // ARCHIVOS
     const fileInput = document.getElementById('archivos');
     let archivosSeleccionados = [];
     document.getElementById('campo_archivos').addEventListener('click', () => fileInput.click());
@@ -295,7 +269,7 @@
         document.getElementById('listaArchivos').innerHTML = archivosSeleccionados.map(f => `<div>📄 ${f.name}</div>`).join('');
     });
 
-    // --- ENVÍO (CORREGIDO PARA ENVIAR DATOS SIMPLES Y EVITAR EL ERROR) ---
+    // ENVÍO
     document.getElementById('gestionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
@@ -304,22 +278,7 @@
 
         try {
             const formData = new FormData(e.target);
-            formData.append('nombreSolicitante', 'USUARIO COMERCIAL');
-            formData.append('emailSolicitante', 'comercial@pso.com');
-
-            // --- CORRECCIÓN AQUÍ: ENVIAMOS SOLO EL NOMBRE O EL ID ---
-            
-            // 1. Cliente: Enviamos el NOMBRE para satisfacer la validación de texto de ClickUp
-            if(window.clienteSeleccionado) {
-                formData.append('cliente', window.clienteSeleccionado.name); 
-            }
-
-            // 2. Proyecto: Enviamos el ID para el enlace técnico
-            if(window.proyectoSeleccionado) {
-                formData.append('proyecto_relacionado', window.proyectoSeleccionado.id);
-            }
-
-            // Archivos
+            // Añadimos archivos manualmente
             archivosSeleccionados.forEach((f, i) => formData.append(`archivo_${i}`, f));
 
             const res = await fetch(WEBHOOKS.crearTarea, { method: 'POST', body: formData });
@@ -331,8 +290,6 @@
                 document.getElementById('listaArchivos').innerHTML = '';
                 document.getElementById('selCliente').classList.add('hidden');
                 document.getElementById('selProyecto').classList.add('hidden');
-                window.clienteSeleccionado = null;
-                window.proyectoSeleccionado = null;
                 document.getElementById('tipoGestion').dispatchEvent(new Event('change'));
             } else {
                 throw new Error('Error en servidor');
