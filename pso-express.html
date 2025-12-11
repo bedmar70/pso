@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>11 PSO Gestión: Modo Seguro</title>
+  <title>22 PSO Gestión: Modo Seguro</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
@@ -11,11 +11,31 @@
 
   <style>
     body { background-color: #050505; color: #e2e8f0; font-family: sans-serif; }
-    .cyber-input { background: rgba(255, 255, 255, 0.05); border: 1px solid #333; color: #00f3ff; width: 100%; border-radius: 0.5rem; padding: 0.75rem; }
+    
+    /* Input Style */
+    .cyber-input { 
+      background: rgba(255, 255, 255, 0.05); 
+      border: 1px solid #333; 
+      color: #00f3ff; 
+      width: 100%; 
+      border-radius: 0.5rem; 
+      padding: 0.75rem; 
+      font-size: 0.95rem;
+    }
     .cyber-input:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+    
+    /* Placeholder Color Force */
+    .cyber-input::placeholder { color: #6b7280; opacity: 1; }
+    
     .hidden-force { display: none !important; }
-    label { font-size: 0.75rem; text-transform: uppercase; color: #9ca3af; margin-bottom: 0.25rem; display: block; }
+    label { font-size: 0.75rem; text-transform: uppercase; color: #9ca3af; margin-bottom: 0.25rem; display: block; letter-spacing: 0.05em; }
     label.required { color: #00f3ff; font-weight: bold; }
+    
+    /* Scrollbar para resultados */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
   </style>
 </head>
 <body class="p-4 flex justify-center min-h-screen">
@@ -23,16 +43,22 @@
   <div class="w-full max-w-4xl bg-gray-900/80 p-6 rounded-xl border border-gray-700 shadow-2xl">
     
     <div class="border-b border-gray-700 pb-4 mb-6 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
-      <div class="text-right text-xs text-gray-500">CONEXIÓN DIRECTA</div>
+      <div>
+        <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
+        <p class="text-xs text-gray-400 mt-1">MODO ACCESO DIRECTO v3.0</p>
+      </div>
+      <div class="text-right text-xs">
+        <div class="text-[#00f3ff] font-bold">USUARIO ACTIVO</div>
+        <div class="text-gray-500">Permisos VIP Habilitados</div>
+      </div>
     </div>
 
     <form id="gestionForm" class="space-y-6">
       
       <div class="col-span-1 md:col-span-2">
-        <label class="required">TIPO DE GESTIÓN</label>
-        <select id="tipoGestion" name="tipo_gestion_comercial" class="cyber-input text-lg font-bold bg-black" required>
-          <option value="">SELECCIONAR OPERACIÓN...</option>
+        <label class="required">TIPO DE GESTIÓN (Selecciona para empezar)</label>
+        <select id="tipoGestion" name="tipo_gestion_comercial" class="cyber-input text-lg font-bold bg-black border-[#00f3ff]" required>
+          <option value="">▼ SELECCIONAR OPERACIÓN...</option>
           <option value="Alta nueva">🚀 ALTA NUEVA</option>
           <option value="Modificación">📝 MODIFICACIÓN</option>
           <option value="Consultas - Varios">❓ CONSULTAS VARIOS</option>
@@ -46,108 +72,126 @@
 
         <div id="campo_nombreSolicitante" class="hidden-force col-span-1">
           <label>Solicitante</label>
-          <input type="text" name="nombreSolicitante" class="cyber-input" value="USUARIO COMERCIAL" readonly>
+          <input type="text" name="nombreSolicitante" class="cyber-input text-gray-500 cursor-not-allowed" value="USUARIO COMERCIAL" readonly>
         </div>
         <div id="campo_emailSolicitante" class="hidden-force col-span-1">
-          <label>Email</label>
-          <input type="email" name="emailSolicitante" class="cyber-input" value="comercial@pso.com" readonly>
+          <label>Email de Contacto</label>
+          <input type="email" name="emailSolicitante" class="cyber-input text-gray-500 cursor-not-allowed" value="comercial@pso.com" readonly>
         </div>
 
         <div id="campo_nombreProyecto" class="hidden-force col-span-1 md:col-span-2">
-          <label class="required">Identificador Proyecto</label>
-          <input type="text" name="nombreProyecto" class="cyber-input">
+          <label class="required">Nombre del Proyecto / Identificador</label>
+          <input type="text" name="nombreProyecto" class="cyber-input" placeholder="Ej: Proyecto Alpha - Envase 500ml">
         </div>
 
         <div id="campo_cliente" class="hidden-force col-span-1 md:col-span-2">
-          <label>Vincular Cliente</label>
+          <label>Vincular Cliente (Base de Datos)</label>
           <div class="relative">
-            <input type="text" id="searchCliente" class="cyber-input pl-10" placeholder="Escribe para buscar..." autocomplete="off">
-            <div id="resCliente" class="absolute z-50 w-full bg-black border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden"></div>
+            <input type="text" id="searchCliente" class="cyber-input pl-10" placeholder="Escribe el nombre del cliente para buscar..." autocomplete="off">
+            <div id="resCliente" class="absolute z-50 w-full bg-gray-900 border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden shadow-xl"></div>
           </div>
-          <div id="selCliente" class="mt-2 p-2 bg-[#00f3ff]/20 text-[#00f3ff] text-sm rounded hidden"></div>
+          <div id="selCliente" class="mt-2 p-3 bg-[#00f3ff]/10 border border-[#00f3ff]/30 text-[#00f3ff] text-sm rounded hidden flex items-center gap-2">
+            <span>✅</span> <span id="selClienteText"></span>
+          </div>
           <input type="hidden" name="cliente" id="inputCliente"> 
         </div>
 
         <div id="campo_buscarProyecto" class="hidden-force col-span-1 md:col-span-2">
           <label>Vincular Proyecto Existente</label>
           <div class="relative">
-            <input type="text" id="searchProyecto" class="cyber-input pl-10" placeholder="Buscar ID..." autocomplete="off">
-            <div id="resProyecto" class="absolute z-50 w-full bg-black border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden"></div>
+            <input type="text" id="searchProyecto" class="cyber-input pl-10" placeholder="Escribe ID o nombre de la tarea..." autocomplete="off">
+            <div id="resProyecto" class="absolute z-50 w-full bg-gray-900 border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden shadow-xl"></div>
           </div>
-          <div id="selProyecto" class="mt-2 p-2 bg-[#00f3ff]/20 text-[#00f3ff] text-sm rounded hidden"></div>
+          <div id="selProyecto" class="mt-2 p-3 bg-[#00f3ff]/10 border border-[#00f3ff]/30 text-[#00f3ff] text-sm rounded hidden flex items-center gap-2">
+            <span>✅</span> <span id="selProyectoText"></span>
+          </div>
           <input type="hidden" name="proyecto_relacionado" id="inputProyecto">
         </div>
 
         <div id="campo_descripcion" class="hidden-force col-span-1 md:col-span-2">
-          <label class="required">Descripción</label>
-          <textarea name="descripcion" rows="4" class="cyber-input"></textarea>
+          <label class="required">Descripción Detallada</label>
+          <textarea name="descripcion" rows="4" class="cyber-input" placeholder="Describe los detalles de la solicitud, especificaciones, cambios requeridos..."></textarea>
         </div>
 
         <div id="campo_prioridadBoceto" class="hidden-force col-span-1">
-          <label>Prioridad</label>
+          <label>Nivel de Prioridad</label>
           <select name="prioridadBoceto" class="cyber-input">
-            <option value="Normal">Normal</option>
-            <option value="Prioritario">Prioritario</option> <option value="Urgente">URGENTE</option>
+            <option value="Normal">Normal (Estándar)</option>
+            <option value="Prioritario">Prioritario</option>
+            <option value="Urgente">🚨 URGENTE</option>
           </select>
         </div>
 
         <div id="campo_necesitaCosteCliches" class="hidden-force col-span-1">
-          <label>¿Coste Clichés?</label>
+          <label>¿Requiere Coste de Clichés?</label>
           <select name="necesitaCosteCliches" class="cyber-input">
-            <option value="">-</option>
+            <option value="">- Seleccionar -</option>
             <option value="SI">SI</option>
             <option value="NO">NO</option>
           </select>
         </div>
 
         <div id="campo_tipoImpresion" class="hidden-force col-span-1">
-          <label>Modo Impresión</label>
+          <label>Modo de Impresión</label>
           <select name="tipoImpresion" class="cyber-input">
-            <option value="">-</option>
+            <option value="">- Seleccionar -</option>
             <option value="Interior">Interior</option>
             <option value="Exterior">Exterior</option>
           </select>
         </div>
 
         <div id="campo_referenciaPSO" class="hidden-force col-span-1">
-          <label>Ref. PSO</label>
-          <input type="text" name="referenciaPSO" class="cyber-input">
+          <label>Referencia Interna PSO</label>
+          <input type="text" name="referenciaPSO" class="cyber-input" placeholder="Ref. numérica o código">
         </div>
         <div id="campo_materiales" class="hidden-force col-span-1 md:col-span-2">
-          <label>Materiales</label>
-          <input type="text" name="materiales" class="cyber-input">
+          <label>Materiales / Sustrato</label>
+          <input type="text" name="materiales" class="cyber-input" placeholder="Ej: Polietileno, Complejo, Papel...">
         </div>
         <div id="campo_enlaceDiseno" class="hidden-force col-span-1 md:col-span-2">
-          <label>Enlace Diseño</label>
-          <input type="url" name="enlaceDiseno" class="cyber-input">
+          <label>Enlace a Archivos (Nube)</label>
+          <input type="url" name="enlaceDiseno" class="cyber-input" placeholder="https://drive.google.com/...">
         </div>
         <div id="campo_presupuesto" class="hidden-force col-span-1">
-          <label>Presupuesto</label>
-          <input type="number" name="presupuesto" class="cyber-input" step="0.01">
+          <label>Presupuesto Estimado (€)</label>
+          <input type="number" name="presupuesto" class="cyber-input" step="0.01" placeholder="0.00">
         </div>
         <div id="campo_complejidad" class="hidden-force col-span-1">
-          <label>Complejidad</label>
-          <input type="range" name="complejidad" min="1" max="4" class="w-full">
+          <label>Nivel de Complejidad (1-4)</label>
+          <div class="flex items-center gap-4">
+            <span class="text-xs text-gray-500">Baja</span>
+            <input type="range" name="complejidad" min="1" max="4" class="w-full accent-[#00f3ff]">
+            <span class="text-xs text-[#00f3ff]">Alta</span>
+          </div>
         </div>
         <div id="campo_fechaPrometida" class="hidden-force col-span-1">
-          <label>Deadline</label>
-          <input type="date" name="fechaPrometida" class="cyber-input">
+          <label>Deadline (Fecha Límite)</label>
+          <input type="date" name="fechaPrometida" class="cyber-input text-gray-300">
         </div>
         <div id="campo_observaciones" class="hidden-force col-span-1 md:col-span-2">
           <label>Notas Adicionales</label>
-          <textarea name="observaciones" rows="2" class="cyber-input"></textarea>
+          <textarea name="observaciones" rows="2" class="cyber-input" placeholder="Cualquier otra información relevante..."></textarea>
         </div>
 
-        <div id="campo_metricasTecnicas" class="hidden-force col-span-1 md:col-span-2 bg-white/5 p-4 rounded border border-white/10">
-           <div class="text-[#00f3ff] font-bold text-sm mb-3">MÉTRICAS TÉCNICAS</div>
-           <div class="grid grid-cols-3 gap-4">
-              <div><label>Caídas</label><input type="number" name="numCaidas" class="cyber-input text-center"></div>
-              <div><label>Repeticiones</label><input type="number" name="numRepeticiones" class="cyber-input text-center"></div>
-              <div><label>Colores</label><input type="number" name="numColores" class="cyber-input text-center"></div>
+        <div id="campo_metricasTecnicas" class="hidden-force col-span-1 md:col-span-2 bg-white/5 p-5 rounded border border-white/10">
+           <div class="text-[#00f3ff] font-bold text-sm mb-4 border-b border-white/10 pb-2">PARÁMETROS TÉCNICOS (VIP)</div>
+           <div class="grid grid-cols-3 gap-6">
+              <div>
+                <label>Nº Caídas</label>
+                <input type="number" name="numCaidas" class="cyber-input text-center" placeholder="0">
+              </div>
+              <div>
+                <label>Repeticiones</label>
+                <input type="number" name="numRepeticiones" class="cyber-input text-center" placeholder="0">
+              </div>
+              <div>
+                <label>Nº Colores</label>
+                <input type="number" name="numColores" class="cyber-input text-center" placeholder="0">
+              </div>
               <div class="col-span-3">
-                <label>Barnices</label>
+                <label>Aplicación de Barnices</label>
                 <select name="barnices" class="cyber-input">
-                  <option value="">-</option>
+                  <option value="">- Seleccionar -</option>
                   <option value="SI">SI</option>
                   <option value="NO">NO</option>
                 </select>
@@ -155,19 +199,25 @@
            </div>
         </div>
 
-        <div id="campo_archivos" class="hidden-force col-span-1 md:col-span-2 border-2 border-dashed border-gray-600 p-6 text-center rounded cursor-pointer hover:border-[#00f3ff]">
-           <p class="text-gray-400">📎 Adjuntar Archivos</p>
+        <div id="campo_archivos" class="hidden-force col-span-1 md:col-span-2 border-2 border-dashed border-gray-600 p-8 text-center rounded-xl cursor-pointer hover:border-[#00f3ff] hover:bg-[#00f3ff]/5 transition-all">
+           <div class="text-3xl mb-2">📎</div>
+           <p class="text-gray-300 font-bold">Adjuntar Archivos</p>
+           <p class="text-xs text-gray-500 mt-1">Haz clic para explorar o arrastra archivos aquí</p>
            <input type="file" id="archivos" multiple class="hidden">
-           <div id="listaArchivos" class="mt-2 text-sm text-left"></div>
+           <div id="listaArchivos" class="mt-4 space-y-2 text-sm text-left"></div>
         </div>
 
       </div>
 
-      <button type="submit" id="btnEnviar" class="w-full bg-[#00f3ff] text-black font-bold py-4 rounded hover:bg-white transition">
-        TRANSMITIR DATOS
+      <button type="submit" id="btnEnviar" class="w-full bg-gradient-to-r from-[#00f3ff] to-blue-600 text-black font-bold text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:scale-[1.01] transition-transform">
+        TRANSMITIR DATOS AL SISTEMA
       </button>
 
     </form>
+  </div>
+
+  <div class="fixed bottom-2 right-2 text-[10px] text-gray-700 font-mono">
+    SECURE MODE :: v3.0
   </div>
 
   <script>
@@ -177,7 +227,7 @@
       crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
     };
 
-    // MAPA DE VISIBILIDAD (IDÉNTICO AL ORIGINAL)
+    // VISIBILIDAD DE CAMPOS
     const TIPOS = {
       'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida'],
       'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'buscarProyecto'],
@@ -187,16 +237,13 @@
       'Consulta - Diseño': ['descripcion', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'emailSolicitante']
     };
 
-    // VISIBILIDAD DE CAMPOS
     document.getElementById('tipoGestion').addEventListener('change', function(e) {
       const seleccion = e.target.value;
-      // Ocultar todo
       document.querySelectorAll('[id^="campo_"]').forEach(el => {
         el.classList.add('hidden-force');
         el.style.display = 'none';
       });
       if (!seleccion) return;
-      // Mostrar selección
       (TIPOS[seleccion] || []).forEach(id => {
         const el = document.getElementById('campo_' + id);
         if(el) { el.classList.remove('hidden-force'); el.style.display = 'block'; }
@@ -204,10 +251,10 @@
       });
     });
 
-    // BÚSQUEDA ROLLUP (SIMPLE Y ROBUSTA)
+    // BÚSQUEDA ROLLUP
     let debounceTimer;
     async function buscarEnN8N(query, url, contenedorResultados, tipo) {
-      contenedorResultados.innerHTML = '<div class="p-2 text-[#00f3ff]">Buscando...</div>';
+      contenedorResultados.innerHTML = '<div class="p-3 text-[#00f3ff] text-xs">Conectando con base de datos...</div>';
       contenedorResultados.classList.remove('hidden');
       try {
         const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ query }) });
@@ -215,48 +262,46 @@
         const items = datos.map(d => d.json ? d.json : d).filter(Boolean);
 
         if(items.length === 0) {
-            contenedorResultados.innerHTML = '<div class="p-2 text-gray-500">Sin resultados</div>';
+            contenedorResultados.innerHTML = '<div class="p-3 text-gray-500 text-xs">No se encontraron coincidencias</div>';
             return;
         }
 
         contenedorResultados.innerHTML = items.map(item => `
-            <div class="p-2 hover:bg-[#00f3ff]/20 cursor-pointer border-b border-gray-800"
+            <div class="p-3 hover:bg-[#00f3ff]/10 cursor-pointer border-b border-gray-800 transition-colors"
                  onclick='seleccionarItem(${JSON.stringify(item).replace(/'/g, "&apos;")}, "${tipo}")'>
-               <div class="font-bold text-white">${item.name}</div>
-               <div class="text-xs text-[#00f3ff]">${item.id || ''}</div>
+               <div class="font-bold text-gray-200 text-sm">${item.name}</div>
+               <div class="text-[10px] text-[#00f3ff] mt-1">ID: ${item.id || 'N/A'}</div>
             </div>
         `).join('');
-      } catch (err) { contenedorResultados.innerHTML = '<div class="p-2 text-red-500">Error</div>'; }
+      } catch (err) { contenedorResultados.innerHTML = '<div class="p-3 text-red-500 text-xs">Error de conexión</div>'; }
     }
 
     window.seleccionarItem = function(item, tipo) {
        if(tipo === 'cliente') {
            document.getElementById('searchCliente').value = '';
            document.getElementById('resCliente').classList.add('hidden');
-           document.getElementById('selCliente').innerHTML = `Cliente: <b>${item.name}</b>`;
+           document.getElementById('selClienteText').textContent = item.name;
            document.getElementById('selCliente').classList.remove('hidden');
-           // AQUÍ ESTÁ LA CLAVE: Guardamos el NOMBRE directamente en el input oculto
-           // Esto es lo que se envía a n8n, evitando el error de objeto vs string
-           document.getElementById('inputCliente').value = item.name; 
+           document.getElementById('inputCliente').value = item.name; // ENVÍA NOMBRE
+           window.clienteSeleccionado = item;
        } else {
            document.getElementById('searchProyecto').value = '';
            document.getElementById('resProyecto').classList.add('hidden');
-           document.getElementById('selProyecto').innerHTML = `Proyecto: <b>${item.name}</b>`;
+           document.getElementById('selProyectoText').textContent = item.name;
            document.getElementById('selProyecto').classList.remove('hidden');
-           // Para proyecto enviamos ID
-           document.getElementById('inputProyecto').value = item.id;
+           document.getElementById('inputProyecto').value = item.id; // ENVÍA ID
+           window.proyectoSeleccionado = item;
        }
     };
 
-    // Listeners
     document.getElementById('searchCliente').addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
-        if(e.target.value.length < 2) return;
+        if(e.target.value.length < 2) { document.getElementById('resCliente').classList.add('hidden'); return; }
         debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarClientes, document.getElementById('resCliente'), 'cliente'), 300);
     });
     document.getElementById('searchProyecto').addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
-        if(e.target.value.length < 2) return;
+        if(e.target.value.length < 2) { document.getElementById('resProyecto').classList.add('hidden'); return; }
         debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarProyectos, document.getElementById('resProyecto'), 'proyecto'), 300);
     });
 
@@ -266,7 +311,12 @@
     document.getElementById('campo_archivos').addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
         archivosSeleccionados = [...archivosSeleccionados, ...Array.from(e.target.files)];
-        document.getElementById('listaArchivos').innerHTML = archivosSeleccionados.map(f => `<div>📄 ${f.name}</div>`).join('');
+        document.getElementById('listaArchivos').innerHTML = archivosSeleccionados.map((f, i) => `
+            <div class="flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700">
+                <span class="text-gray-300 truncate">${f.name}</span>
+                <span class="text-[#00f3ff] text-xs">${(f.size/1024).toFixed(0)} KB</span>
+            </div>
+        `).join('');
     });
 
     // ENVÍO
@@ -274,31 +324,49 @@
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
         btn.disabled = true;
-        btn.innerText = 'ENVIANDO...';
+        btn.innerHTML = '<span class="animate-pulse">TRANSMITIENDO DATOS...</span>';
 
         try {
             const formData = new FormData(e.target);
-            // Añadimos archivos manualmente
+            // Datos fijos usuario
+            formData.append('nombreSolicitante', 'USUARIO COMERCIAL');
+            formData.append('emailSolicitante', 'comercial@pso.com');
+
+            // Asegurar Cliente y Proyecto
+            if(window.clienteSeleccionado) formData.append('cliente', window.clienteSeleccionado.name);
+            if(window.proyectoSeleccionado) formData.append('proyecto_relacionado', window.proyectoSeleccionado.id);
+
+            // Archivos
             archivosSeleccionados.forEach((f, i) => formData.append(`archivo_${i}`, f));
 
             const res = await fetch(WEBHOOKS.crearTarea, { method: 'POST', body: formData });
             
             if(res.ok) {
-                Swal.fire('¡Enviado!', 'Datos transmitidos correctamente', 'success');
+                Swal.fire({
+                    title: '¡SOLICITUD ENVIADA!',
+                    text: 'Los datos han sido registrados correctamente en el sistema.',
+                    icon: 'success',
+                    background: '#111',
+                    color: '#fff',
+                    confirmButtonColor: '#00f3ff',
+                    confirmButtonText: '<span style="color:black; font-weight:bold">ENTENDIDO</span>'
+                });
                 e.target.reset();
                 archivosSeleccionados = [];
                 document.getElementById('listaArchivos').innerHTML = '';
                 document.getElementById('selCliente').classList.add('hidden');
                 document.getElementById('selProyecto').classList.add('hidden');
+                window.clienteSeleccionado = null;
+                window.proyectoSeleccionado = null;
                 document.getElementById('tipoGestion').dispatchEvent(new Event('change'));
             } else {
                 throw new Error('Error en servidor');
             }
         } catch (err) {
-            Swal.fire('Error', 'No se pudo enviar. Verifica tu conexión.', 'error');
+            Swal.fire('Error de Conexión', 'No se pudo contactar con el servidor. Inténtalo de nuevo.', 'error');
         } finally {
             btn.disabled = false;
-            btn.innerText = 'TRANSMITIR DATOS';
+            btn.innerText = 'TRANSMITIR DATOS AL SISTEMA';
         }
     });
   </script>
