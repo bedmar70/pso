@@ -1,251 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Registrar Incidencia</title>
+  <meta charset="UTF-8">
+  <title>Registrar incidencia</title>
 
-  <!-- Google Font -->
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#2563eb',
+              600: '#1d4ed8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Icons -->
-  <link href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css" rel="stylesheet">
-
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-dark: #1e40af;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --radius: 14px;
-      --shadow: 0 10px 25px rgba(0,0,0,0.06);
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-
-    body {
-      margin: 0;
-      background: linear-gradient(180deg, #f1f5f9, #e2e8f0);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      color: var(--text);
-    }
-
-    .container {
-      width: 100%;
-      max-width: 820px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 32px;
-    }
-
-    h1 {
-      font-size: 1.6rem;
-      margin: 0 0 8px;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      margin-bottom: 32px;
-      font-size: 0.95rem;
-    }
-
-    .form-group {
-      margin-bottom: 22px;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      font-size: 0.9rem;
-    }
-
-    .hint {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    input[type="text"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      font-size: 0.95rem;
-      transition: border 0.2s, box-shadow 0.2s;
-    }
-
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .file-input {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      text-align: center;
-      cursor: pointer;
-      transition: border 0.2s, background 0.2s;
-    }
-
-    .file-input:hover {
-      border-color: var(--primary);
-      background: #f8fafc;
-    }
-
-    .file-input input {
-      display: none;
-    }
-
-    .actions {
-      margin-top: 32px;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    button {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 14px 26px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    button:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
-
-    .status {
-      margin-top: 20px;
-      font-size: 0.9rem;
-      display: none;
-    }
-
-    .status.success {
-      color: #16a34a;
-    }
-
-    .status.error {
-      color: #dc2626;
-    }
-
-    @media (max-width: 700px) {
-      .row {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
 </head>
 
-<body>
+<body class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 flex items-center justify-center p-6">
 
-<div class="container">
-  <div class="card">
-    <h1>Registrar incidencia</h1>
-    <div class="subtitle">
-      Selecciona el proyecto y describe claramente la incidencia para su correcta gestión.
-    </div>
+  <div class="w-full max-w-3xl">
+    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-2xl p-10">
 
-    <form id="incidenceForm">
-
-      <!-- Proyecto -->
-      <div class="form-group">
-        <label>Proyecto</label>
-        <div class="hint">Selecciona el proyecto donde registrar la incidencia</div>
-        <select id="projectSelect" name="list_id" required>
-          <option value="">Cargando proyectos…</option>
-        </select>
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-slate-900">Registrar incidencia</h1>
+        <p class="text-slate-500 mt-1 text-sm">
+          Selecciona el proyecto y describe claramente la incidencia.
+        </p>
       </div>
 
-      <!-- Extracto -->
-      <div class="form-group">
-        <label>Extracto de la incidencia</label>
-        <div class="hint">Resumen breve. Será el nombre de la tarea.</div>
-        <input type="text" name="extracto" required placeholder="Ej: Encimera dañada en esquina izquierda">
-      </div>
+      <form id="incidenceForm" class="space-y-6">
 
-      <!-- Detalle -->
-      <div class="form-group">
-        <label>Detalle de la incidencia</label>
-        <div class="hint">Describe el problema con todo el contexto necesario.</div>
-        <textarea name="detalle" placeholder="Describe aquí la incidencia con el mayor detalle posible…"></textarea>
-      </div>
-
-      <div class="row">
-        <!-- Prioridad -->
-        <div class="form-group">
-          <label>Prioridad</label>
-          <select name="priority">
-            <option value="">Normal</option>
-            <option value="1">Urgente</option>
-            <option value="2">Alta</option>
-            <option value="3">Media</option>
-            <option value="4">Baja</option>
+        <!-- Proyecto -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Proyecto
+          </label>
+          <select
+            id="projectSelect"
+            name="list_id"
+            required
+            class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500"
+          >
+            <option>Cargando proyectos…</option>
           </select>
         </div>
 
-        <!-- Adjuntos -->
-        <div class="form-group">
-          <label>Adjuntos</label>
-          <label class="file-input">
-            <i class="ph ph-paperclip"></i> Añadir archivos
-            <input type="file" name="attachments" multiple>
+        <!-- Extracto -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Extracto de la incidencia
           </label>
+          <input
+            type="text"
+            name="extracto"
+            required
+            placeholder="Ej: Encimera dañada en esquina izquierda"
+            class="w-full rounded-xl border-slate-300 px-4 py-3 text-lg font-medium focus:border-brand-500 focus:ring-brand-500"
+          >
         </div>
-      </div>
 
-      <div class="actions">
-        <button type="submit">
-          <i class="ph ph-paper-plane-tilt"></i>
-          Enviar incidencia
-        </button>
-      </div>
+        <!-- Detalle -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Detalle de la incidencia
+          </label>
+          <textarea
+            name="detalle"
+            rows="5"
+            placeholder="Describe aquí la incidencia con todo el contexto necesario…"
+            class="w-full rounded-xl border-slate-300 px-4 py-3 focus:border-brand-500 focus:ring-brand-500"
+          ></textarea>
+        </div>
 
-      <div id="status" class="status"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-      
-    </form>
+          <!-- Prioridad -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">
+              Prioridad
+            </label>
+            <select
+              name="priority"
+              class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500"
+            >
+              <option value="">Normal</option>
+              <option value="1">Urgente</option>
+              <option value="2">Alta</option>
+              <option value="3">Media</option>
+              <option value="4">Baja</option>
+            </select>
+          </div>
+
+          <!-- Adjuntos -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">
+              Adjuntos
+            </label>
+            <label class="flex flex-col items-center justify-center gap-2 px-4 py-6 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-brand-500 transition">
+              <span class="text-slate-500 text-sm">
+                Arrastra archivos o haz clic
+              </span>
+              <input
+                type="file"
+                name="attachments"
+                multiple
+                class="hidden"
+              >
+            </label>
+          </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-6 flex justify-end">
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition disabled:opacity-50"
+          >
+            Enviar incidencia
+          </button>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="text-sm hidden"></div>
+
+      </form>
+    </div>
   </div>
-</div>
 
 <script>
   const SEARCH_PROJECTS_URL = 'https://TU_N8N/webhook/buscar-proyectos';
@@ -256,7 +155,6 @@
   const statusEl = document.getElementById('status');
   const submitBtn = form.querySelector('button');
 
-  // Cargar proyectos
   fetch(SEARCH_PROJECTS_URL)
     .then(res => res.json())
     .then(data => {
@@ -269,17 +167,16 @@
       });
     })
     .catch(() => {
-      projectSelect.innerHTML = '<option value="">Error cargando proyectos</option>';
+      projectSelect.innerHTML = '<option>Error cargando proyectos</option>';
     });
 
-  // Enviar formulario
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     submitBtn.disabled = true;
-    statusEl.style.display = 'block';
-    statusEl.className = 'status';
+    statusEl.className = 'text-sm text-slate-500';
     statusEl.textContent = 'Enviando incidencia…';
+    statusEl.classList.remove('hidden');
 
     const formData = new FormData(form);
 
@@ -291,13 +188,13 @@
 
       if (!res.ok) throw new Error();
 
-      statusEl.classList.add('success');
+      statusEl.className = 'text-sm text-green-600';
       statusEl.textContent = 'Incidencia registrada correctamente.';
       form.reset();
 
-    } catch (err) {
-      statusEl.classList.add('error');
-      statusEl.textContent = 'Error al registrar la incidencia. Inténtalo de nuevo.';
+    } catch {
+      statusEl.className = 'text-sm text-red-600';
+      statusEl.textContent = 'Error al registrar la incidencia.';
     } finally {
       submitBtn.disabled = false;
     }
