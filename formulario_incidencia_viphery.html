@@ -2,12 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Registrar incidencia</title>
+  <title>PSO · Registrar Incidencia</title>
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Tailwind config -->
   <script>
     tailwind.config = {
       theme: {
@@ -16,166 +15,187 @@
             sans: ['Inter', 'system-ui', 'sans-serif'],
           },
           colors: {
-            brand: {
-              50: '#eff6ff',
-              500: '#2563eb',
-              600: '#1d4ed8'
-            }
+            neon: '#22d3ee',
+            bgdark: '#0b1220',
+            bgpanel: '#0f172a'
+          },
+          boxShadow: {
+            neon: '0 0 0 1px rgba(34,211,238,.3), 0 0 25px rgba(34,211,238,.15)'
           }
         }
       }
     }
   </script>
 
-  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 flex items-center justify-center p-6">
+<body class="min-h-screen bg-gradient-to-br from-bgdark via-black to-bgdark text-slate-200">
 
-  <div class="w-full max-w-3xl">
-    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-2xl p-10">
+<div class="max-w-4xl mx-auto px-6 py-10">
 
-      <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-slate-900">Registrar incidencia</h1>
-        <p class="text-slate-500 mt-1 text-sm">
-          Selecciona el proyecto y describe claramente la incidencia.
-        </p>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-10">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-wide text-cyan-400">
+        PSO SYSTEM
+      </h1>
+      <p class="text-xs text-slate-400 tracking-widest mt-1">
+        REGISTRO DE INCIDENCIAS
+      </p>
+    </div>
+  </div>
+
+  <!-- Panel -->
+  <div class="bg-bgpanel/80 backdrop-blur rounded-2xl shadow-xl border border-cyan-500/20 p-8">
+
+    <form id="incidenceForm" class="space-y-8">
+
+      <!-- Proyecto autocomplete -->
+      <div class="relative">
+        <label class="block text-xs uppercase tracking-widest text-cyan-400 mb-2">
+          Proyecto
+        </label>
+        <input
+          type="text"
+          id="projectInput"
+          placeholder="Empieza a escribir para buscar…"
+          class="w-full bg-black/40 border border-slate-700 rounded-xl px-4 py-3 focus:border-cyan-400 focus:ring-0 outline-none"
+        >
+        <input type="hidden" name="list_id" id="projectId">
+
+        <div
+          id="projectResults"
+          class="absolute z-10 mt-2 w-full bg-black border border-slate-700 rounded-xl overflow-hidden hidden"
+        ></div>
       </div>
 
-      <form id="incidenceForm" class="space-y-6">
+      <!-- Extracto -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-cyan-400 mb-2">
+          Extracto de la incidencia
+        </label>
+        <input
+          type="text"
+          name="extracto"
+          required
+          class="w-full bg-black/40 border border-slate-700 rounded-xl px-4 py-3 text-lg focus:border-cyan-400 outline-none"
+        >
+      </div>
 
-        <!-- Proyecto -->
+      <!-- Detalle -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-cyan-400 mb-2">
+          Detalle de la incidencia
+        </label>
+        <textarea
+          name="detalle"
+          rows="5"
+          class="w-full bg-black/40 border border-slate-700 rounded-xl px-4 py-3 focus:border-cyan-400 outline-none"
+        ></textarea>
+      </div>
+
+      <!-- Prioridad + Adjuntos -->
+      <div class="grid md:grid-cols-2 gap-6">
+
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
-            Proyecto
+          <label class="block text-xs uppercase tracking-widest text-cyan-400 mb-2">
+            Prioridad
           </label>
           <select
-            id="projectSelect"
-            name="list_id"
-            required
-            class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500"
+            name="priority"
+            class="w-full bg-black/40 border border-slate-700 rounded-xl px-4 py-3 focus:border-cyan-400"
           >
-            <option>Cargando proyectos…</option>
+            <option value="">Normal</option>
+            <option value="1">Urgente</option>
+            <option value="2">Alta</option>
+            <option value="3">Media</option>
+            <option value="4">Baja</option>
           </select>
         </div>
 
-        <!-- Extracto -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
-            Extracto de la incidencia
+          <label class="block text-xs uppercase tracking-widest text-cyan-400 mb-2">
+            Adjuntos
           </label>
-          <input
-            type="text"
-            name="extracto"
-            required
-            placeholder="Ej: Encimera dañada en esquina izquierda"
-            class="w-full rounded-xl border-slate-300 px-4 py-3 text-lg font-medium focus:border-brand-500 focus:ring-brand-500"
-          >
-        </div>
-
-        <!-- Detalle -->
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
-            Detalle de la incidencia
+          <label class="flex flex-col items-center justify-center h-24 border border-dashed border-slate-600 rounded-xl cursor-pointer hover:border-cyan-400 hover:shadow-neon transition">
+            <span class="text-sm text-slate-400">
+              Click o arrastra archivos
+            </span>
+            <input type="file" name="attachments" multiple class="hidden">
           </label>
-          <textarea
-            name="detalle"
-            rows="5"
-            placeholder="Describe aquí la incidencia con todo el contexto necesario…"
-            class="w-full rounded-xl border-slate-300 px-4 py-3 focus:border-brand-500 focus:ring-brand-500"
-          ></textarea>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      </div>
 
-          <!-- Prioridad -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
-              Prioridad
-            </label>
-            <select
-              name="priority"
-              class="w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500"
-            >
-              <option value="">Normal</option>
-              <option value="1">Urgente</option>
-              <option value="2">Alta</option>
-              <option value="3">Media</option>
-              <option value="4">Baja</option>
-            </select>
-          </div>
+      <!-- Actions -->
+      <div class="flex justify-end pt-6">
+        <button
+          type="submit"
+          class="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-8 py-3 rounded-xl shadow-lg transition"
+        >
+          Registrar incidencia
+        </button>
+      </div>
 
-          <!-- Adjuntos -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
-              Adjuntos
-            </label>
-            <label class="flex flex-col items-center justify-center gap-2 px-4 py-6 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-brand-500 transition">
-              <span class="text-slate-500 text-sm">
-                Arrastra archivos o haz clic
-              </span>
-              <input
-                type="file"
-                name="attachments"
-                multiple
-                class="hidden"
-              >
-            </label>
-          </div>
+      <div id="status" class="text-sm hidden"></div>
 
-        </div>
-
-        <!-- Actions -->
-        <div class="pt-6 flex justify-end">
-          <button
-            type="submit"
-            class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition disabled:opacity-50"
-          >
-            Enviar incidencia
-          </button>
-        </div>
-
-        <!-- Status -->
-        <div id="status" class="text-sm hidden"></div>
-
-      </form>
-    </div>
+    </form>
   </div>
+</div>
 
 <script>
   const SEARCH_PROJECTS_URL = 'https://TU_N8N/webhook/buscar-proyectos';
   const CREATE_INCIDENCE_URL = 'https://TU_N8N/webhook/crear-incidencia';
 
-  const projectSelect = document.getElementById('projectSelect');
+  const projectInput = document.getElementById('projectInput');
+  const projectResults = document.getElementById('projectResults');
+  const projectIdInput = document.getElementById('projectId');
   const form = document.getElementById('incidenceForm');
   const statusEl = document.getElementById('status');
-  const submitBtn = form.querySelector('button');
 
-  fetch(SEARCH_PROJECTS_URL)
-    .then(res => res.json())
-    .then(data => {
-      projectSelect.innerHTML = '<option value="">Selecciona un proyecto</option>';
-      data.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item.json?.id || item.id;
-        opt.textContent = item.json?.name || item.name;
-        projectSelect.appendChild(opt);
+  let debounce;
+
+  projectInput.addEventListener('input', () => {
+    clearTimeout(debounce);
+    const query = projectInput.value.trim();
+    if (!query) {
+      projectResults.classList.add('hidden');
+      return;
+    }
+
+    debounce = setTimeout(async () => {
+      const res = await fetch(SEARCH_PROJECTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
       });
-    })
-    .catch(() => {
-      projectSelect.innerHTML = '<option>Error cargando proyectos</option>';
-    });
 
-  form.addEventListener('submit', async (e) => {
+      const data = await res.json();
+      projectResults.innerHTML = '';
+      projectResults.classList.remove('hidden');
+
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.textContent = item.json?.name || item.name;
+        div.className = 'px-4 py-2 hover:bg-cyan-500/20 cursor-pointer';
+        div.onclick = () => {
+          projectInput.value = div.textContent;
+          projectIdInput.value = item.json?.id || item.id;
+          projectResults.classList.add('hidden');
+        };
+        projectResults.appendChild(div);
+      });
+    }, 300);
+  });
+
+  form.addEventListener('submit', async e => {
     e.preventDefault();
 
-    submitBtn.disabled = true;
-    statusEl.className = 'text-sm text-slate-500';
     statusEl.textContent = 'Enviando incidencia…';
+    statusEl.className = 'text-sm text-cyan-400';
     statusEl.classList.remove('hidden');
 
     const formData = new FormData(form);
@@ -188,15 +208,13 @@
 
       if (!res.ok) throw new Error();
 
-      statusEl.className = 'text-sm text-green-600';
       statusEl.textContent = 'Incidencia registrada correctamente.';
+      statusEl.className = 'text-sm text-green-400';
       form.reset();
 
     } catch {
-      statusEl.className = 'text-sm text-red-600';
       statusEl.textContent = 'Error al registrar la incidencia.';
-    } finally {
-      submitBtn.disabled = false;
+      statusEl.className = 'text-sm text-red-400';
     }
   });
 </script>
