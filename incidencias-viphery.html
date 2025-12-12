@@ -1,197 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Viphery · Alta de Incidencia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#00f5d4',
+            darkbg: '#0b0f19',
+            cardbg: '#121826'
+          },
+          boxShadow: {
+            neon: '0 0 0 1px rgba(0,245,212,0.25), 0 0 28px rgba(0,245,212,0.08)'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-darkbg text-gray-200 min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-3xl bg-cardbg rounded-2xl shadow-xl p-8 space-y-8">
+
+    <!-- HEADER -->
+    <div class="border-b border-gray-700 pb-4">
+      <h1 class="text-2xl font-bold text-primary">Viphery</h1>
+      <p class="text-sm text-gray-400">Alta de Incidencia</p>
+    </div>
+
+    <!-- FORM -->
+    <form id="incidenciaForm" class="space-y-6" enctype="multipart/form-data">
+
+      <!-- Hidden list_id -->
+      <input type="hidden" name="list_id" id="list_id" />
+
+      <!-- PROYECTO -->
+      <div class="relative">
+        <label class="block text-sm mb-1">Proyecto (ClickUp)</label>
+        <input
+          type="text"
+          id="projectSearch"
+          autocomplete="off"
+          required
+          placeholder="Empieza a escribir para buscar proyectos..."
+          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:ring-primary"
+        />
+
+        <div
+          id="projectDropdown"
+          class="hidden absolute z-20 mt-2 w-full rounded-xl border border-gray-700 bg-black/60 backdrop-blur shadow-neon overflow-hidden"
+        >
+          <div id="projectResults" class="max-h-64 overflow-auto"></div>
+          <div id="projectEmpty" class="hidden px-4 py-3 text-sm text-gray-400">
+            No se encontraron proyectos.
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRACTO -->
+      <div>
+        <label class="block text-sm mb-1">Extracto de la incidencia</label>
+        <input
+          type="text"
+          name="taskName"
+          required
+          placeholder="Ej. Puertas dañadas en montaje"
+          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:ring-primary"
+        />
+      </div>
+
+      <!-- DESCRIPCIÓN -->
+      <div>
+        <label class="block text-sm mb-1">Descripción detallada</label>
+        <textarea
+          name="description"
+          rows="6"
+          placeholder="Describe la incidencia con el máximo detalle posible…"
+          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:ring-primary"
+        ></textarea>
+      </div>
+
+      <!-- PRIORIDAD -->
+      <div>
+        <label class="block text-sm mb-1">Prioridad</label>
+        <select
+          name="priority"
+          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:ring-primary"
+        >
+          <option value="4">Baja</option>
+          <option value="3" selected>Normal</option>
+          <option value="2">Alta</option>
+          <option value="1">Urgente</option>
+        </select>
+      </div>
+
+      <!-- ADJUNTOS -->
+      <div>
+        <label class="block text-sm mb-2">Adjuntar archivos</label>
+
+        <label
+          for="files"
+          class="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-primary hover:shadow-neon transition"
+        >
+          <span class="text-sm text-gray-400">
+            Haz clic o arrastra archivos aquí
+          </span>
+        </label>
+
+        <!-- input file REAL -->
+        <input id="files" type="file" multiple class="hidden" />
+
+        <!-- listado -->
+        <ul id="fileList" class="mt-4 space-y-2 text-sm"></ul>
+      </div>
+
+      <!-- SUBMIT -->
+      <div>
+        <button
+          id="submitBtn"
+          type="submit"
+          class="w-full bg-primary text-black font-semibold py-3 rounded-xl hover:opacity-90 transition"
+        >
+          Enviar incidencia
+        </button>
+
+        <p id="statusMsg" class="mt-3 text-sm hidden"></p>
+      </div>
+
+    </form>
+  </div>
+
 <script>
-  // ================== WEBHOOKS ==================
-  const SEARCH_PROJECTS_URL =
-    'https://n8n.escueladeefectividad.com/webhook/viphery-buscar-proyectos';
-  const CREATE_INCIDENCE_URL =
-    'https://n8n.escueladeefectividad.com/webhook/viphery-crear-incidencia';
+/* ================= CONFIG ================= */
+const SEARCH_PROJECTS_URL =
+  'https://n8n.escueladeefectividad.com/webhook/viphery-buscar-proyectos';
+const CREATE_INCIDENCE_URL =
+  'https://n8n.escueladeefectividad.com/webhook/viphery-crear-incidencia';
 
-  // ================== ELEMENTOS ==================
-  const form = document.getElementById('incidenciaForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const statusMsg = document.getElementById('statusMsg');
+/* ================= ELEMENTOS ================= */
+const form = document.getElementById('incidenciaForm');
+const submitBtn = document.getElementById('submitBtn');
+const statusMsg = document.getElementById('statusMsg');
 
-  const projectSearch = document.getElementById('projectSearch');
-  const listIdInput = document.getElementById('list_id');
-  const dropdown = document.getElementById('projectDropdown');
-  const results = document.getElementById('projectResults');
-  const empty = document.getElementById('projectEmpty');
+const projectSearch = document.getElementById('projectSearch');
+const listIdInput = document.getElementById('list_id');
+const dropdown = document.getElementById('projectDropdown');
+const results = document.getElementById('projectResults');
+const empty = document.getElementById('projectEmpty');
 
-  const fileInput = document.getElementById('files');
-  const fileList = document.getElementById('fileList');
+const fileInput = document.getElementById('files');
+const fileList = document.getElementById('fileList');
 
-  // ================== UTIL ==================
-  function escapeHtml(str) {
-    return String(str)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
+/* ================= UTILS ================= */
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
 
-  // ================== ADJUNTOS ==================
-  let filesBuffer = [];
+/* ================= ADJUNTOS ================= */
+let filesBuffer = [];
 
-  fileInput.addEventListener('change', () => {
-    for (const f of fileInput.files) filesBuffer.push(f);
-    fileInput.value = '';
-    renderFiles();
+fileInput.addEventListener('change', () => {
+  for (const f of fileInput.files) filesBuffer.push(f);
+  fileInput.value = '';
+  renderFiles();
+});
+
+function renderFiles() {
+  fileList.innerHTML = '';
+  filesBuffer.forEach((file, i) => {
+    const li = document.createElement('li');
+    li.className =
+      'flex justify-between items-center bg-darkbg border border-gray-700 rounded px-3 py-2';
+    li.innerHTML = `
+      <span class="truncate">📎 ${escapeHtml(file.name)}</span>
+      <button type="button" class="text-red-400">✕</button>
+    `;
+    li.querySelector('button').onclick = () => {
+      filesBuffer.splice(i, 1);
+      renderFiles();
+    };
+    fileList.appendChild(li);
   });
+}
 
-  function renderFiles() {
-    fileList.innerHTML = '';
-    filesBuffer.forEach((file, i) => {
-      const li = document.createElement('li');
-      li.className =
-        'flex justify-between items-center bg-darkbg border border-gray-700 rounded px-3 py-2';
-      li.innerHTML = `
-        <span class="truncate">📎 ${escapeHtml(file.name)}</span>
-        <button type="button" class="text-red-400">✕</button>
-      `;
-      li.querySelector('button').onclick = () => {
-        filesBuffer.splice(i, 1);
-        renderFiles();
-      };
-      fileList.appendChild(li);
-    });
+/* ================= ROLLUP PROYECTOS ================= */
+let debounceTimer = null;
+let lastQuery = '';
+
+projectSearch.addEventListener('input', () => {
+  listIdInput.value = '';
+  scheduleSearch(projectSearch.value);
+});
+
+projectSearch.addEventListener('focus', () => {
+  if (projectSearch.value.trim().length >= 1) {
+    scheduleSearch(projectSearch.value, true);
   }
+});
 
-  // ================== ROLLUP PROYECTOS ==================
-  let debounceTimer = null;
-  let lastQuery = '';
+document.addEventListener('click', (e) => {
+  const inside =
+    dropdown.contains(e.target) || projectSearch.contains(e.target);
+  if (!inside) dropdown.classList.add('hidden');
+});
 
-  projectSearch.addEventListener('input', () => {
-    listIdInput.value = '';
-    scheduleSearch(projectSearch.value);
-  });
-
-  projectSearch.addEventListener('focus', () => {
-    if (projectSearch.value.trim().length >= 1) {
-      scheduleSearch(projectSearch.value, true);
-    }
-  });
-
-  document.addEventListener('click', (e) => {
-    const inside =
-      dropdown.contains(e.target) || projectSearch.contains(e.target);
-    if (!inside) hideDropdown();
-  });
-
-  function scheduleSearch(q, immediate = false) {
-    const query = (q || '').trim();
-    if (!query) {
-      hideDropdown();
-      return;
-    }
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(
-      () => searchProjects(query),
-      immediate ? 0 : 250
-    );
-  }
-
-  async function searchProjects(query) {
-    if (query === lastQuery) return;
-    lastQuery = query;
-
-    showDropdown();
-    results.innerHTML =
-      '<div class="px-4 py-3 text-sm text-gray-400">Buscando...</div>';
-    empty.classList.add('hidden');
-
-    try {
-      const res = await fetch(SEARCH_PROJECTS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
-      });
-
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      renderProjects(Array.isArray(data) ? data : []);
-    } catch {
-      results.innerHTML =
-        '<div class="px-4 py-3 text-sm text-red-400">Error consultando proyectos</div>';
-    }
-  }
-
-  function renderProjects(list) {
-    results.innerHTML = '';
-    if (!list.length) {
-      empty.classList.remove('hidden');
-      return;
-    }
-    empty.classList.add('hidden');
-
-    list.forEach((item) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className =
-        'w-full text-left px-4 py-3 hover:bg-primary/10 border-b border-gray-800 last:border-b-0';
-      btn.innerHTML = `
-        <div class="text-sm text-gray-100">${escapeHtml(item.name)}</div>
-        <div class="text-xs text-gray-500">ID: ${escapeHtml(item.id)}</div>
-      `;
-      btn.onclick = () => {
-        projectSearch.value = item.name;
-        listIdInput.value = item.id;
-        hideDropdown();
-      };
-      results.appendChild(btn);
-    });
-  }
-
-  function showDropdown() {
-    dropdown.classList.remove('hidden');
-  }
-
-  function hideDropdown() {
+function scheduleSearch(q, immediate = false) {
+  const query = (q || '').trim();
+  if (!query) {
     dropdown.classList.add('hidden');
+    return;
+  }
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(
+    () => searchProjects(query),
+    immediate ? 0 : 250
+  );
+}
+
+async function searchProjects(query) {
+  if (query === lastQuery) return;
+  lastQuery = query;
+
+  dropdown.classList.remove('hidden');
+  results.innerHTML =
+    '<div class="px-4 py-3 text-sm text-gray-400">Buscando...</div>';
+  empty.classList.add('hidden');
+
+  try {
+    const res = await fetch(SEARCH_PROJECTS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    renderProjects(Array.isArray(data) ? data : []);
+  } catch {
+    results.innerHTML =
+      '<div class="px-4 py-3 text-sm text-red-400">Error consultando proyectos</div>';
+  }
+}
+
+function renderProjects(list) {
+  results.innerHTML = '';
+  if (!list.length) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  list.forEach(item => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className =
+      'w-full text-left px-4 py-3 hover:bg-primary/10 border-b border-gray-800 last:border-b-0';
+    btn.innerHTML = `
+      <div class="text-sm text-gray-100">${escapeHtml(item.name)}</div>
+      <div class="text-xs text-gray-500">ID: ${escapeHtml(item.id)}</div>
+    `;
+    btn.onclick = () => {
+      projectSearch.value = item.name;
+      listIdInput.value = item.id;
+      dropdown.classList.add('hidden');
+    };
+    results.appendChild(btn);
+  });
+}
+
+/* ================= SUBMIT ================= */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!listIdInput.value) {
+    statusMsg.textContent =
+      'Selecciona un proyecto del desplegable.';
+    statusMsg.className = 'mt-3 text-sm text-red-400';
+    return;
   }
 
-  // ================== SUBMIT ==================
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  submitBtn.disabled = true;
+  statusMsg.textContent = 'Enviando incidencia...';
+  statusMsg.className = 'mt-3 text-sm text-gray-400';
 
-    if (!listIdInput.value) {
-      statusMsg.textContent =
-        'Selecciona un proyecto del desplegable.';
-      statusMsg.className = 'mt-3 text-sm text-red-400';
-      projectSearch.focus();
-      return;
-    }
+  const fd = new FormData(form);
+  filesBuffer.forEach(f => fd.append('file', f));
 
-    submitBtn.disabled = true;
-    statusMsg.textContent = 'Enviando incidencia...';
-    statusMsg.className = 'mt-3 text-sm text-gray-400';
+  try {
+    const res = await fetch(CREATE_INCIDENCE_URL, {
+      method: 'POST',
+      body: fd
+    });
+    if (!res.ok) throw new Error();
 
-    const fd = new FormData(form);
-    filesBuffer.forEach((f) => fd.append('file', f));
+    statusMsg.textContent = '✅ Incidencia enviada correctamente';
+    statusMsg.className = 'mt-3 text-sm text-green-400';
 
-    try {
-      const res = await fetch(CREATE_INCIDENCE_URL, {
-        method: 'POST',
-        body: fd,
-      });
-      if (!res.ok) throw new Error();
+    setTimeout(() => {
+      form.reset();
+      filesBuffer = [];
+      renderFiles();
+      listIdInput.value = '';
+      lastQuery = '';
+      dropdown.classList.add('hidden');
+      statusMsg.textContent = '';
+    }, 2500);
 
-      statusMsg.textContent = '✅ Incidencia enviada correctamente';
-      statusMsg.className = 'mt-3 text-sm text-green-400';
-
-      setTimeout(() => {
-        form.reset();
-        filesBuffer = [];
-        renderFiles();
-        listIdInput.value = '';
-        lastQuery = '';
-        hideDropdown();
-        statusMsg.textContent = '';
-      }, 2500);
-    } catch {
-      statusMsg.textContent = '❌ Error al enviar la incidencia';
-      statusMsg.className = 'mt-3 text-sm text-red-400';
-    } finally {
-      submitBtn.disabled = false;
-    }
-  });
+  } catch {
+    statusMsg.textContent =
+      '❌ Error al enviar la incidencia';
+    statusMsg.className = 'mt-3 text-sm text-red-400';
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
 </script>
+</body>
+</html>
