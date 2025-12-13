@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Viphery · Alta de Medición</title>
+  <title>Viphery · Alta de Medición Revision 13/12/2025 V.1.0.</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Tailwind CDN -->
@@ -35,383 +35,47 @@
       <p class="text-sm text-gray-400">Alta de Medición</p>
     </div>
 
-    <!-- FORM -->
     <form id="medicionForm" class="space-y-6" enctype="multipart/form-data">
-      <!-- Hidden: list_id -->
       <input type="hidden" name="list_id" id="list_id" value="" />
 
-      <!-- PROYECTO (rollup) -->
+      <!-- PROYECTO -->
       <div class="relative">
         <label class="block text-sm mb-1">Proyecto (lista de ClickUp)</label>
-        <input
-          type="text"
-          id="projectSearch"
-          name="projectSearch"
-          autocomplete="off"
-          required
+        <input id="projectSearch" autocomplete="off" required
           placeholder="Empieza a escribir para buscar proyectos..."
-          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:ring-2 focus:ring-primary"/>
 
-        <!-- dropdown -->
-        <div
-          id="projectDropdown"
-          class="hidden absolute z-20 mt-2 w-full rounded-xl border border-gray-700 bg-black/60 backdrop-blur shadow-neon overflow-hidden"
-        >
+        <div id="projectDropdown"
+          class="hidden absolute z-20 mt-2 w-full rounded-xl border border-gray-700 bg-black/60 backdrop-blur shadow-neon">
           <div id="projectResults" class="max-h-64 overflow-auto"></div>
           <div id="projectEmpty" class="hidden px-4 py-3 text-sm text-gray-400">
             No se encontraron proyectos.
           </div>
         </div>
-
-        <p id="projectHint" class="mt-2 text-xs text-gray-500">
-          Selecciona un proyecto del desplegable. (Esto define dónde se crea la medición)
-        </p>
       </div>
 
-      <!-- NOMBRE / EXTRACTO -->
-      <div>
-        <label class="block text-sm mb-1">Nombre de la medición (extracto)</label>
-        <input
-          type="text"
-          name="taskName"
-          id="taskName"
-          required
-          placeholder="Ej. Medición cocina · Portal + escalera"
-          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-      </div>
+      <!-- TEXTO -->
+      <input id="taskName" required placeholder="Nombre de la medición"
+        class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2"/>
 
-      <!-- DESCRIPCIÓN -->
-      <div>
-        <label class="block text-sm mb-1">Descripción / notas (se guarda en Content)</label>
-        <textarea
-          name="description"
-          id="description"
-          rows="5"
-          placeholder="Describe el contexto de la medición, zonas, incidencias, etc…"
-          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        ></textarea>
-      </div>
+      <textarea id="description" rows="4" placeholder="Descripción / notas"
+        class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2"></textarea>
 
-      <!-- ELECTRODOMÉSTICOS -->
-      <div>
-        <label class="block text-sm mb-1">Electrodomésticos (campo ClickUp: Electrodomesticos)</label>
-        <textarea
-          name="electrodomesticos"
-          id="electrodomesticos"
-          rows="4"
-          placeholder="Lista de electrodomésticos / marcas / medidas relevantes…"
-          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        ></textarea>
-      </div>
+      <textarea id="electrodomesticos" rows="3" placeholder="Electrodomésticos"
+        class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2"></textarea>
 
-      <!-- OBSERVACIONES -->
-      <div>
-        <label class="block text-sm mb-1">Observaciones (campo ClickUp: Observaciones Medicion)</label>
-        <textarea
-          name="observaciones"
-          id="observaciones"
-          rows="4"
-          placeholder="Observaciones adicionales…"
-          class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-        ></textarea>
-      </div>
+      <textarea id="observaciones" rows="3" placeholder="Observaciones"
+        class="w-full rounded-lg bg-darkbg border border-gray-700 px-4 py-2"></textarea>
 
-      <!-- FOTOS (attachments normales) -->
+      <!-- FOTOS -->
       <div>
-        <label class="block text-sm mb-2">Fotos (se adjuntan a la tarea)</label>
-
-        <label
-          for="photos"
-          class="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-primary hover:shadow-neon transition"
-        >
+        <label class="block text-sm mb-2">Fotos</label>
+        <label for="photos"
+          class="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer">
           <span class="text-sm text-gray-400">Haz clic o arrastra fotos aquí</span>
         </label>
-
-        <input
-          id="photos"
-          type="file"
-          name="photos[]"
-          accept="image/*"
-          multiple
-          class="hidden"
-        />
-
-        <ul id="photosList" class="mt-4 space-y-2 text-sm text-gray-300"></ul>
+        <input id="photos" type="file" accept="image/*" multiple class="hidden"/>
+        <ul id="photosList" class="mt-4 space-y-2 text-sm"></ul>
       </div>
 
-      <!-- HOJA DE MEDICIÓN (archivo/s técnico/s) -->
-      <div>
-        <label class="block text-sm mb-2">Hoja de medición (archivo técnico)</label>
-
-        <label
-          for="hoja"
-          class="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-primary hover:shadow-neon transition"
-        >
-          <span class="text-sm text-gray-400">Haz clic o arrastra la hoja de medición aquí</span>
-        </label>
-
-        <input
-          id="hoja"
-          type="file"
-          name="hoja_medicion[]"
-          multiple
-          class="hidden"
-        />
-
-        <ul id="hojaList" class="mt-4 space-y-2 text-sm text-gray-300"></ul>
-      </div>
-
-      <!-- BOTÓN -->
-      <div class="pt-2">
-        <button
-          id="submitBtn"
-          type="submit"
-          class="w-full bg-primary text-black font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Enviar medición
-        </button>
-
-        <p id="statusMsg" class="mt-3 text-sm text-gray-400 hidden"></p>
-      </div>
-    </form>
-  </div>
-
-  <script>
-    // Webhooks
-    // ✅ Reutiliza el mismo que ya te funciona para buscar proyectos
-    const SEARCH_PROJECTS_URL = 'https://n8n.escueladeefectividad.com/webhook/viphery-buscar-proyectos';
-
-    // ✅ Nuevo webhook para crear medición (lo crea el workflow JSON)
-    const CREATE_MEDICION_URL = 'https://n8n.escueladeefectividad.com/webhook/viphery-crear-medicion';
-
-    // ---------- helpers ----------
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function bytesToHuman(bytes) {
-      const units = ['B','KB','MB','GB'];
-      let i = 0;
-      let n = bytes;
-      while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
-      return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-    }
-
-    // ---------- Adjuntos con eliminación (sin romper el FormData) ----------
-    // Guardamos selección en memoria para poder eliminar elementos individualmente.
-    let photosStore = [];
-    let hojaStore = [];
-
-    const photosInput = document.getElementById('photos');
-    const hojaInput = document.getElementById('hoja');
-    const photosList = document.getElementById('photosList');
-    const hojaList = document.getElementById('hojaList');
-
-    photosInput.addEventListener('change', () => {
-      // añadimos (no sustituimos) para permitir varias tandas
-      photosStore = photosStore.concat(Array.from(photosInput.files));
-      photosInput.value = '';
-      renderFiles(photosStore, photosList, (idx) => {
-        photosStore.splice(idx, 1);
-        renderFiles(photosStore, photosList, arguments.callee);
-      });
-    });
-
-    hojaInput.addEventListener('change', () => {
-      hojaStore = hojaStore.concat(Array.from(hojaInput.files));
-      hojaInput.value = '';
-      renderFiles(hojaStore, hojaList, (idx) => {
-        hojaStore.splice(idx, 1);
-        renderFiles(hojaStore, hojaList, arguments.callee);
-      });
-    });
-
-    function renderFiles(store, ul, onRemove) {
-      ul.innerHTML = '';
-      store.forEach((file, idx) => {
-        const li = document.createElement('li');
-        li.className = 'flex items-center justify-between bg-darkbg border border-gray-700 rounded-lg px-3 py-2 gap-3';
-
-        const left = document.createElement('div');
-        left.className = 'min-w-0';
-        left.innerHTML = `<div class="truncate max-w-[520px]">📎 ${escapeHtml(file.name)}</div>
-                          <div class="text-xs text-gray-400">${bytesToHuman(file.size)}</div>`;
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'shrink-0 px-3 py-1 rounded-lg border border-gray-600 hover:border-primary hover:shadow-neon transition text-xs text-gray-200';
-        btn.textContent = 'Eliminar';
-        btn.addEventListener('click', () => onRemove(idx));
-
-        li.appendChild(left);
-        li.appendChild(btn);
-        ul.appendChild(li);
-      });
-    }
-
-    // ---------- Proyecto: autocomplete / rollup ----------
-    const projectSearch = document.getElementById('projectSearch');
-    const listIdInput = document.getElementById('list_id');
-    const dropdown = document.getElementById('projectDropdown');
-    const results = document.getElementById('projectResults');
-    const empty = document.getElementById('projectEmpty');
-
-    let debounceTimer = null;
-    let lastQuery = '';
-
-    projectSearch.addEventListener('input', () => {
-      listIdInput.value = ''; // invalida hasta seleccionar
-      scheduleSearch(projectSearch.value);
-    });
-
-    projectSearch.addEventListener('focus', () => {
-      if (projectSearch.value.trim().length >= 1) {
-        scheduleSearch(projectSearch.value, true);
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      const isInside = dropdown.contains(e.target) || projectSearch.contains(e.target);
-      if (!isInside) hideDropdown();
-    });
-
-    function scheduleSearch(q, immediate = false) {
-      const query = (q || '').trim();
-      if (!query) { hideDropdown(); return; }
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => searchProjects(query), immediate ? 0 : 250);
-    }
-
-    async function searchProjects(query) {
-      if (query === lastQuery) return;
-      lastQuery = query;
-
-      showDropdown();
-      results.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">Buscando...</div>`;
-      empty.classList.add('hidden');
-
-      try {
-        const res = await fetch(SEARCH_PROJECTS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query })
-        });
-
-        if (!res.ok) throw new Error('Error consultando proyectos');
-        const data = await res.json();
-        renderProjects(Array.isArray(data) ? data : []);
-      } catch (err) {
-        results.innerHTML = `<div class="px-4 py-3 text-sm text-red-400">Error consultando proyectos</div>`;
-      }
-    }
-
-    function renderProjects(list) {
-      results.innerHTML = '';
-      if (!list.length) {
-        empty.classList.remove('hidden');
-        return;
-      }
-      empty.classList.add('hidden');
-
-      list.forEach(item => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'w-full text-left px-4 py-3 hover:bg-primary/10 border-b border-gray-800 last:border-b-0';
-        btn.innerHTML = `
-          <div class="text-sm text-gray-100">${escapeHtml(item.name)}</div>
-          <div class="text-xs text-gray-500">ID: ${escapeHtml(String(item.id))}</div>
-        `;
-        btn.addEventListener('click', () => {
-          projectSearch.value = item.name;
-          listIdInput.value = item.id;
-          hideDropdown();
-        });
-        results.appendChild(btn);
-      });
-    }
-
-    function showDropdown() { dropdown.classList.remove('hidden'); }
-    function hideDropdown() { dropdown.classList.add('hidden'); }
-
-    // ---------- Submit ----------
-    const form = document.getElementById('medicionForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const statusMsg = document.getElementById('statusMsg');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      if (!listIdInput.value) {
-        showStatus('Selecciona un proyecto del desplegable (no vale texto libre).', true);
-        projectSearch.focus();
-        return;
-      }
-
-      submitBtn.disabled = true;
-      showStatus('Enviando medición...', false);
-
-      try {
-        const formData = new FormData();
-
-        // campos texto
-        formData.append('list_id', listIdInput.value);
-        formData.append('taskName', document.getElementById('taskName').value || '');
-        formData.append('description', document.getElementById('description').value || '');
-        formData.append('electrodomesticos', document.getElementById('electrodomesticos').value || '');
-        formData.append('observaciones', document.getElementById('observaciones').value || '');
-
-        // fotos (múltiples)
-        for (const f of photosStore) formData.append('photos[]', f);
-
-        // hoja medición (múltiples)
-        for (const f of hojaStore) formData.append('hoja_medicion[]', f);
-
-        const res = await fetch(CREATE_MEDICION_URL, {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!res.ok) throw new Error('Error al enviar');
-        // opcional: const json = await res.json();
-
-        showStatus('✅ Medición enviada correctamente.', false);
-
-        // reset total
-        form.reset();
-        listIdInput.value = '';
-        lastQuery = '';
-        hideDropdown();
-        photosStore = [];
-        hojaStore = [];
-        photosList.innerHTML = '';
-        hojaList.innerHTML = '';
-
-        // limpiar mensaje tras 3s
-        setTimeout(() => {
-          statusMsg.classList.add('hidden');
-          statusMsg.textContent = '';
-        }, 3000);
-
-      } catch (err) {
-        showStatus('❌ Error al enviar la medición. Revisa n8n (Executions).', true);
-      } finally {
-        submitBtn.disabled = false;
-      }
-    });
-
-    function showStatus(msg, isError) {
-      statusMsg.textContent = msg;
-      statusMsg.classList.remove('hidden');
-      statusMsg.classList.toggle('text-red-400', !!isError);
-      statusMsg.classList.toggle('text-gray-400', !isError);
-    }
-  </script>
-</body>
-</html>
+      <!-- HOJA -->
