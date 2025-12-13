@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Viphery · Alta de Medición Revision 13/12/2025 V.1.0.</title>
+  <title>v.1.0. Viphery · Alta de Medición</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Tailwind CDN -->
@@ -79,3 +79,116 @@
       </div>
 
       <!-- HOJA -->
+      <div>
+        <label class="block text-sm mb-2">Hoja de medición</label>
+        <label for="hoja"
+          class="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer">
+          <span class="text-sm text-gray-400">Haz clic o arrastra archivo técnico</span>
+        </label>
+        <input id="hoja" type="file" multiple class="hidden"/>
+        <ul id="hojaList" class="mt-4 space-y-2 text-sm"></ul>
+      </div>
+
+      <button id="submitBtn"
+        class="w-full bg-primary text-black font-semibold py-3 rounded-xl">
+        Enviar medición
+      </button>
+
+      <p id="statusMsg" class="text-sm hidden"></p>
+    </form>
+  </div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const SEARCH_PROJECTS_URL = 'https://n8n.escueladeefectividad.com/webhook/viphery-buscar-proyectos';
+const CREATE_MEDICION_URL = 'https://n8n.escueladeefectividad.com/webhook/viphery-crear-medicion';
+
+/* ===================== HELPERS ===================== */
+function normalizeFile(file, prefix) {
+  const ext = file.name.split('.').pop();
+  const clean =
+    prefix +
+    '_' +
+    Date.now() +
+    '_' +
+    Math.random().toString(36).slice(2, 6) +
+    '.' + ext;
+
+  return new File([file], clean, { type: file.type });
+}
+
+function render(store, ul, onRemove) {
+  ul.innerHTML = '';
+  store.forEach((f, i) => {
+    const li = document.createElement('li');
+    li.className = 'flex justify-between border border-gray-700 rounded px-3 py-2';
+    li.innerHTML = `<span class="truncate">📎 ${f.name}</span>`;
+    const btn = document.createElement('button');
+    btn.textContent = 'Eliminar';
+    btn.onclick = () => onRemove(i);
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
+}
+
+/* ===================== FILES ===================== */
+let photosStore = [];
+let hojaStore = [];
+
+photos.onchange = () => {
+  Array.from(photos.files).forEach(f =>
+    photosStore.push(normalizeFile(f, 'foto'))
+  );
+  render(photosStore, photosList, i => {
+    photosStore.splice(i, 1);
+    render(photosStore, photosList, arguments.callee);
+  });
+  photos.value = '';
+};
+
+hoja.onchange = () => {
+  Array.from(hoja.files).forEach(f =>
+    hojaStore.push(normalizeFile(f, 'hoja'))
+  );
+  render(hojaStore, hojaList, i => {
+    hojaStore.splice(i, 1);
+    render(hojaStore, hojaList, arguments.callee);
+  });
+  hoja.value = '';
+};
+
+/* ===================== SUBMIT ===================== */
+medicionForm.onsubmit = async e => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+
+  const fd = new FormData();
+  fd.append('list_id', list_id.value);
+  fd.append('taskName', taskName.value);
+  fd.append('description', description.value);
+  fd.append('electrodomesticos', electrodomesticos.value);
+  fd.append('observaciones', observaciones.value);
+
+  photosStore.forEach(f => fd.append('photos[]', f));
+  hojaStore.forEach(f => fd.append('hoja_medicion[]', f));
+
+  try {
+    const r = await fetch(CREATE_MEDICION_URL, { method: 'POST', body: fd });
+    if (!r.ok) throw new Error();
+    statusMsg.textContent = '✅ Medición enviada correctamente';
+    statusMsg.classList.remove('hidden');
+    medicionForm.reset();
+    photosStore = [];
+    hojaStore = [];
+    photosList.innerHTML = '';
+    hojaList.innerHTML = '';
+  } catch {
+    statusMsg.textContent = '❌ Error al enviar la medición';
+    statusMsg.classList.remove('hidden');
+  } finally {
+    submitBtn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>
