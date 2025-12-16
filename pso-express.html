@@ -183,6 +183,7 @@
             por favor enviar con WeTransfer o servicio similar indicando aquí la URL.
           </p>
         </div>
+
         <div id="campo_presupuesto" class="hidden-force col-span-1">
           <label>Presupuesto Estimado (€)</label>
           <input type="number" name="presupuesto" class="cyber-input" step="0.01" placeholder="0.00">
@@ -298,12 +299,14 @@
       window.location.reload();
     }
 
-    // --- VISIBILIDAD ---
+    // --- VISIBILIDAD DE CAMPOS ---
+    // AQUÍ ES DONDE HE HECHO EL CAMBIO PARA OCULTAR PRESUPUESTO Y COMPLEJIDAD EN "CLICHÉ"
     const TIPOS = {
       'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida'],
       'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'buscarProyecto'],
       'Consultas - Varios': ['nombreSolicitante', 'emailSolicitante', 'descripcion', 'archivos', 'enlaceDiseno', 'observaciones'],
-      'Consulta - Precio Cliché': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'metricasTecnicas'],
+      // ELIMINADOS DE AQUÍ: 'presupuesto' Y 'complejidad'
+      'Consulta - Precio Cliché': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'fechaPrometida', 'observaciones', 'metricasTecnicas'],
       'Consulta - Diseño Plano': ['descripcion', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'emailSolicitante'],
       'Consulta - Diseño': ['descripcion', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'emailSolicitante']
     };
