@@ -173,9 +173,15 @@
           <label>Materiales / Sustrato</label>
           <input type="text" name="materiales" class="cyber-input" placeholder="Ej: Polietileno, Complejo, Papel...">
         </div>
+        
         <div id="campo_enlaceDiseno" class="hidden-force col-span-1 md:col-span-2">
           <label>Enlace a Archivos (Nube)</label>
           <input type="url" name="enlaceDiseno" class="cyber-input" placeholder="https://drive.google.com/...">
+          <p class="text-xs text-gray-400 mt-2 leading-relaxed">
+            ℹ️ Los archivos adjuntos se podrán insertar más abajo en el campo "Adjuntar Archivos". 
+            Si los mismos pesan <span class="text-[#00f3ff] font-bold">más de 10 Megas</span>, 
+            por favor enviar con WeTransfer o servicio similar indicando aquí la URL.
+          </p>
         </div>
         <div id="campo_presupuesto" class="hidden-force col-span-1">
           <label>Presupuesto Estimado (€)</label>
@@ -201,17 +207,17 @@
         <div id="campo_metricasTecnicas" class="hidden-force col-span-1 md:col-span-2 bg-white/5 p-5 rounded border border-white/10">
            <div class="text-[#00f3ff] font-bold text-sm mb-4 border-b border-white/10 pb-2">PARÁMETROS TÉCNICOS</div>
            <div class="grid grid-cols-3 gap-6">
-              <div><label>Nº Caídas</label><input type="number" name="numCaidas" class="cyber-input text-center" placeholder="0"></div>
-              <div><label>Repeticiones</label><input type="number" name="numRepeticiones" class="cyber-input text-center" placeholder="0"></div>
-              <div><label>Nº Colores</label><input type="number" name="numColores" class="cyber-input text-center" placeholder="0"></div>
-              <div class="col-span-3">
-                <label>Aplicación de Barnices</label>
-                <select name="barnices" class="cyber-input">
-                  <option value="">- Seleccionar -</option>
-                  <option value="SI">SI</option>
-                  <option value="NO">NO</option>
-                </select>
-              </div>
+             <div><label>Nº Caídas</label><input type="number" name="numCaidas" class="cyber-input text-center" placeholder="0"></div>
+             <div><label>Repeticiones</label><input type="number" name="numRepeticiones" class="cyber-input text-center" placeholder="0"></div>
+             <div><label>Nº Colores</label><input type="number" name="numColores" class="cyber-input text-center" placeholder="0"></div>
+             <div class="col-span-3">
+               <label>Aplicación de Barnices</label>
+               <select name="barnices" class="cyber-input">
+                 <option value="">- Seleccionar -</option>
+                 <option value="SI">SI</option>
+                 <option value="NO">NO</option>
+               </select>
+             </div>
            </div>
         </div>
 
