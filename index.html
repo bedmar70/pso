@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Gestión - Acceso Clientes</title>
     
-    <!-- Carga de Librerías (React, Babel, Tailwind) -->
+    <!-- Carga de Librerías -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
@@ -29,7 +29,6 @@
         const { useState, useEffect } = React;
 
         // --- CONFIGURACIÓN ---
-        // Verifica que estas URLs sean las correctas de tu N8N
         const ENDPOINTS = {
             AUTH: "https://n8n.escueladeefectividad.com/webhook/saas-login-master", 
             OPERATIONS: "https://n8n.escueladeefectividad.com/webhook/saas-operations-router" 
@@ -43,7 +42,10 @@
             AlertCircle: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>,
             Save: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
             RefreshCw: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>,
-            Search: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Search: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
+            User: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            ChevronDown: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>,
+            ChevronUp: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m18 15-6-6-6 6"/></svg>
         };
 
         // --- COMPONENTE BOTÓN ---
@@ -87,8 +89,12 @@
                     const result = Array.isArray(data) ? data[0] : data;
                     const payload = result.json || result;
 
-                    if (payload && payload.success) onLogin(payload.tenant);
-                    else setError(payload?.message || 'Credenciales incorrectas');
+                    if (payload && payload.success) {
+                        // Pasamos el tenant Y el email del usuario
+                        onLogin(payload.tenant, formData.email);
+                    } else {
+                        setError(payload?.message || 'Credenciales incorrectas');
+                    }
                 } catch (err) { setError('Error de conexión.'); console.error(err); } finally { setLoading(false); }
             };
 
@@ -151,10 +157,11 @@
         };
 
         // --- DASHBOARD ---
-        const Dashboard = ({ tenant, onLogout }) => {
+        const Dashboard = ({ tenant, userEmail, onLogout }) => {
             const [decisions, setDecisions] = useState([]);
             const [loading, setLoading] = useState(false);
             const [searchTerm, setSearchTerm] = useState('');
+            const [showCompleted, setShowCompleted] = useState(false); // Estado para el acordeón
 
             const fetchDecisions = async () => {
                 setLoading(true);
@@ -167,8 +174,6 @@
                     });
                     
                     const text = await response.text();
-                    console.log("Respuesta N8N:", text);
-                    
                     let data = [];
                     try { data = text ? JSON.parse(text) : []; } catch (e) { console.error("Error JSON:", e); }
                     
@@ -187,7 +192,17 @@
                 } catch (err) { alert("Error actualizando"); }
             };
 
-            const filteredDecisions = decisions.filter(d => (d.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
+            // Filtrar primero por búsqueda
+            const filteredByName = decisions.filter(d => (d.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
+
+            // Lógica de separación: Pendientes vs Finalizadas
+            const isCompleted = (status) => {
+                const s = (status || '').toLowerCase();
+                return s.includes('aprobado') || s.includes('rechazado') || s.includes('done') || s.includes('complete');
+            };
+
+            const pendingDecisions = filteredByName.filter(d => !isCompleted(d.status?.status));
+            const completedDecisions = filteredByName.filter(d => isCompleted(d.status?.status));
 
             return (
                 <div className="min-h-screen bg-[#0B0F19] text-slate-200">
@@ -195,7 +210,13 @@
                         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
                             <div className="flex items-center gap-4">
                                 {tenant.logo ? <img src={tenant.logo} alt={tenant.name} className="h-10 w-auto rounded" /> : <div className="h-10 w-10 bg-slate-700 rounded flex items-center justify-center font-bold">{tenant.name ? tenant.name.charAt(0) : 'T'}</div>}
-                                <div><h1 className="font-bold text-white leading-tight">{tenant.name || 'Empresa'}</h1><p className="text-xs text-slate-500">Portal de Gestión</p></div>
+                                <div>
+                                    <h1 className="font-bold text-white leading-tight">{tenant.name || 'Empresa'}</h1>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                                        <Icons.User className="w-3 h-3" />
+                                        <span>{userEmail || 'Usuario'}</span>
+                                    </div>
+                                </div>
                             </div>
                             <Button variant="ghost" onClick={onLogout} className="p-2"><Icons.LogOut className="w-5 h-5" /></Button>
                         </div>
@@ -208,7 +229,54 @@
                                 <Button onClick={fetchDecisions} variant="secondary" loading={loading} className="px-4 whitespace-nowrap"><Icons.RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Buscar</Button>
                             </div>
                         </div>
-                        {loading ? <div className="flex justify-center py-20"><Icons.Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div> : filteredDecisions.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{filteredDecisions.map(task => <DecisionCard key={task.id} task={task} onUpdate={handleUpdateDecision} />)}</div> : <div className="text-center py-12 bg-[#151B2B]/50 rounded-xl border border-dashed border-[#2D3748]"><div className="flex justify-center mb-3"><Icons.CheckCircle2 className="w-10 h-10 text-slate-600" /></div><p className="text-slate-500">Pulsa buscar para cargar datos.</p></div>}
+
+                        {loading ? (
+                            <div className="flex justify-center py-20"><Icons.Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>
+                        ) : (
+                            <>
+                                {/* LISTA DE PENDIENTES (Siempre visible) */}
+                                {pendingDecisions.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                        {pendingDecisions.map(task => (
+                                            <DecisionCard key={task.id} task={task} onUpdate={handleUpdateDecision} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 bg-[#151B2B]/30 rounded-xl border border-dashed border-[#2D3748] mb-8">
+                                        <p className="text-slate-500 text-sm">No tienes decisiones pendientes 🎉</p>
+                                    </div>
+                                )}
+
+                                {/* ACORDEÓN DE COMPLETADAS */}
+                                {completedDecisions.length > 0 && (
+                                    <div className="mt-8">
+                                        <button 
+                                            onClick={() => setShowCompleted(!showCompleted)} 
+                                            className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-300 transition-colors w-full border-b border-[#2D3748] pb-2 mb-4"
+                                        >
+                                            {showCompleted ? <Icons.ChevronUp className="w-4 h-4" /> : <Icons.ChevronDown className="w-4 h-4" />}
+                                            Ver {completedDecisions.length} decisiones finalizadas
+                                        </button>
+                                        
+                                        {showCompleted && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-pulse-once">
+                                                {completedDecisions.map(task => (
+                                                    <DecisionCard key={task.id} task={task} onUpdate={handleUpdateDecision} />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                {decisions.length === 0 && !loading && (
+                                    <div className="text-center py-12 bg-[#151B2B]/50 rounded-xl border border-dashed border-[#2D3748]">
+                                        <div className="flex justify-center mb-3"><Icons.CheckCircle2 className="w-10 h-10 text-slate-600" /></div>
+                                        <p className="text-slate-500">No hay datos. Pulsa buscar.</p>
+                                        <Button onClick={fetchDecisions} variant="ghost" className="mt-2 text-blue-400">Cargar</Button>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </main>
                 </div>
             );
@@ -217,11 +285,31 @@
         // --- APP ROOT ---
         const App = () => {
             const [tenant, setTenant] = useState(null);
-            useEffect(() => { const saved = sessionStorage.getItem('saas_tenant'); if (saved) { try { setTenant(JSON.parse(saved)); } catch(e) {} } }, []);
-            const handleLogin = (tenantData) => { setTenant(tenantData); sessionStorage.setItem('saas_tenant', JSON.stringify(tenantData)); };
-            const handleLogout = () => { setTenant(null); sessionStorage.removeItem('saas_tenant'); };
+            const [userEmail, setUserEmail] = useState('');
+
+            useEffect(() => { 
+                const saved = sessionStorage.getItem('saas_tenant'); 
+                const savedEmail = sessionStorage.getItem('saas_user_email');
+                if (saved) { try { setTenant(JSON.parse(saved)); } catch(e) {} }
+                if (savedEmail) setUserEmail(savedEmail);
+            }, []);
+
+            const handleLogin = (tenantData, email) => { 
+                setTenant(tenantData); 
+                setUserEmail(email);
+                sessionStorage.setItem('saas_tenant', JSON.stringify(tenantData));
+                sessionStorage.setItem('saas_user_email', email);
+            };
+
+            const handleLogout = () => { 
+                setTenant(null); 
+                setUserEmail('');
+                sessionStorage.removeItem('saas_tenant'); 
+                sessionStorage.removeItem('saas_user_email');
+            };
+
             if (!tenant) return <LoginScreen onLogin={handleLogin} />;
-            return <Dashboard tenant={tenant} onLogout={handleLogout} />;
+            return <Dashboard tenant={tenant} userEmail={userEmail} onLogout={handleLogout} />;
         };
 
         ReactDOM.render(<App />, document.getElementById('root'));
