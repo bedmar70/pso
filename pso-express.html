@@ -1,455 +1,412 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5.1. PSO Gestión: Acceso Seguro</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <style>
-    body { background-color: #050505; color: #e2e8f0; font-family: sans-serif; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Portal - Acceso Clientes</title>
     
-    /* Input Style */
-    .cyber-input { 
-      background: rgba(255, 255, 255, 0.05); 
-      border: 1px solid #333; 
-      color: #00f3ff; 
-      width: 100%; 
-      border-radius: 0.5rem; 
-      padding: 0.75rem; 
-      font-size: 0.95rem;
-      transition: all 0.3s;
-    }
-    .cyber-input:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
-    .cyber-input::placeholder { color: #6b7280; opacity: 1; }
+    <!-- Carga de Librerías desde CDN (No requiere instalación) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    .hidden-force { display: none !important; }
-    label { font-size: 0.75rem; text-transform: uppercase; color: #9ca3af; margin-bottom: 0.25rem; display: block; letter-spacing: 0.05em; }
-    label.required { color: #00f3ff; font-weight: bold; }
-    
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #111; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
-
-    /* Animación simple */
-    .fade-in { animation: fadeIn 0.5s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+    <!-- Configuración visual -->
+    <style>
+        body { background-color: #0B0F19; color: #e2e8f0; font-family: sans-serif; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0B0F19; }
+        ::-webkit-scrollbar-thumb { background: #2D3748; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4A5568; }
+    </style>
 </head>
-<body class="p-4 flex justify-center items-center min-h-screen bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+<body>
+    <div id="root"></div>
 
-  <div id="viewLogin" class="w-full max-w-md bg-gray-900/90 p-8 rounded-2xl border border-[#00f3ff]/30 shadow-[0_0_30px_rgba(0,243,255,0.1)] backdrop-blur-sm fade-in">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-white mb-2">PSO <span class="text-[#00f3ff]">ACCESS</span></h1>
-      <p class="text-gray-400 text-xs tracking-widest">IDENTIFICACIÓN REQUERIDA</p>
-    </div>
+    <script type="text/babel">
+        // Acceso global a React
+        const { useState, useEffect } = React;
 
-    <form id="loginForm" class="space-y-6">
-      <div>
-        <label>Email Corporativo</label>
-        <input type="email" id="loginEmail" class="cyber-input text-center" placeholder="usuario@pso.com" required>
-      </div>
-      <div>
-        <label>Contraseña</label>
-        <input type="password" id="loginPass" class="cyber-input text-center" placeholder="••••••••" required>
-      </div>
-      <button type="submit" id="btnLogin" class="w-full bg-[#00f3ff] text-black font-bold py-3 rounded hover:bg-white transition-all shadow-lg hover:shadow-[#00f3ff]/50">
-        INICIAR SESIÓN
-      </button>
-    </form>
-  </div>
+        // --- CONFIGURACIÓN ---
+        const N8N_BASE_URL = "https://n8n.escueladeefectividad.com/webhook";
+        const ENDPOINTS = {
+            AUTH: `${N8N_BASE_URL}/saas-login-master`, 
+            OPERATIONS: `${N8N_BASE_URL}/saas-operations-router` 
+        };
 
+        // --- ICONOS (Definidos manualmente para evitar fallos de carga externa) ---
+        const Icons = {
+            Loader2: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>,
+            LogOut: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>,
+            CheckCircle2: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>,
+            AlertCircle: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>,
+            Save: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+            RefreshCw: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>,
+            Search: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        };
 
-  <div id="viewApp" class="w-full max-w-4xl bg-gray-900/90 p-6 rounded-xl border border-gray-700 shadow-2xl hidden-force fade-in">
-    
-    <div class="border-b border-gray-700 pb-4 mb-6 flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-white">PSO <span class="text-[#00f3ff]">SYSTEM</span></h1>
-        <p class="text-xs text-gray-400 mt-1">PANEL DE GESTIÓN v5.1</p>
-      </div>
-      <div class="text-right text-xs">
-        <div class="text-[#00f3ff] font-bold" id="displayUser">USUARIO</div>
-        <button onclick="logout()" class="text-red-400 hover:text-white underline mt-1">Cerrar Sesión</button>
-      </div>
-    </div>
+        // --- COMPONENTES UI GENÉRICOS ---
+        const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false, loading = false }) => {
+            const variants = {
+                primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-md",
+                success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
+                secondary: "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700",
+                ghost: "text-slate-400 hover:text-white hover:bg-white/5"
+            };
+            return (
+                <button 
+                    onClick={onClick} 
+                    disabled={disabled || loading}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+                >
+                    {loading && <Icons.Loader2 className="w-4 h-4 animate-spin" />}
+                    {children}
+                </button>
+            );
+        };
 
-    <form id="gestionForm" class="space-y-6">
-      
-      <div class="col-span-1 md:col-span-2">
-        <label class="required">TIPO DE GESTIÓN (Selecciona para empezar)</label>
-        <select id="tipoGestion" name="tipo_gestion_comercial" class="cyber-input text-lg font-bold bg-black border-[#00f3ff]" required>
-          <option value="">▼ SELECCIONAR OPERACIÓN...</option>
-          <option value="Alta nueva">🚀 ALTA NUEVA</option>
-          <option value="Modificación">📝 MODIFICACIÓN</option>
-          <option value="Consultas - Varios">❓ CONSULTAS VARIOS</option>
-          <option value="Consulta - Precio Cliché">💰 CONSULTA PRECIO CLICHÉS</option>
-          <option value="Consulta - Diseño Plano">📐 CONSULTA PLANO</option>
-          <option value="Consulta - Diseño">🎨 CONSULTA DISEÑO</option>
-        </select>
-      </div>
+        // --- PANTALLA DE LOGIN ---
+        const LoginScreen = ({ onLogin }) => {
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [formData, setFormData] = useState({ email: '', password: '' });
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
 
-        <div id="campo_nombreSolicitante" class="hidden-force col-span-1">
-          <label class="required">Solicitante</label>
-          <input type="text" name="nombreSolicitante" id="inputNombreSolicitante" class="cyber-input" required>
-        </div>
-        <div id="campo_emailSolicitante" class="hidden-force col-span-1">
-          <label class="required">Email de Contacto</label>
-          <input type="email" name="emailSolicitante" id="inputEmailSolicitante" class="cyber-input" required>
-        </div>
+                try {
+                    // Timestamp para evitar caché
+                    const response = await fetch(`${ENDPOINTS.AUTH}?t=${Date.now()}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
 
-        <div id="campo_nombreProyecto" class="hidden-force col-span-1 md:col-span-2">
-          <label class="required">Nombre del Proyecto / Identificador</label>
-          <input type="text" name="nombreProyecto" class="cyber-input" placeholder="Ej: Proyecto Alpha - Envase 500ml">
-        </div>
+                    const text = await response.text();
+                    let data = {};
+                    try {
+                        data = text ? JSON.parse(text) : {};
+                    } catch (e) {
+                        console.error("Error parseando respuesta Login:", text);
+                        throw new Error("Respuesta inválida del servidor");
+                    }
+                    
+                    // Manejo robusto de respuesta (array u objeto)
+                    const result = Array.isArray(data) ? data[0] : data;
+                    const payload = result.json || result;
 
-        <div id="campo_cliente" class="hidden-force col-span-1 md:col-span-2">
-          <label>Vincular Cliente (Base de Datos)</label>
-          <div class="relative">
-            <input type="text" id="searchCliente" class="cyber-input pl-10" placeholder="Escribe el nombre del cliente para buscar..." autocomplete="off">
-            <div id="resCliente" class="absolute z-50 w-full bg-gray-900 border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden shadow-xl"></div>
-          </div>
-          <div id="selCliente" class="mt-2 p-3 bg-[#00f3ff]/10 border border-[#00f3ff]/30 text-[#00f3ff] text-sm rounded hidden flex items-center gap-2">
-            <span>✅</span> <span id="selClienteText"></span>
-          </div>
-          <input type="hidden" name="cliente" id="inputCliente"> 
-        </div>
+                    if (payload && payload.success) {
+                        onLogin(payload.tenant);
+                    } else {
+                        setError(payload?.message || 'Credenciales incorrectas');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setError('Error de conexión. Verifica que el Webhook de N8N esté activo.');
+                } finally {
+                    setLoading(false);
+                }
+            };
 
-        <div id="campo_buscarProyecto" class="hidden-force col-span-1 md:col-span-2">
-          <label>Vincular Proyecto Existente</label>
-          <div class="relative">
-            <input type="text" id="searchProyecto" class="cyber-input pl-10" placeholder="Escribe ID o nombre de la tarea..." autocomplete="off">
-            <div id="resProyecto" class="absolute z-50 w-full bg-gray-900 border border-[#00f3ff] mt-1 rounded max-h-60 overflow-y-auto hidden shadow-xl"></div>
-          </div>
-          <div id="selProyecto" class="mt-2 p-3 bg-[#00f3ff]/10 border border-[#00f3ff]/30 text-[#00f3ff] text-sm rounded hidden flex items-center gap-2">
-            <span>✅</span> <span id="selProyectoText"></span>
-          </div>
-          <input type="hidden" name="proyecto_relacionado" id="inputProyecto">
-        </div>
+            return (
+                <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center p-4">
+                    <div className="max-w-md w-full bg-[#151B2B] rounded-2xl shadow-2xl border border-[#2D3748] overflow-hidden">
+                        <div className="p-8 text-center border-b border-[#2D3748]">
+                            <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
+                                <Icons.RefreshCw className="w-8 h-8 text-blue-500" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white">SaaS Access</h2>
+                            <p className="text-slate-400 text-sm mt-2">Plataforma de Gestión Multi-Cliente</p>
+                        </div>
+                        <div className="p-8">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {error && (
+                                    <div className="p-3 bg-red-900/20 border border-red-500/30 text-red-400 rounded-lg text-sm flex items-center gap-2">
+                                        <Icons.AlertCircle className="w-4 h-4" /> {error}
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email</label>
+                                    <input 
+                                        type="email" 
+                                        className="w-full bg-[#0B0F19] border border-[#2D3748] rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors"
+                                        placeholder="usuario@empresa.com" 
+                                        value={formData.email} 
+                                        onChange={e => setFormData({...formData, email: e.target.value})} 
+                                        required 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contraseña</label>
+                                    <input 
+                                        type="password" 
+                                        className="w-full bg-[#0B0F19] border border-[#2D3748] rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition-colors"
+                                        placeholder="••••••••" 
+                                        value={formData.password} 
+                                        onChange={e => setFormData({...formData, password: e.target.value})} 
+                                        required 
+                                    />
+                                </div>
+                                <Button type="submit" variant="primary" className="w-full mt-4" loading={loading}>
+                                    Acceder al Panel
+                                </Button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
-        <div id="campo_descripcion" class="hidden-force col-span-1 md:col-span-2">
-          <label class="required">Descripción Detallada</label>
-          <textarea name="descripcion" rows="4" class="cyber-input" placeholder="Describe los detalles de la solicitud, especificaciones, cambios requeridos..."></textarea>
-        </div>
+        // --- TARJETA DE DECISIÓN INDIVIDUAL ---
+        const DecisionCard = ({ task, onUpdate }) => {
+            const [observation, setObservation] = useState(task.observaciones || '');
+            const [isSaving, setIsSaving] = useState(false);
+            const [status, setStatus] = useState(task.status?.status || 'pendiente');
 
-        <div id="campo_prioridadBoceto" class="hidden-force col-span-1">
-          <label>Nivel de Prioridad</label>
-          <select name="prioridadBoceto" class="cyber-input">
-            <option value="Normal">Normal (Estándar)</option>
-            <option value="Prioritario">Prioritario</option>
-            <option value="Urgente">🚨 URGENTE</option>
-          </select>
-        </div>
+            const getStatusColor = (s) => {
+                const st = (s || '').toLowerCase();
+                if (st.includes('aprobado') || st.includes('done') || st.includes('complete')) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                if (st.includes('rechazado')) return 'bg-red-500/10 text-red-400 border-red-500/20';
+                return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+            };
 
-        <div id="campo_necesitaCosteCliches" class="hidden-force col-span-1">
-          <label>¿Requiere Coste de Clichés?</label>
-          <select name="necesitaCosteCliches" class="cyber-input">
-            <option value="">- Seleccionar -</option>
-            <option value="SI">SI</option>
-            <option value="NO">NO</option>
-          </select>
-        </div>
+            const handleSave = async () => {
+                setIsSaving(true);
+                await onUpdate(task.id, { observaciones: observation, status: status });
+                setIsSaving(false);
+            };
 
-        <div id="campo_tipoImpresion" class="hidden-force col-span-1">
-          <label>Modo de Impresión</label>
-          <select name="tipoImpresion" class="cyber-input">
-            <option value="">- Seleccionar -</option>
-            <option value="Interior">Interior</option>
-            <option value="Exterior">Exterior</option>
-          </select>
-        </div>
+            return (
+                <div className="bg-[#151B2B] rounded-xl border border-[#2D3748] p-5 shadow-sm hover:border-blue-500/30 transition-colors">
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 className="font-semibold text-lg text-white mb-1">{task.name}</h3>
+                            <p className="text-sm text-slate-400 line-clamp-2">{task.description || 'Sin descripción adicional'}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(status)} uppercase`}>
+                            {status}
+                        </span>
+                    </div>
 
-        <div id="campo_referenciaPSO" class="hidden-force col-span-1">
-          <label>Referencia Interna PSO</label>
-          <input type="text" name="referenciaPSO" class="cyber-input" placeholder="Ref. numérica o código">
-        </div>
-        <div id="campo_materiales" class="hidden-force col-span-1 md:col-span-2">
-          <label>Materiales / Sustrato</label>
-          <input type="text" name="materiales" class="cyber-input" placeholder="Ej: Polietileno, Complejo, Papel...">
-        </div>
-        
-        <div id="campo_enlaceDiseno" class="hidden-force col-span-1 md:col-span-2">
-          <label>Enlace a Archivos (Nube)</label>
-          <input type="url" name="enlaceDiseno" class="cyber-input" placeholder="https://drive.google.com/...">
-          <p class="text-xs text-gray-400 mt-2 leading-relaxed">
-            ℹ️ Los archivos adjuntos se podrán insertar más abajo en el campo "Adjuntar Archivos". 
-            Si los mismos pesan <span class="text-[#00f3ff] font-bold">más de 10 Megas</span>, 
-            por favor enviar con WeTransfer o servicio similar indicando aquí la URL.
-          </p>
-        </div>
+                    <div className="space-y-3">
+                        {/* Botones de Estado */}
+                        <div className="flex gap-2 overflow-x-auto pb-2">
+                            {['Pendiente', 'Aprobado', 'Rechazado'].map(opt => (
+                                <button
+                                    key={opt}
+                                    onClick={() => setStatus(opt.toLowerCase())}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                        status === opt.toLowerCase() 
+                                        ? 'bg-blue-600 border-blue-500 text-white' 
+                                        : 'bg-[#0B0F19] border-[#2D3748] text-slate-400 hover:text-white'
+                                    }`}
+                                >
+                                    {opt}
+                                </button>
+                            ))}
+                        </div>
 
-        <div id="campo_presupuesto" class="hidden-force col-span-1">
-          <label>Presupuesto Estimado (€)</label>
-          <input type="number" name="presupuesto" class="cyber-input" step="0.01" placeholder="0.00">
-        </div>
-        <div id="campo_complejidad" class="hidden-force col-span-1">
-          <label>Nivel de Complejidad (1-4)</label>
-          <div class="flex items-center gap-4">
-            <span class="text-xs text-gray-500">Baja</span>
-            <input type="range" name="complejidad" min="1" max="4" class="w-full accent-[#00f3ff]">
-            <span class="text-xs text-[#00f3ff]">Alta</span>
-          </div>
-        </div>
-        <div id="campo_fechaPrometida" class="hidden-force col-span-1">
-          <label>Deadline (Fecha Límite)</label>
-          <input type="date" name="fechaPrometida" class="cyber-input text-gray-300">
-        </div>
-        <div id="campo_observaciones" class="hidden-force col-span-1 md:col-span-2">
-          <label>Notas Adicionales</label>
-          <textarea name="observaciones" rows="2" class="cyber-input" placeholder="Cualquier otra información relevante..."></textarea>
-        </div>
+                        {/* Campo Observaciones */}
+                        <div>
+                            <label className="block text-xs text-slate-500 mb-1">Observaciones / Respuesta</label>
+                            <textarea 
+                                className="w-full bg-[#0B0F19] border border-[#2D3748] rounded-lg p-3 text-sm text-slate-200 focus:border-blue-500 outline-none resize-none"
+                                rows="2"
+                                value={observation}
+                                onChange={(e) => setObservation(e.target.value)}
+                                placeholder="Añade una nota..."
+                            />
+                        </div>
 
-        <div id="campo_metricasTecnicas" class="hidden-force col-span-1 md:col-span-2 bg-white/5 p-5 rounded border border-white/10">
-           <div class="text-[#00f3ff] font-bold text-sm mb-4 border-b border-white/10 pb-2">PARÁMETROS TÉCNICOS</div>
-           <div class="grid grid-cols-3 gap-6">
-             <div><label>Nº Caídas</label><input type="number" name="numCaidas" class="cyber-input text-center" placeholder="0"></div>
-             <div><label>Repeticiones</label><input type="number" name="numRepeticiones" class="cyber-input text-center" placeholder="0"></div>
-             <div><label>Nº Colores</label><input type="number" name="numColores" class="cyber-input text-center" placeholder="0"></div>
-             <div class="col-span-3">
-               <label>Aplicación de Barnices</label>
-               <select name="barnices" class="cyber-input">
-                 <option value="">- Seleccionar -</option>
-                 <option value="SI">SI</option>
-                 <option value="NO">NO</option>
-               </select>
-             </div>
-           </div>
-        </div>
+                        <div className="flex justify-end pt-2">
+                            <Button onClick={handleSave} variant="secondary" loading={isSaving} className="text-xs py-1.5 h-8">
+                                <Icons.Save className="w-3 h-3 mr-1" /> Guardar Cambios
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
-        <div id="campo_archivos" class="hidden-force col-span-1 md:col-span-2 border-2 border-dashed border-gray-600 p-8 text-center rounded-xl cursor-pointer hover:border-[#00f3ff] hover:bg-[#00f3ff]/5 transition-all">
-           <div class="text-3xl mb-2">📎</div>
-           <p class="text-gray-300 font-bold">Adjuntar Archivos</p>
-           <p class="text-xs text-gray-500 mt-1">Haz clic para explorar o arrastra archivos aquí</p>
-           <input type="file" id="archivos" multiple class="hidden">
-           <div id="listaArchivos" class="mt-4 space-y-2 text-sm text-left"></div>
-        </div>
+        // --- DASHBOARD PRINCIPAL ---
+        const Dashboard = ({ tenant, onLogout }) => {
+            const [decisions, setDecisions] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [searchTerm, setSearchTerm] = useState('');
 
-      </div>
+            // Función para cargar datos desde N8N
+            const fetchDecisions = async () => {
+                setLoading(true);
+                try {
+                    // Enviamos los datos del tenant actual al router de N8N
+                    console.log("Petición a N8N:", { action: 'get_decisions', tenantId: tenant.id });
+                    
+                    const response = await fetch(`${ENDPOINTS.OPERATIONS}?t=${Date.now()}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'get_decisions',
+                            tenantId: tenant.id, // ID para el Switch en N8N
+                            listId: tenant.listId // ID de la lista ClickUp objetivo
+                        })
+                    });
+                    
+                    const text = await response.text();
+                    console.log("Respuesta N8N:", text);
+                    
+                    let data = [];
+                    try { data = text ? JSON.parse(text) : []; } catch (e) { console.error("Error JSON:", e); }
+                    
+                    // Asegurar que es un array
+                    const tasks = Array.isArray(data) ? data : (data.tasks || []);
+                    setDecisions(tasks);
+                } catch (err) {
+                    console.error("Error fetching decisions", err);
+                } finally {
+                    setLoading(false);
+                }
+            };
 
-      <button type="submit" id="btnEnviar" class="w-full bg-gradient-to-r from-[#00f3ff] to-blue-600 text-black font-bold text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:scale-[1.01] transition-transform">
-        TRANSMITIR DATOS AL SISTEMA
-      </button>
+            // Cargar al inicio
+            useEffect(() => {
+                if (tenant) fetchDecisions();
+            }, [tenant]);
 
-    </form>
-  </div>
+            const handleUpdateDecision = async (taskId, updates) => {
+                try {
+                    await fetch(`${ENDPOINTS.OPERATIONS}?t=${Date.now()}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'update_decision',
+                            tenantId: tenant.id,
+                            taskId: taskId,
+                            updates: updates
+                        })
+                    });
+                    // Recargamos tras actualizar
+                    fetchDecisions();
+                } catch (err) { alert("Error actualizando"); }
+            };
 
-  <script>
-    // URLS N8N - ASEGÚRATE DE QUE SEAN CORRECTAS
-    const WEBHOOKS = {
-      login: 'https://n8n.escueladeefectividad.com/webhook/pso-login-comerciales',
-      buscarProyectos: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-proyectos',
-      buscarClientes: 'https://n8n.escueladeefectividad.com/webhook/pso-buscar-clientes',
-      crearTarea: 'https://n8n.escueladeefectividad.com/webhook/pso-crear-tarea-gestion'
-    };
+            const filteredDecisions = decisions.filter(d => 
+                (d.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+            );
 
-    // --- LÓGICA DE LOGIN ---
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const pass = document.getElementById('loginPass').value;
-      const btn = document.getElementById('btnLogin');
-      
-      btn.disabled = true;
-      btn.innerText = 'VERIFICANDO...';
+            return (
+                <div className="min-h-screen bg-[#0B0F19] text-slate-200">
+                    {/* Navbar */}
+                    <nav className="bg-[#151B2B] border-b border-[#2D3748] sticky top-0 z-50">
+                        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                {tenant.logo ? (
+                                    <img src={tenant.logo} alt={tenant.name} className="h-10 w-auto rounded" />
+                                ) : (
+                                    <div className="h-10 w-10 bg-slate-700 rounded flex items-center justify-center font-bold">
+                                        {tenant.name ? tenant.name.charAt(0) : 'T'}
+                                    </div>
+                                )}
+                                <div>
+                                    <h1 className="font-bold text-white leading-tight">{tenant.name || 'Empresa'}</h1>
+                                    <p className="text-xs text-slate-500">Portal de Decisiones</p>
+                                </div>
+                            </div>
+                            <Button variant="ghost" onClick={onLogout} className="p-2">
+                                <Icons.LogOut className="w-5 h-5" />
+                            </Button>
+                        </div>
+                    </nav>
 
-      try {
-        const res = await fetch(WEBHOOKS.login, { 
-          method: 'POST', 
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ email, password: pass }) 
-        });
-        const data = await res.json();
-        
-        console.log('Respuesta Login:', data); // Ver en consola F12
+                    {/* Contenido Principal */}
+                    <main className="max-w-5xl mx-auto p-4 md:p-8">
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">Decisiones Pendientes</h2>
+                                <p className="text-slate-400">Revisa y actualiza el estado de los asuntos clave.</p>
+                            </div>
+                            
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <div className="relative w-full md:w-64">
+                                    <div className="absolute left-3 top-3 pointer-events-none">
+                                        <Icons.Search className="w-4 h-4 text-slate-500" />
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Filtrar..." 
+                                        value={searchTerm} 
+                                        onChange={e => setSearchTerm(e.target.value)} 
+                                        className="w-full bg-[#151B2B] border border-[#2D3748] rounded-lg pl-9 pr-4 py-2.5 text-sm focus:border-blue-500 outline-none text-white" 
+                                    />
+                                </div>
+                                <Button onClick={fetchDecisions} variant="secondary" loading={loading} className="px-3">
+                                    <Icons.RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                                </Button>
+                            </div>
+                        </div>
 
-        if(data.success) {
-          // Ocultar Login / Mostrar App
-          document.getElementById('viewLogin').classList.add('hidden-force');
-          document.getElementById('viewApp').classList.remove('hidden-force');
-          
-          // RESCATAR DATOS: Lee 'nombre' O 'usuario.nombre'
-          const nombreUsuario = data.nombre || (data.usuario && data.usuario.nombre) || "Usuario";
-          const emailUsuario = data.email || (data.usuario && data.usuario.email) || email;
+                        {/* Estados de Carga y Lista */}
+                        {loading ? (
+                            <div className="flex justify-center py-20">
+                                <Icons.Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                            </div>
+                        ) : filteredDecisions.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {filteredDecisions.map(task => (
+                                    <DecisionCard key={task.id} task={task} onUpdate={handleUpdateDecision} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 bg-[#151B2B]/50 rounded-xl border border-dashed border-[#2D3748]">
+                                <div className="flex justify-center mb-3">
+                                    <Icons.CheckCircle2 className="w-10 h-10 text-slate-600" />
+                                </div>
+                                <p className="text-slate-500">No hay decisiones pendientes (o pulsa refrescar).</p>
+                                <Button onClick={fetchDecisions} variant="ghost" className="mt-2 text-blue-400">
+                                    Cargar Datos
+                                </Button>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
 
-          // Rellenar campos (AHORA EDITABLES)
-          document.getElementById('inputNombreSolicitante').value = nombreUsuario;
-          document.getElementById('inputEmailSolicitante').value = emailUsuario;
-          document.getElementById('displayUser').textContent = nombreUsuario.toUpperCase();
+        // --- APP ROOT ---
+        const App = () => {
+            const [tenant, setTenant] = useState(null);
 
-        } else {
-          Swal.fire('Acceso Denegado', 'Credenciales incorrectas.', 'error');
-        }
-      } catch (err) {
-        console.error(err);
-        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerText = 'INICIAR SESIÓN';
-      }
-    });
+            // Persistencia simple de sesión
+            useEffect(() => {
+                const saved = sessionStorage.getItem('saas_tenant');
+                if (saved) {
+                    try { setTenant(JSON.parse(saved)); } catch(e) {}
+                }
+            }, []);
 
-    // Función Logout
-    window.logout = function() {
-      window.location.reload();
-    }
+            const handleLogin = (tenantData) => {
+                setTenant(tenantData);
+                sessionStorage.setItem('saas_tenant', JSON.stringify(tenantData));
+            };
 
-    // --- VISIBILIDAD DE CAMPOS ---
-    // AQUÍ ES DONDE HE HECHO EL CAMBIO PARA OCULTAR PRESUPUESTO Y COMPLEJIDAD EN "CLICHÉ"
-    const TIPOS = {
-      'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida'],
-      'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'observaciones', 'buscarProyecto'],
-      'Consultas - Varios': ['nombreSolicitante', 'emailSolicitante', 'descripcion', 'archivos', 'enlaceDiseno', 'observaciones'],
-      // ELIMINADOS DE AQUÍ: 'presupuesto' Y 'complejidad'
-      'Consulta - Precio Cliché': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'fechaPrometida', 'observaciones', 'metricasTecnicas'],
-      'Consulta - Diseño Plano': ['descripcion', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'emailSolicitante'],
-      'Consulta - Diseño': ['descripcion', 'archivos', 'presupuesto', 'complejidad', 'fechaPrometida', 'emailSolicitante']
-    };
+            const handleLogout = () => {
+                setTenant(null);
+                sessionStorage.removeItem('saas_tenant');
+            };
 
-    document.getElementById('tipoGestion').addEventListener('change', function(e) {
-      const seleccion = e.target.value;
-      document.querySelectorAll('[id^="campo_"]').forEach(el => {
-        el.classList.add('hidden-force');
-        el.style.display = 'none';
-      });
-      if (!seleccion) return;
-      (TIPOS[seleccion] || []).forEach(id => {
-        const el = document.getElementById('campo_' + id);
-        if(el) { el.classList.remove('hidden-force'); el.style.display = 'block'; }
-        if(el && el.classList.contains('md:col-span-2') && window.innerWidth >= 768) el.style.gridColumn = 'span 2 / span 2';
-      });
-    });
-
-    // --- BÚSQUEDA ---
-    let debounceTimer;
-    async function buscarEnN8N(query, url, contenedorResultados, tipo) {
-      contenedorResultados.innerHTML = '<div class="p-3 text-[#00f3ff] text-xs">Conectando...</div>';
-      contenedorResultados.classList.remove('hidden');
-      try {
-        const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ query }) });
-        const datos = await res.json();
-        const items = datos.map(d => d.json ? d.json : d).filter(Boolean);
-
-        if(items.length === 0) {
-            contenedorResultados.innerHTML = '<div class="p-3 text-gray-500 text-xs">Sin resultados</div>';
-            return;
-        }
-
-        contenedorResultados.innerHTML = items.map(item => `
-            <div class="p-3 hover:bg-[#00f3ff]/10 cursor-pointer border-b border-gray-800 transition-colors"
-                 onclick='seleccionarItem(${JSON.stringify(item).replace(/'/g, "&apos;")}, "${tipo}")'>
-               <div class="font-bold text-gray-200 text-sm">${item.name}</div>
-               <div class="text-[10px] text-[#00f3ff] mt-1">ID: ${item.id || 'N/A'}</div>
-            </div>
-        `).join('');
-      } catch (err) { contenedorResultados.innerHTML = '<div class="p-3 text-red-500 text-xs">Error</div>'; }
-    }
-
-    window.seleccionarItem = function(item, tipo) {
-       if(tipo === 'cliente') {
-           document.getElementById('searchCliente').value = '';
-           document.getElementById('resCliente').classList.add('hidden');
-           document.getElementById('selClienteText').textContent = item.name;
-           document.getElementById('selCliente').classList.remove('hidden');
-           document.getElementById('inputCliente').value = item.name; 
-           window.clienteSeleccionado = item;
-       } else {
-           document.getElementById('searchProyecto').value = '';
-           document.getElementById('resProyecto').classList.add('hidden');
-           document.getElementById('selProyectoText').textContent = item.name;
-           document.getElementById('selProyecto').classList.remove('hidden');
-           document.getElementById('inputProyecto').value = item.id;
-           window.proyectoSeleccionado = item;
-       }
-    };
-
-    document.getElementById('searchCliente').addEventListener('input', (e) => {
-        clearTimeout(debounceTimer);
-        if(e.target.value.length < 2) { document.getElementById('resCliente').classList.add('hidden'); return; }
-        debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarClientes, document.getElementById('resCliente'), 'cliente'), 300);
-    });
-    document.getElementById('searchProyecto').addEventListener('input', (e) => {
-        clearTimeout(debounceTimer);
-        if(e.target.value.length < 2) { document.getElementById('resProyecto').classList.add('hidden'); return; }
-        debounceTimer = setTimeout(() => buscarEnN8N(e.target.value, WEBHOOKS.buscarProyectos, document.getElementById('resProyecto'), 'proyecto'), 300);
-    });
-
-    // --- ARCHIVOS ---
-    const fileInput = document.getElementById('archivos');
-    let archivosSeleccionados = [];
-    document.getElementById('campo_archivos').addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-        archivosSeleccionados = [...archivosSeleccionados, ...Array.from(e.target.files)];
-        document.getElementById('listaArchivos').innerHTML = archivosSeleccionados.map((f, i) => `
-            <div class="flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700">
-                <span class="text-gray-300 truncate">${f.name}</span>
-                <span class="text-[#00f3ff] text-xs">${(f.size/1024).toFixed(0)} KB</span>
-            </div>
-        `).join('');
-    });
-
-    // --- ENVÍO ---
-    document.getElementById('gestionForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('btnEnviar');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="animate-pulse">TRANSMITIENDO...</span>';
-
-        try {
-            const formData = new FormData(e.target);
-            
-            // INYECTAR ROLLUPS EN DESCRIPCIÓN
-            let descFinal = formData.get('descripcion') || "";
-            let infoRollup = "";
-            if(window.clienteSeleccionado) {
-                 formData.set('cliente', window.clienteSeleccionado.name);
-                 infoRollup += `\n\n📌 CLIENTE VINCULADO: ${window.clienteSeleccionado.name}`;
+            if (!tenant) {
+                return <LoginScreen onLogin={handleLogin} />;
             }
-            if(window.proyectoSeleccionado) {
-                 formData.set('proyecto_relacionado', window.proyectoSeleccionado.id);
-                 infoRollup += `\n🔗 PROYECTO RELACIONADO: ${window.proyectoSeleccionado.name} (ID: ${window.proyectoSeleccionado.id})`;
-            }
-            if(infoRollup) {
-                formData.set('descripcion', descFinal + infoRollup);
-            }
 
-            archivosSeleccionados.forEach((f, i) => formData.append(`archivo_${i}`, f));
+            return <Dashboard tenant={tenant} onLogout={handleLogout} />;
+        };
 
-            const res = await fetch(WEBHOOKS.crearTarea, { method: 'POST', body: formData });
-            
-            if(res.ok) {
-                Swal.fire({
-                    title: '¡SOLICITUD ENVIADA!',
-                    text: 'Datos registrados correctamente.',
-                    icon: 'success',
-                    background: '#111',
-                    color: '#fff',
-                    confirmButtonColor: '#00f3ff',
-                    confirmButtonText: '<span style="color:black; font-weight:bold">ENTENDIDO</span>'
-                });
-                e.target.reset();
-                archivosSeleccionados = [];
-                document.getElementById('listaArchivos').innerHTML = '';
-                document.getElementById('selCliente').classList.add('hidden');
-                document.getElementById('selProyecto').classList.add('hidden');
-                window.clienteSeleccionado = null;
-                window.proyectoSeleccionado = null;
-                document.getElementById('tipoGestion').dispatchEvent(new Event('change'));
-            } else {
-                throw new Error('Error en servidor');
-            }
-        } catch (err) {
-            Swal.fire('Error', 'No se pudo contactar con el servidor.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerText = 'TRANSMITIR DATOS AL SISTEMA';
-        }
-    });
-  </script>
+        // Renderizado (Compatible React 17/18)
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </body>
 </html>
