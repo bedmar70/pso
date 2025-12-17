@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaaS Portal - Acceso Clientes</title>
+    <title>SaaS Portal - Acceso Clientes 2.0.</title>
     
     <!-- Carga de Librerías desde CDN (No requiere instalación) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -244,7 +244,7 @@
                 setLoading(true);
                 try {
                     // Enviamos los datos del tenant actual al router de N8N
-                    console.log("Petición a N8N:", { action: 'get_decisions', tenantId: tenant.id });
+                    console.log("Petición a N8N:", { action: 'get_decisions', tenantId: tenant.id, listId: tenant.listId });
                     
                     const response = await fetch(`${ENDPOINTS.OPERATIONS}?t=${Date.now()}`, {
                         method: 'POST',
@@ -343,8 +343,10 @@
                                         className="w-full bg-[#151B2B] border border-[#2D3748] rounded-lg pl-9 pr-4 py-2.5 text-sm focus:border-blue-500 outline-none text-white" 
                                     />
                                 </div>
-                                <Button onClick={fetchDecisions} variant="secondary" loading={loading} className="px-3">
-                                    <Icons.RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                                {/* BOTÓN DE BUSCAR/REFRESCAR */}
+                                <Button onClick={fetchDecisions} variant="secondary" loading={loading} className="px-4">
+                                    <Icons.RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                                    Buscar
                                 </Button>
                             </div>
                         </div>
@@ -365,7 +367,7 @@
                                 <div className="flex justify-center mb-3">
                                     <Icons.CheckCircle2 className="w-10 h-10 text-slate-600" />
                                 </div>
-                                <p className="text-slate-500">No hay decisiones pendientes (o pulsa refrescar).</p>
+                                <p className="text-slate-500">No hay decisiones pendientes (o pulsa buscar).</p>
                                 <Button onClick={fetchDecisions} variant="ghost" className="mt-2 text-blue-400">
                                     Cargar Datos
                                 </Button>
