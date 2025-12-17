@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Gestión</title>
+    <title>Portal de Gestión - Acceso Clientes</title>
     
-    <!-- Carga de Librerías desde CDN -->
+    <!-- Carga de Librerías (React, Babel, Tailwind) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        body { background-color: #0B0F19; color: #e2e8f0; font-family: sans-serif; }
+        body { background-color: #0B0F19; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         /* Scrollbar */
@@ -29,11 +29,10 @@
         const { useState, useEffect } = React;
 
         // --- CONFIGURACIÓN ---
-        // Tus Endpoints de N8N
-        const N8N_BASE_URL = "https://n8n.escueladeefectividad.com/webhook";
+        // Verifica que estas URLs sean las correctas de tu N8N
         const ENDPOINTS = {
-            AUTH: `${N8N_BASE_URL}/saas-login-master`, 
-            OPERATIONS: `${N8N_BASE_URL}/saas-operations-router` 
+            AUTH: "https://n8n.escueladeefectividad.com/webhook/saas-login-master", 
+            OPERATIONS: "https://n8n.escueladeefectividad.com/webhook/saas-operations-router" 
         };
 
         // --- ICONOS SVG ---
@@ -56,7 +55,11 @@
                 ghost: "text-slate-400 hover:text-white hover:bg-white/5"
             };
             return (
-                <button onClick={onClick} disabled={disabled || loading} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>
+                <button 
+                    onClick={onClick} 
+                    disabled={disabled || loading}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+                >
                     {loading && <Icons.Loader2 className="w-4 h-4 animate-spin" />}
                     {children}
                 </button>
@@ -79,7 +82,7 @@
                     });
                     const text = await response.text();
                     let data = {};
-                    try { data = text ? JSON.parse(text) : {}; } catch (e) { throw new Error("Error en respuesta del servidor"); }
+                    try { data = text ? JSON.parse(text) : {}; } catch (e) { throw new Error("Respuesta inválida del servidor"); }
                     
                     const result = Array.isArray(data) ? data[0] : data;
                     const payload = result.json || result;
@@ -94,7 +97,7 @@
                     <div className="max-w-md w-full bg-[#151B2B] rounded-2xl shadow-2xl border border-[#2D3748] overflow-hidden">
                         <div className="p-8 text-center border-b border-[#2D3748]">
                             <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20"><Icons.RefreshCw className="w-8 h-8 text-blue-500" /></div>
-                            <h2 className="text-2xl font-bold text-white">Portal de Gestión</h2>
+                            <h2 className="text-2xl font-bold text-white">SaaS Access</h2>
                         </div>
                         <div className="p-8">
                             <form onSubmit={handleSubmit} className="space-y-4">
@@ -156,14 +159,19 @@
             const fetchDecisions = async () => {
                 setLoading(true);
                 try {
-                    console.log("Enviando petición a N8N:", { action: 'get_decisions', tenantId: tenant.id, listId: tenant.listId });
+                    console.log("Enviando petición a N8N...", { action: 'get_decisions', tenantId: tenant.id, listId: tenant.listId });
+                    
                     const response = await fetch(`${ENDPOINTS.OPERATIONS}?t=${Date.now()}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'get_decisions', tenantId: tenant.id, listId: tenant.listId })
                     });
+                    
                     const text = await response.text();
+                    console.log("Respuesta N8N:", text);
+                    
                     let data = [];
                     try { data = text ? JSON.parse(text) : []; } catch (e) { console.error("Error JSON:", e); }
+                    
                     const tasks = Array.isArray(data) ? data : (data.tasks || []);
                     setDecisions(tasks);
                 } catch (err) { console.error("Error fetching decisions", err); } finally { setLoading(false); }
