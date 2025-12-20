@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; padding: 20px; }
+  .timeline-container { display: flex; gap: 10px; justify-content: center; max-width: 1200px; margin: 0 auto; }
+  .phase-col { flex: 1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+  
+  /* Colores inspirados en Playbook pero sobrios para Arquitectura */
+  .p1 { background-color: #ffffff; border-top: 8px solid #2A9D8F; } /* Teal */
+  .p2 { background-color: #ffffff; border-top: 8px solid #264653; } /* Dark Blue */
+  .p3 { background-color: #ffffff; border-top: 8px solid #E76F51; } /* Burnt Sienna */
+  .p4 { background-color: #ffffff; border-top: 8px solid #F4A261; } /* Sandy Orange */
+  .p5 { background-color: #ffffff; border-top: 8px solid #606c38; } /* Olive Green */
+
+  .header { padding: 20px 10px; color: white; text-align: center; height: 80px; display: flex; flex-direction: column; justify-content: center; }
+  .p1 .header { background-color: #2A9D8F; }
+  .p2 .header { background-color: #264653; }
+  .p3 .header { background-color: #E76F51; }
+  .p4 .header { background-color: #F4A261; }
+  .p5 .header { background-color: #606c38; }
+
+  .phase-title { font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+  .phase-days { font-size: 12px; opacity: 0.9; }
+
+  .content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
+  .item { font-size: 13px; color: #333; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+  .item:last-child { border-bottom: none; }
+  .highlight { font-weight: bold; color: #000; display: block; margin-bottom: 3px; }
+
+  .icon { font-size: 24px; margin-bottom: 5px; display: block; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="timeline-container">
+  <div class="phase-col p1">
+    <div class="header">
+      <span class="icon">🔍</span>
+      <div class="phase-title">1. Topografía</div>
+      <div class="phase-days">Días 1-10</div>
+    </div>
+    <div class="content">
+      <div class="item">
+        <span class="highlight">Diagnóstico "As-Is"</span>
+        Mapa de calor de procesos y cuellos de botella actuales.
+      </div>
+      <div class="item">
+        <span class="highlight">Anteproyecto (V/TO)</span>
+        Definición de organigrama y objetivos verticales.
+      </div>
+       <div class="item">
+        <span class="highlight">Caseta de Obra</span>
+        Setup inicial de seguridad y roles en ClickUp.
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-col p2">
+    <div class="header">
+      <span class="icon">🏗️</span>
+      <div class="phase-title">2. Cimentación</div>
+      <div class="phase-days">Días 11-30</div>
+    </div>
+    <div class="content">
+      <div class="item">
+        <span class="highlight">Jerarquía Maestra</span>
+        Estructura monolista validada (Fases > Actividades).
+      </div>
+      <div class="item">
+        <span class="highlight">Migración de Datos</span>
+        Limpieza y carga de CRM (Clientes y Proveedores).
+      </div>
+      <div class="item">
+        <span class="highlight">Matriz de Permisos</span>
+        Seguridad de datos y jerarquía de accesos.
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-col p3">
+    <div class="header">
+      <span class="icon">🏭</span>
+      <div class="phase-title">3. Instalaciones</div>
+      <div class="phase-days">Días 31-60</div>
+    </div>
+    <div class="content">
+      <div class="item">
+        <span class="highlight">Catálogo AEC</span>
+        Plantillas maestras (Básico, Ejecución, D.O.).
+      </div>
+      <div class="item">
+        <span class="highlight">Vistas Operativas</span>
+        Gantt Global y Control de Carga de Trabajo.
+      </div>
+      <div class="item">
+        <span class="highlight">Protocolos (SOPs)</span>
+        Definición de estados y flujos de aprobación.
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-col p4">
+    <div class="header">
+      <span class="icon">⚙️</span>
+      <div class="phase-title">4. Domótica</div>
+      <div class="phase-days">Días 61-80</div>
+    </div>
+    <div class="content">
+      <div class="item">
+        <span class="highlight">Control Económico</span>
+        Vista de Rentabilidad (Coste vs Venta) en tiempo real.
+      </div>
+      <div class="item">
+        <span class="highlight">Semáforo de Desviación</span>
+        Alertas automáticas al 80% del consumo de horas.
+      </div>
+      <div class="item">
+        <span class="highlight">Cashflow</span>
+        Calendario de Hitos de Certificación y Cobro.
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-col p5">
+    <div class="header">
+      <span class="icon">🔑</span>
+      <div class="phase-title">5. Entrega</div>
+      <div class="phase-days">Días 81-90</div>
+    </div>
+    <div class="content">
+      <div class="item">
+        <span class="highlight">La Wiki (Video)</span>
+        SOPs incrustados en tareas con ClickUp Clips.
+      </div>
+      <div class="item">
+        <span class="highlight">Videoteca Onboarding</span>
+        Grabaciones para formación de futuros empleados.
+      </div>
+      <div class="item">
+        <span class="highlight">Certificación Final</span>
+        Transferencia de propiedad y cierre de proyecto.
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
