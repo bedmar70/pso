@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanOS | Business Operating System</title>
+    <title>PlanOS v2.1 | Interactive Business Operating System</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -27,7 +27,13 @@
                         accent: '#ff003c', /* Alert Red */
                         grid: 'rgba(255, 255, 255, 0.03)',
                         textMain: '#e0e6ed',
-                        textDim: '#94a3b8'
+                        textDim: '#94a3b8',
+                        // Colores de Fases
+                        p1: '#2a9d8f',
+                        p2: '#264653',
+                        p3: '#e76f51',
+                        p4: '#f4a261',
+                        p5: '#6a7f38',
                     },
                     fontFamily: {
                         sans: ['Space Grotesk', 'sans-serif'],
@@ -80,26 +86,12 @@
 
         /* CLASES UTILITARIAS PERSONALIZADAS */
         .glass-panel {
-            background: rgba(15, 17, 21, 0.7);
+            background: rgba(15, 17, 21, 0.75);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-
-        .tech-border {
-            position: relative;
-        }
-        .tech-border::before, .tech-border::after {
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border: 1px solid var(--primary);
-            transition: all 0.3s ease;
-        }
-        .tech-border::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
-        .tech-border::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
 
         .slide-container {
             display: none; /* Se maneja con JS */
@@ -119,12 +111,19 @@
             display: flex;
         }
 
-        /* Fases Colores */
-        .phase-1 { border-top: 4px solid #2a9d8f; }
-        .phase-2 { border-top: 4px solid #264653; }
-        .phase-3 { border-top: 4px solid #e76f51; }
-        .phase-4 { border-top: 4px solid #f4a261; }
-        .phase-5 { border-top: 4px solid #6a7f38; }
+        /* Estilos específicos de fases */
+        .phase-card {
+            transition: all 0.3s ease;
+        }
+        .phase-card:hover {
+            transform: translateY(-5px);
+        }
+        /* Fases Colores Borders */
+        .phase-card.p1 { border-top: 4px solid #2a9d8f; }
+        .phase-card.p2 { border-top: 4px solid #264653; }
+        .phase-card.p3 { border-top: 4px solid #e76f51; }
+        .phase-card.p4 { border-top: 4px solid #f4a261; }
+        .phase-card.p5 { border-top: 4px solid #6a7f38; }
 
         /* Botón animado */
         .btn-glitch {
@@ -150,6 +149,25 @@
             top: 0;
             left: 0;
             z-index: 1;
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            transform: scale(0.95);
+            opacity: 0;
         }
     </style>
 </head>
@@ -179,6 +197,16 @@
         </div>
     </div>
 
+    <div id="imageModal" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content glass-panel p-2 rounded-xl border-primary/30 relative" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute -top-4 -right-4 bg-accent p-2 rounded-full text-white hover:bg-red-600 transition z-10">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <img id="modalImage" src="" alt="Detalle Fase" class="rounded-lg max-h-[80vh] w-auto object-contain border border-white/10">
+        </div>
+    </div>
+
+
     <div class="slide-container slide-active" id="slide-0">
         <div class="max-w-5xl mx-auto w-full text-center relative">
             <div class="gsap-reveal inline-block px-4 py-1 border border-primary/30 rounded-full bg-primary/5 text-primary font-mono text-sm mb-6">
@@ -193,7 +221,7 @@
             </p>
             <div class="gsap-reveal flex justify-center gap-4">
                 <div class="flex items-center gap-2 text-xs font-mono text-gray-500">
-                    <i data-lucide="cpu" class="w-4 h-4"></i> v2.0 READY
+                    <i data-lucide="cpu" class="w-4 h-4"></i> v2.1 INTERACTIVE
                 </div>
                 <div class="flex items-center gap-2 text-xs font-mono text-gray-500">
                     <i data-lucide="shield-check" class="w-4 h-4"></i> PMP® CERTIFIED
@@ -258,70 +286,124 @@
     </div>
 
     <div class="slide-container" id="slide-2">
-        <div class="max-w-7xl mx-auto w-full h-full flex flex-col justify-center">
-            <div class="text-center mb-10 gsap-reveal">
+        <div class="max-w-[90rem] mx-auto w-full h-full flex flex-col justify-center">
+            <div class="text-center mb-8 gsap-reveal">
                 <h2 class="text-4xl font-bold text-white mb-2">INGENIERÍA OPERATIVA</h2>
                 <p class="font-mono text-primary text-sm tracking-widest">DE CAOS ARTESANAL A PRECISIÓN INDUSTRIAL</p>
+                <p class="text-xs text-textDim mt-2"><i data-lucide="mouse-pointer-click" class="w-4 h-4 inline animate-bounce"></i> Haz clic en las fases 1 y 2 para ver detalles.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 h-[50vh]">
-                <div class="gsap-reveal glass-panel phase-1 p-6 flex flex-col items-center justify-between text-center hover:-translate-y-2 transition-transform duration-300 group">
-                    <div class="w-full">
-                        <span class="font-mono text-[10px] text-gray-500 block mb-2">DÍAS 1-10</span>
-                        <h3 class="font-bold text-[#2a9d8f] text-sm tracking-wider">TOPOGRAFÍA</h3>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 h-auto items-stretch">
+                
+                <div onclick="openModal('RUTA_A_TU_IMAGEN_1_FASES.png')" class="gsap-reveal glass-panel phase-card p1 p-5 flex flex-col text-left group cursor-pointer relative overflow-hidden">
+                    <div class="absolute top-2 right-2 opacity-50 group-hover:opacity-100 transition"><i data-lucide="expand" class="text-p1 w-4 h-4"></i></div>
+                    <div class="mb-4 text-center">
+                         <i data-lucide="scan-search" class="w-8 h-8 text-p1 mx-auto mb-2"></i>
+                        <h3 class="font-bold text-p1 text-lg tracking-wider">1. TOPOGRAFÍA</h3>
+                        <span class="font-mono text-[10px] text-gray-500 block">DÍAS 1-10</span>
                     </div>
-                    <i data-lucide="scan-search" class="w-12 h-12 text-[#2a9d8f] group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="h-px w-full bg-[#2a9d8f]/30 mb-4"></div>
-                        <p class="text-xs font-mono text-gray-300">Mapa de Calor &<br>Diagnóstico "As-Is"</p>
-                    </div>
-                </div>
-
-                <div class="gsap-reveal glass-panel phase-2 p-6 flex flex-col items-center justify-between text-center hover:-translate-y-2 transition-transform duration-300 group">
-                    <div class="w-full">
-                        <span class="font-mono text-[10px] text-gray-500 block mb-2">DÍAS 11-30</span>
-                        <h3 class="font-bold text-[#264653] text-sm tracking-wider">CIMENTACIÓN</h3>
-                    </div>
-                    <i data-lucide="hammer" class="w-12 h-12 text-[#264653] group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="h-px w-full bg-[#264653]/30 mb-4"></div>
-                        <p class="text-xs font-mono text-gray-300">Jerarquía Maestra<br>Validada</p>
-                    </div>
-                </div>
-
-                <div class="gsap-reveal glass-panel phase-3 p-6 flex flex-col items-center justify-between text-center hover:-translate-y-2 transition-transform duration-300 group">
-                    <div class="w-full">
-                        <span class="font-mono text-[10px] text-gray-500 block mb-2">DÍAS 31-60</span>
-                        <h3 class="font-bold text-[#e76f51] text-sm tracking-wider">INSTALACIONES</h3>
-                    </div>
-                    <i data-lucide="factory" class="w-12 h-12 text-[#e76f51] group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="h-px w-full bg-[#e76f51]/30 mb-4"></div>
-                        <p class="text-xs font-mono text-gray-300">Catálogo AEC &<br>Vistas Operativas</p>
+                    <div class="space-y-3 font-mono text-xs text-gray-300 flex-grow">
+                        <div>
+                            <strong class="text-white block mb-1">Diagnóstico "As-Is"</strong>
+                            <p class="text-textDim leading-tight">Mapa de calor de procesos y cuellos de botella actuales.</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Anteproyecto (V/TO)</strong>
+                            <p class="text-textDim leading-tight">Definición de organigrama y objetivos verticales.</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Caseta de Obra</strong>
+                            <p class="text-textDim leading-tight">Setup inicial de seguridad y roles en ClickUp.</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="gsap-reveal glass-panel phase-4 p-6 flex flex-col items-center justify-between text-center hover:-translate-y-2 transition-transform duration-300 group">
-                    <div class="w-full">
-                        <span class="font-mono text-[10px] text-gray-500 block mb-2">DÍAS 61-80</span>
-                        <h3 class="font-bold text-[#f4a261] text-sm tracking-wider">DOMÓTICA</h3>
+                <div onclick="openModal('RUTA_A_TU_IMAGEN_3_INTERFAZ.jpg')" class="gsap-reveal glass-panel phase-card p2 p-5 flex flex-col text-left group cursor-pointer relative overflow-hidden">
+                     <div class="absolute top-2 right-2 opacity-50 group-hover:opacity-100 transition"><i data-lucide="expand" class="text-p2 w-4 h-4"></i></div>
+                    <div class="mb-4 text-center">
+                        <i data-lucide="hammer" class="w-8 h-8 text-p2 mx-auto mb-2"></i>
+                        <h3 class="font-bold text-p2 text-lg tracking-wider">2. CIMENTACIÓN</h3>
+                        <span class="font-mono text-[10px] text-gray-500 block">DÍAS 11-30</span>
                     </div>
-                    <i data-lucide="bot" class="w-12 h-12 text-[#f4a261] group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="h-px w-full bg-[#f4a261]/30 mb-4"></div>
-                        <p class="text-xs font-mono text-gray-300">Dashboard de<br>Rentabilidad Real</p>
+                     <div class="space-y-3 font-mono text-xs text-gray-300 flex-grow">
+                        <div>
+                            <strong class="text-white block mb-1">Jerarquía Maestra</strong>
+                            <p class="text-textDim leading-tight">Estructura monolista validada (Fases > Actividades).</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Migración de Datos</strong>
+                            <p class="text-textDim leading-tight">Limpieza y carga de CRM (Clientes y Proveedores).</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Matriz de Permisos</strong>
+                            <p class="text-textDim leading-tight">Seguridad de datos y jerarquía de accesos.</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="gsap-reveal glass-panel phase-5 p-6 flex flex-col items-center justify-between text-center hover:-translate-y-2 transition-transform duration-300 group">
-                    <div class="w-full">
-                        <span class="font-mono text-[10px] text-gray-500 block mb-2">DÍAS 81-90</span>
-                        <h3 class="font-bold text-[#6a7f38] text-sm tracking-wider">ENTREGA</h3>
+                <div class="gsap-reveal glass-panel phase-card p3 p-5 flex flex-col text-left group">
+                    <div class="mb-4 text-center">
+                        <i data-lucide="factory" class="w-8 h-8 text-p3 mx-auto mb-2"></i>
+                        <h3 class="font-bold text-p3 text-lg tracking-wider">3. INSTALACIONES</h3>
+                        <span class="font-mono text-[10px] text-gray-500 block">DÍAS 31-60</span>
                     </div>
-                    <i data-lucide="key" class="w-12 h-12 text-[#6a7f38] group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="h-px w-full bg-[#6a7f38]/30 mb-4"></div>
-                        <p class="text-xs font-mono text-gray-300">Videoteca Wiki &<br>Onboarding Auto.</p>
+                     <div class="space-y-3 font-mono text-xs text-gray-300 flex-grow">
+                        <div>
+                            <strong class="text-white block mb-1">Catálogo AEC</strong>
+                            <p class="text-textDim leading-tight">Plantillas maestras (Básico, Ejecución, D.O.).</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Vistas Operativas</strong>
+                            <p class="text-textDim leading-tight">Gantt Global y Control de Carga de Trabajo.</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Protocolos (SOPs)</strong>
+                            <p class="text-textDim leading-tight">Definición de estados y flujos de aprobación.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gsap-reveal glass-panel phase-card p4 p-5 flex flex-col text-left group">
+                    <div class="mb-4 text-center">
+                         <i data-lucide="bot" class="w-8 h-8 text-p4 mx-auto mb-2"></i>
+                        <h3 class="font-bold text-p4 text-lg tracking-wider">4. DOMÓTICA</h3>
+                        <span class="font-mono text-[10px] text-gray-500 block">DÍAS 61-80</span>
+                    </div>
+                     <div class="space-y-3 font-mono text-xs text-gray-300 flex-grow">
+                        <div>
+                            <strong class="text-white block mb-1">Control Económico</strong>
+                            <p class="text-textDim leading-tight">Vista de Rentabilidad (Coste vs Venta) en tiempo real.</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Semáforo Desviación</strong>
+                            <p class="text-textDim leading-tight">Alertas automáticas al 80% del consumo de horas.</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Cashflow</strong>
+                            <p class="text-textDim leading-tight">Calendario de Hitos de Certificación y Cobro.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gsap-reveal glass-panel phase-card p5 p-5 flex flex-col text-left group">
+                    <div class="mb-4 text-center">
+                        <i data-lucide="key" class="w-8 h-8 text-p5 mx-auto mb-2"></i>
+                        <h3 class="font-bold text-p5 text-lg tracking-wider">5. ENTREGA</h3>
+                        <span class="font-mono text-[10px] text-gray-500 block">DÍAS 81-90</span>
+                    </div>
+                     <div class="space-y-3 font-mono text-xs text-gray-300 flex-grow">
+                        <div>
+                            <strong class="text-white block mb-1">La Wiki (Video)</strong>
+                            <p class="text-textDim leading-tight">SOPs incrustados en tareas con ClickUp Clips.</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Videoteca Onboarding</strong>
+                            <p class="text-textDim leading-tight">Grabaciones para formación de futuros empleados.</p>
+                        </div>
+                        <div>
+                            <strong class="text-white block mb-1">Certificación Final</strong>
+                            <p class="text-textDim leading-tight">Transferencia de propiedad y cierre de proyecto.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -531,7 +613,51 @@
         // INICIALIZACIÓN DE ICONOS
         lucide.createIcons();
 
+        // =========================================
+        // LÓGICA DE MODAL (POPUP)
+        // =========================================
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalContent = modal.querySelector('.modal-content');
+
+        function openModal(imageSrc) {
+            if (!imageSrc || imageSrc.includes('RUTA_A_TU_IMAGEN')) {
+                 console.warn("Recuerda reemplazar la ruta de la imagen en el HTML");
+                 // Opcional: usar una imagen de placeholder si no hay ruta
+                 // imageSrc = 'https://via.placeholder.com/800x600?text=Imagen+No+Encontrada';
+            }
+            modalImage.src = imageSrc;
+            modal.style.display = 'flex';
+            
+            // Animación de entrada
+            gsap.to(modal, { opacity: 1, duration: 0.3 });
+            gsap.fromTo(modalContent, 
+                { opacity: 0, scale: 0.9 }, 
+                { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.2)" }
+            );
+        }
+
+        function closeModal() {
+             // Animación de salida
+            gsap.to(modalContent, { opacity: 0, scale: 0.9, duration: 0.2 });
+            gsap.to(modal, { 
+                opacity: 0, 
+                duration: 0.3, 
+                onComplete: () => { modal.style.display = 'none'; modalImage.src = ''; }
+            });
+        }
+
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                closeModal();
+            }
+        });
+
+
+        // =========================================
         // LÓGICA DE SLIDES
+        // =========================================
         let currentSlide = 0;
         const totalSlides = 7;
         const slideIndicator = document.getElementById('slide-indicator');
