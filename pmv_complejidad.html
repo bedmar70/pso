@@ -1,632 +1,218 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Complexity Governor · PMV (Offline)</title>
-  <style>
-    :root{
-      --bg:#f4f6f8; --card:#ffffff; --ink:#0f172a; --muted:#475569;
-      --nav:#0b1220; --nav2:#111b2e; --accent:#3b82f6; --warn:#f97316; --ok:#16a34a;
-      --line:#e2e8f0;
-    }
-    body{ margin:0; font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--ink); }
-    header{ background:var(--nav); color:#fff; padding:16px 16px 10px; }
-    header h1{ margin:0 0 4px; font-size:18px; }
-    header p{ margin:0; opacity:.85; font-size:12px; }
-    .wrap{ max-width: 980px; margin: 0 auto; padding: 14px; }
-    .row{ display:flex; gap:12px; flex-wrap:wrap; }
-    .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
-    .card h2{ font-size:15px; margin:0 0 8px; }
-    .card h3{ font-size:13px; margin:14px 0 8px; }
-    .pill{ display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line); background:#fff; }
-    .pill.ok{ border-color:rgba(22,163,74,.25); background:rgba(22,163,74,.08); color:#0f5132; }
-    .pill.warn{ border-color:rgba(249,115,22,.25); background:rgba(249,115,22,.10); color:#7c2d12; }
-    .pill.info{ border-color:rgba(59,130,246,.25); background:rgba(59,130,246,.10); color:#1e3a8a; }
-    nav{ position: sticky; top:0; z-index:10; background:var(--nav2); display:flex; overflow:auto; }
-    nav button{
-      flex: 0 0 auto; padding: 12px 12px; border:none; background:transparent; color:#fff;
-      opacity:.8; cursor:pointer; font-size:13px;
-    }
-    nav button.active{ opacity:1; border-bottom: 2px solid var(--accent); }
-    section{ margin-bottom:12px; }
-    label{ display:block; margin-top:10px; font-weight:600; font-size:12px; }
-    input, textarea, select{
-      width:100%; box-sizing:border-box; padding:10px; border-radius:10px; border:1px solid var(--line); background:#fff;
-      font-size:14px;
-    }
-    textarea{ min-height: 90px; }
-    .help{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.35; }
-    .btnbar{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    button.primary{
-      background:var(--accent); color:#fff; border:none; border-radius:10px; padding:10px 12px; cursor:pointer; font-weight:600;
-    }
-    button.ghost{
-      background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; cursor:pointer; font-weight:600;
-    }
-    .grid2{ display:grid; grid-template-columns: 1fr; gap:12px; }
-    @media (min-width: 900px){
-      .grid2{ grid-template-columns: 1.2fr .8fr; }
-    }
-    .hr{ height:1px; background:var(--line); margin:12px 0; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; }
-    .small{ font-size:12px; color:var(--muted); }
-    .kpi{ display:flex; gap:10px; flex-wrap:wrap; }
-    .kpi .box{ flex:1; min-width: 180px; border:1px solid var(--line); border-radius:12px; padding:10px; background:#fff; }
-    .kpi .box .n{ font-size:20px; font-weight:800; }
-    .kpi .box .t{ font-size:12px; color:var(--muted); }
-    .table{ width:100%; border-collapse: collapse; font-size:13px; }
-    .table th, .table td{ text-align:left; border-bottom:1px solid var(--line); padding:8px 6px; vertical-align:top; }
-    .table th{ font-size:12px; color:var(--muted); font-weight:700; }
-    .callout{
-      border-left: 4px solid var(--accent); background: rgba(59,130,246,.08);
-      padding: 10px; border-radius: 10px; margin-top:10px;
-    }
-    .callout.warn{ border-left-color: var(--warn); background: rgba(249,115,22,.10); }
-    .callout.ok{ border-left-color: var(--ok); background: rgba(22,163,74,.10); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Complexity Governor · PMV</title>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --ink:#0f172a; --muted:#475569;
+  --nav:#0b1220; --nav2:#111b2e; --accent:#3b82f6; --warn:#f97316; --ok:#16a34a;
+  --line:#e2e8f0;
+}
+body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+header{background:var(--nav);color:#fff;padding:16px;}
+header h1{margin:0;font-size:18px;}
+header p{margin:4px 0 0;font-size:12px;opacity:.85}
+nav{display:flex;overflow:auto;background:var(--nav2);}
+nav button{padding:12px 14px;border:none;background:none;color:#fff;opacity:.8;cursor:pointer;font-size:13px;}
+nav button.active{opacity:1;border-bottom:2px solid var(--accent);}
+.wrap{max-width:1000px;margin:0 auto;padding:14px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;}
+h2{margin-top:0;font-size:16px;}
+.help{font-size:13px;color:var(--muted);line-height:1.45}
+.callout{border-left:4px solid var(--accent);background:#eef2ff;padding:12px;border-radius:10px;margin:12px 0}
+.callout.warn{border-left-color:var(--warn);background:#fff7ed}
+.callout.ok{border-left-color:var(--ok);background:#ecfdf5}
+section{display:none}
+section.active{display:block}
+ol{padding-left:18px}
+</style>
 </head>
+
 <body>
+
 <header>
-  <h1>Complexity Governor · PMV (Offline)</h1>
-  <p>Gobierno de complejidad → sistema gobernable → herramientas después. (Sin nube, sin cuentas)</p>
+<h1>Complexity Governor</h1>
+<p>Gobernar complejidad antes de herramientas</p>
 </header>
 
 <nav>
-  <button class="active" onclick="showTab('asistente')">Asistente IA</button>
-  <button onclick="showTab('wip')">WIP</button>
-  <button onclick="showTab('intake')">Intake</button>
-  <button onclick="showTab('decisiones')">Decisiones</button>
-  <button onclick="showTab('rituales')">Rituales</button>
-  <button onclick="showTab('salida')">Salida</button>
-  <button onclick="showTab('ayuda')">Guía</button>
+<button class="active" onclick="showTab('inicio')">Inicio</button>
+<button onclick="showTab('asistente')">1. Clasificar</button>
+<button onclick="showTab('intake')">2. Intake</button>
+<button onclick="showTab('wip')">3. WIP</button>
+<button onclick="showTab('decisiones')">4. Decisiones</button>
+<button onclick="showTab('rituales')">5. Rituales</button>
+<button onclick="showTab('salida')">Salida</button>
 </nav>
 
 <div class="wrap">
 
-  <section id="asistente" class="card">
-    <div class="grid2">
-      <div>
-        <h2>Asistente de Clasificación (IA offline)</h2>
-        <div class="help">
-          Esto es “IA” en modo PMV: un <strong>motor de reglas</strong> que aplica el razonamiento del método y te explica el porqué.
-          Úsalo para: (1) clasificar entradas, (2) decidir si entran, (3) asignar DRI, (4) exigir DoD, (5) proteger WIP.
-        </div>
+<!-- INICIO -->
+<section id="inicio" class="active card">
+<h2>¿Qué es esto?</h2>
+<div class="callout">
+<strong>Complexity Governor</strong> no es un gestor de tareas.<br>
+Es un sistema para decidir:
+<ul>
+<li>qué es realmente complejo</li>
+<li>cuánta complejidad puede sostener la organización</li>
+<li>quién decide</li>
+<li>cuándo algo está cerrado</li>
+</ul>
+</div>
 
-        <label>Describe la entrada (tal y como llega)</label>
-        <textarea id="in_text">Cliente pide cambiar el diseño una semana antes de instalar. Comercial dice que es urgente.</textarea>
-        <div class="help">Escribe como si fuese un WhatsApp o un email. No “lo mejores”. Queremos la realidad.</div>
+<h2>¿Cuándo se usa?</h2>
+<div class="help">
+Cuando:
+<ul>
+<li>todo parece urgente</li>
+<li>hay muchas cosas abiertas y pocas cerradas</li>
+<li>las decisiones se reabren</li>
+<li>las herramientas no “cuajan”</li>
+</ul>
+</div>
 
-        <div class="row">
-          <div style="flex:1; min-width:240px;">
-            <label>Impacto si no se hace</label>
-            <select id="in_impact">
-              <option value="low">Bajo (molesto, pero asumible)</option>
-              <option value="med" selected>Medio (cliente/€ afecta)</option>
-              <option value="high">Alto (riesgo serio)</option>
-              <option value="legal">Legal / contractual / seguridad</option>
-            </select>
-          </div>
-          <div style="flex:1; min-width:240px;">
-            <label>Reversibilidad</label>
-            <select id="in_reversible">
-              <option value="yes">Sí (se puede deshacer fácil)</option>
-              <option value="partial" selected>Parcial (cuesta, deja efectos)</option>
-              <option value="no">No (difícilmente reversible)</option>
-            </select>
-          </div>
-        </div>
+<h2>Cómo usar el sistema (orden obligatorio)</h2>
+<div class="callout ok">
+<ol>
+<li><strong>Clasificar</strong> → entender qué tipo de problema es</li>
+<li><strong>Intake</strong> → decidir si entra o no</li>
+<li><strong>WIP</strong> → limitar cuántos problemas complejos hay activos</li>
+<li><strong>Decisiones</strong> → asignar DRI y caducidad</li>
+<li><strong>Rituales</strong> → priorizar y cerrar</li>
+<li><strong>Salida</strong> → el sistema ya funciona sin el consultor</li>
+</ol>
+</div>
 
-        <div class="row">
-          <div style="flex:1; min-width:240px;">
-            <label>¿Está cubierto por SOP/Regla existente?</label>
-            <select id="in_sop">
-              <option value="yes">Sí (hay criterio claro)</option>
-              <option value="no" selected>No (o es ambiguo)</option>
-            </select>
-          </div>
-          <div style="flex:1; min-width:240px;">
-            <label>¿Cruza áreas / requiere coordinación?</label>
-            <select id="in_cross">
-              <option value="no">No (una persona/área)</option>
-              <option value="yes" selected>Sí (varias áreas)</option>
-            </select>
-          </div>
-        </div>
+<div class="callout warn">
+Regla de oro:<br>
+<strong>Nada complejo se ejecuta sin pasar por Intake y WIP.</strong>
+</div>
+</section>
 
-        <div class="row">
-          <div style="flex:1; min-width:240px;">
-            <label>¿Es “flujo” (trabajo repetible) o “excepción”?</label>
-            <select id="in_flow">
-              <option value="flow">Flujo operativo repetible</option>
-              <option value="exception" selected>Excepción / caso especial</option>
-              <option value="unknown">No lo sé</option>
-            </select>
-          </div>
-          <div style="flex:1; min-width:240px;">
-            <label>Urgencia percibida</label>
-            <select id="in_urgency">
-              <option value="normal">Normal</option>
-              <option value="urgent" selected>Urgente</option>
-              <option value="panic">Pánico / incendio</option>
-            </select>
-          </div>
-        </div>
+<!-- ASISTENTE -->
+<section id="asistente" class="card">
+<h2>1️⃣ Clasificación</h2>
+<div class="help">
+Aquí se trae cualquier cosa que llegue a la empresa (email, WhatsApp, idea, urgencia).
+El objetivo no es resolverla, sino <strong>clasificarla correctamente</strong>.
+</div>
 
-        <div class="btnbar">
-          <button class="primary" onclick="classify()">Clasificar y explicar</button>
-          <button class="ghost" onclick="addToIntakeFromAssistant()">Enviar a Intake</button>
-          <button class="ghost" onclick="resetDemo()">Cargar ejemplo “Consultora ClickUp sin filtro”</button>
-        </div>
+<div class="callout">
+Pregúntate:
+<ul>
+<li>¿Está cubierto por una regla?</li>
+<li>¿Cruza áreas?</li>
+<li>¿Es reversible?</li>
+<li>¿Requiere decisión o solo ejecución?</li>
+</ul>
+</div>
 
-        <div id="out" class="callout" style="display:none;"></div>
-        <div id="out2" class="callout warn" style="display:none;"></div>
+<p><em>(Aquí viviría el asistente de clasificación que ya has visto en la versión anterior)</em></p>
+</section>
 
-      </div>
+<!-- INTAKE -->
+<section id="intake" class="card">
+<h2>2️⃣ Intake</h2>
+<div class="help">
+Todo pasa por aquí. Nada entra directamente al sistema.
+</div>
 
-      <div>
-        <h2>Panel rápido</h2>
-        <div class="kpi">
-          <div class="box">
-            <div class="n" id="kpi_wip">0</div>
-            <div class="t">Problemas complejos ACTIVO</div>
-          </div>
-          <div class="box">
-            <div class="n" id="kpi_cap">3</div>
-            <div class="t">Límite WIP</div>
-          </div>
-          <div class="box">
-            <div class="n" id="kpi_in">0</div>
-            <div class="t">Entradas en Intake</div>
-          </div>
-        </div>
+<div class="callout">
+Decisiones posibles:
+<ul>
+<li><strong>ENTRA</strong> → pasa a WIP</li>
+<li><strong>ESPERA</strong> → backlog consciente</li>
+<li><strong>NO ENTRA</strong> → se descarta explícitamente</li>
+<li><strong>OPERATIVO</strong> → se resuelve sin contaminar WIP</li>
+</ul>
+</div>
+</section>
 
-        <div class="hr"></div>
+<!-- WIP -->
+<section id="wip" class="card">
+<h2>3️⃣ WIP – Problemas complejos activos</h2>
+<div class="help">
+Aquí solo viven problemas complejos.<br>
+Si el WIP está lleno, <strong>algo debe salir antes de que algo entre</strong>.
+</div>
 
-        <h3>Qué hace este asistente</h3>
-        <div class="help">
-          <ol style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
-            <li><strong>No</strong> decide por ti: hace explícito el razonamiento.</li>
-            <li>Distingue <strong>flujo</strong>, <strong>excepción</strong> y <strong>problema complejo</strong>.</li>
-            <li>Asigna nivel: <strong>operativa / táctica / sistémica</strong>.</li>
-            <li>Protege: si no cabe en WIP, fuerza <em>qué debe salir</em>.</li>
-            <li>Exige cierre: si entra como complejo, pide <strong>DoD</strong> y <strong>DRI</strong>.</li>
-          </ol>
-        </div>
+<div class="callout warn">
+Si todo está en WIP, entonces nada lo está.
+</div>
+</section>
 
-        <div class="hr"></div>
+<!-- DECISIONES -->
+<section id="decisiones" class="card">
+<h2>4️⃣ Decisiones</h2>
+<div class="help">
+Una decisión sin DRI no existe.<br>
+Una decisión compleja sin caducidad se convierte en dogma.
+</div>
 
-        <h3>Plantilla mental</h3>
-        <div class="mono small">
-          Operativa = ejecutar dentro de reglas<br/>
-          Táctica = ajustar reglas / capacidad<br/>
-          Sistémica = cambiar el marco completo
-        </div>
+<div class="callout">
+Tipos:
+<ul>
+<li><strong>Operativa</strong> → ejecutar</li>
+<li><strong>Táctica</strong> → ajustar reglas/capacidad</li>
+<li><strong>Sistémica</strong> → cambiar el marco</li>
+</ul>
+</div>
+</section>
 
-      </div>
-    </div>
-  </section>
+<!-- RITUALES -->
+<section id="rituales" class="card">
+<h2>5️⃣ Rituales</h2>
+<div class="help">
+Los rituales sostienen el sistema sin heroicidad.
+</div>
 
-  <section id="wip" class="card" style="display:none;">
-    <h2>WIP (Problemas complejos)</h2>
-    <div class="help">Aquí solo vive lo complejo. Si entra, exige DRI + DoD + caducidad.</div>
+<div class="callout">
+Ejemplos:
+<ul>
+<li>Intake semanal (30 min)</li>
+<li>Priorización operativa</li>
+<li>Cierre semanal</li>
+</ul>
+</div>
 
-    <div class="row">
-      <div style="flex:1; min-width:240px;">
-        <label>Límite WIP</label>
-        <input id="wip_limit" type="number" min="1" value="3" />
-        <div class="help">Recomendación inicial: 2–3 problemas complejos activos para una pyme.</div>
-      </div>
-      <div style="flex:1; min-width:240px;">
-        <label>Acciones</label>
-        <div class="btnbar">
-          <button class="primary" onclick="saveWipLimit()">Guardar</button>
-          <button class="ghost" onclick="seedData()">Cargar datos de ejemplo</button>
-          <button class="ghost" onclick="clearAll()">Borrar todo</button>
-        </div>
-      </div>
-    </div>
+<div class="callout warn">
+Si un ritual se cancela “por urgencia”, el sistema está en riesgo.
+</div>
+</section>
 
-    <div class="hr"></div>
+<!-- SALIDA -->
+<section id="salida" class="card">
+<h2>Salida del sistema</h2>
+<div class="help">
+Esta fase termina cuando:
+</div>
 
-    <table class="table" id="wip_table">
-      <thead>
-        <tr><th>ID</th><th>Problema</th><th>DRI</th><th>DoD</th><th>Caduca</th><th>Estado</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+<div class="callout ok">
+<ul>
+<li>el equipo clasifica sin el consultor</li>
+<li>el Intake se respeta</li>
+<li>el WIP no se rompe</li>
+<li>las decisiones se cierran</li>
+</ul>
+</div>
 
-  <section id="intake" class="card" style="display:none;">
-    <h2>Intake & Triage</h2>
-    <div class="help">Nada entra directo al sistema. La urgencia se evalúa.</div>
-
-    <label>Nueva entrada</label>
-    <textarea id="intake_text">Ecommerce: aluvión de pedidos → soporte saturado → devoluciones suben.</textarea>
-
-    <div class="row">
-      <div style="flex:1; min-width:240px;">
-        <label>Tipo de trabajo</label>
-        <select id="intake_type">
-          <option value="flow">Flujo operativo</option>
-          <option value="exception">Excepción</option>
-          <option value="complex" selected>Problema complejo</option>
-        </select>
-      </div>
-      <div style="flex:1; min-width:240px;">
-        <label>Decisión</label>
-        <select id="intake_decision">
-          <option value="enter" selected>ENTRA</option>
-          <option value="wait">ESPERA</option>
-          <option value="no">NO ENTRA</option>
-          <option value="ops">OPERATIVO (resolver ya)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div style="flex:1; min-width:240px;">
-        <label>DRI</label>
-        <input id="intake_dri" value="Gerente / Ops" />
-      </div>
-      <div style="flex:1; min-width:240px;">
-        <label>¿Qué sale si entra?</label>
-        <input id="intake_out" value="PC-01 pasa a ESPERA" />
-      </div>
-    </div>
-
-    <div class="btnbar">
-      <button class="primary" onclick="addIntake()">Registrar entrada</button>
-      <button class="ghost" onclick="promoteSelectedIntake()">Promover seleccionados a WIP</button>
-    </div>
-
-    <div class="hr"></div>
-
-    <table class="table" id="intake_table">
-      <thead>
-        <tr><th></th><th>Fecha</th><th>Entrada</th><th>Tipo</th><th>Decisión</th><th>DRI</th><th>Qué sale</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <section id="decisiones" class="card" style="display:none;">
-    <h2>Decisiones (DRI + caducidad)</h2>
-    <div class="help">Memoria externa. Si no hay DRI y caducidad (cuando aplica), no es decisión cerrada.</div>
-
-    <div class="row">
-      <div style="flex:1; min-width:220px;">
-        <label>Tipo</label>
-        <select id="dec_type">
-          <option value="operativa">Operativa</option>
-          <option value="tactica" selected>Táctica</option>
-          <option value="sistemica">Sistémica</option>
-        </select>
-      </div>
-      <div style="flex:2; min-width:280px;">
-        <label>Decisión tomada</label>
-        <input id="dec_text" value="No implementamos ClickUp sin fase previa de contención." />
-      </div>
-    </div>
-
-    <div class="row">
-      <div style="flex:1; min-width:220px;">
-        <label>DRI</label>
-        <input id="dec_dri" value="Dirección" />
-      </div>
-      <div style="flex:1; min-width:220px;">
-        <label>Caduca (opcional)</label>
-        <input id="dec_due" type="date" />
-      </div>
-    </div>
-
-    <div class="btnbar">
-      <button class="primary" onclick="addDecision()">Registrar decisión</button>
-    </div>
-
-    <div class="hr"></div>
-
-    <table class="table" id="dec_table">
-      <thead>
-        <tr><th>Fecha</th><th>Tipo</th><th>Decisión</th><th>DRI</th><th>Caduca</th><th>Estado</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <section id="rituales" class="card" style="display:none;">
-    <h2>Rituales (sostén)</h2>
-    <div class="help">Un ritual existe si produce salida clara.</div>
-
-    <div class="row">
-      <div style="flex:1; min-width:220px;">
-        <label>Ritual</label>
-        <select id="rit_type">
-          <option value="intake">Intake semanal</option>
-          <option value="prio">Priorización operativa</option>
-          <option value="cierre" selected>Cierre semanal</option>
-        </select>
-      </div>
-      <div style="flex:2; min-width:280px;">
-        <label>Salida / cierre</label>
-        <input id="rit_out" value="Se cierra PC-03. Se ratifica DEC-13." />
-      </div>
-    </div>
-
-    <div class="btnbar">
-      <button class="primary" onclick="addRitual()">Registrar ritual</button>
-    </div>
-
-    <div class="hr"></div>
-
-    <table class="table" id="rit_table">
-      <thead>
-        <tr><th>Fecha</th><th>Ritual</th><th>Salida</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <section id="salida" class="card" style="display:none;">
-    <h2>Salida (fin de fase)</h2>
-    <div class="help">Si el sistema no funciona sin ti, la fase no ha terminado.</div>
-
-    <label>¿El sistema decide y cierra sin el consultor?</label>
-    <select id="exit_ok">
-      <option value="yes" selected>Sí</option>
-      <option value="no">No</option>
-    </select>
-
-    <label>Evidencia</label>
-    <textarea id="exit_ev">Durante 3 semanas: Intake se ejecuta sin nosotros, WIP se respeta y los cierres se registran.</textarea>
-
-    <div class="btnbar">
-      <button class="primary" onclick="saveExit()">Guardar</button>
-    </div>
-
-    <div id="exit_saved" class="callout ok" style="display:none;">Guardado.</div>
-  </section>
-
-  <section id="ayuda" class="card" style="display:none;">
-    <h2>Guía rápida</h2>
-    <div class="callout">
-      <strong>Qué es esta app</strong><br>
-      Un “gobernador” de complejidad: obliga a clasificar, limitar, decidir y cerrar. No es un gestor de tareas.
-    </div>
-
-    <h3>Cómo usar (30 min)</h3>
-    <ol class="help">
-      <li>Trae 5 entradas reales (emails/WhatsApps). Pásalas por el <strong>Asistente</strong>.</li>
-      <li>Solo lo complejo entra a <strong>WIP</strong>. Excepciones se resuelven como operativo.</li>
-      <li>Para cada complejo: define <strong>DRI + DoD + caducidad</strong>.</li>
-      <li>Protege la puerta: todo lo nuevo va a <strong>Intake</strong>.</li>
-      <li>Registra cierres en <strong>Rituales</strong>.</li>
-    </ol>
-
-    <div class="callout warn">
-      <strong>Nota sobre “IA”</strong><br>
-      En esta versión, “IA” = reglas + explicación (offline). Más adelante puedes conectarlo a un modelo, pero el valor es el método.
-    </div>
-  </section>
+<div class="callout">
+Si el sistema no funciona sin ti, no ha terminado.
+</div>
+</section>
 
 </div>
 
 <script>
-const S={get:(k,f)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
-function nowPretty(){const d=new Date();return d.toLocaleDateString('es-ES')+" "+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});}
 function showTab(id){
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  [...document.querySelectorAll("nav button")].find(b=>b.getAttribute("onclick").includes("'"+id+"'"))?.classList.add("active");
-  document.querySelectorAll(".wrap > section").forEach(s=>s.style.display="none");
-  document.getElementById(id).style.display="block";
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.querySelector(`[onclick="showTab('${id}')"]`).classList.add("active");
+  document.getElementById(id).classList.add("active");
 }
-function escapeHtml(s){return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
-function badge(text,kind){const cls=kind==="ok"?"ok":(kind==="warn"?"warn":"info");return `<span class="pill ${cls}">${escapeHtml(text)}</span>`;}
-function labelType(t){if(t==="flow")return"Flujo";if(t==="exception")return"Excepción";return"Complejo";}
-function labelDecision(d){if(d==="enter")return"ENTRA";if(d==="wait")return"ESPERA";if(d==="no")return"NO ENTRA";return"OPERATIVO";}
-function labelDecisionType(t){if(t==="operativa")return"Operativa";if(t==="tactica")return"Táctica";return"Sistémica";}
-function labelRitual(t){if(t==="intake")return"Intake";if(t==="prio")return"Priorización";return"Cierre";}
-
-function seedData(){
-  const wip=[
-    {id:"PC-01",problem:"Incidencias repetidas en instalaciones",dri:"Director de Operaciones",dod:"5 instalaciones seguidas sin incidencia crítica",due:"",status:"ACTIVO"},
-    {id:"PC-02",problem:"Saturación soporte post-campaña",dri:"Gerente",dod:"Backlog < 20 tickets durante 7 días",due:"",status:"ACTIVO"},
-    {id:"PC-03",problem:"Criterio devoluciones ambiguo",dri:"COO",dod:"Política aplicada en 10 casos sin escalado",due:"",status:"CERRADO"}
-  ];
-  const intake=[
-    {id:"IN-21",date:nowPretty(),text:"Cliente pide cambio de diseño una semana antes de instalar",type:"complex",decision:"wait",dri:"Director de Operaciones",out:"—"},
-    {id:"IN-22",date:nowPretty(),text:"Error de facturación puntual",type:"exception",decision:"ops",dri:"Admin senior",out:"—"}
-  ];
-  const decisions=[{date:nowPretty(),type:"tactica",text:"No implementamos ClickUp sin fase previa de contención.",dri:"Dirección",due:"",status:"VIGENTE"}];
-  const rituals=[{date:nowPretty(),type:"intake",out:"Se decide que IN-21 espera. Se resuelve IN-22 como operativo."}];
-  S.set("wip",wip);S.set("intake",intake);S.set("decisions",decisions);S.set("rituals",rituals);
-  renderAll(); alert("Datos de ejemplo cargados.");
-}
-function clearAll(){
-  if(!confirm("¿Borrar todos los datos locales de este PMV?"))return;
-  ["wip","intake","decisions","rituals","exit","wipLimit"].forEach(k=>localStorage.removeItem(k));
-  renderAll();
-}
-function renderKPIs(){
-  const wip=S.get("wip",[]), intake=S.get("intake",[]);
-  const limit=Number(S.get("wipLimit",3));
-  const active=wip.filter(x=>x.status==="ACTIVO").length;
-  document.getElementById("kpi_wip").textContent=active;
-  document.getElementById("kpi_cap").textContent=limit;
-  document.getElementById("kpi_in").textContent=intake.length;
-}
-function saveWipLimit(){const v=Number(document.getElementById("wip_limit").value||3);S.set("wipLimit",v);renderKPIs();alert("Límite WIP guardado.");}
-function renderWip(){
-  const wip=S.get("wip",[]);
-  const tb=document.querySelector("#wip_table tbody"); tb.innerHTML="";
-  wip.forEach(r=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td class="mono">${r.id}</td><td>${escapeHtml(r.problem)}</td><td>${escapeHtml(r.dri)}</td><td>${escapeHtml(r.dod||"—")}</td><td class="mono">${r.due||"—"}</td><td>${badge(r.status, r.status==="ACTIVO"?"warn":"ok")}</td>`;
-    tb.appendChild(tr);
-  });
-  document.getElementById("wip_limit").value=Number(S.get("wipLimit",3));
-}
-function addIntake(){
-  const list=S.get("intake",[]);
-  const id="IN-"+String(Math.floor(Math.random()*900)+100);
-  list.unshift({id,date:nowPretty(),text:document.getElementById("intake_text").value.trim(),type:document.getElementById("intake_type").value,decision:document.getElementById("intake_decision").value,dri:document.getElementById("intake_dri").value.trim(),out:document.getElementById("intake_out").value.trim()});
-  S.set("intake",list); renderAll(); alert("Entrada registrada.");
-}
-function renderIntake(){
-  const list=S.get("intake",[]);
-  const tb=document.querySelector("#intake_table tbody"); tb.innerHTML="";
-  list.forEach(r=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td><input type="checkbox" data-id="${r.id}"></td><td class="mono">${escapeHtml(r.date)}</td><td>${escapeHtml(r.text)}</td><td>${badge(labelType(r.type),"info")}</td><td>${badge(labelDecision(r.decision), r.decision==="enter"?"ok":(r.decision==="no"?"warn":"info"))}</td><td>${escapeHtml(r.dri)}</td><td>${escapeHtml(r.out||"—")}</td>`;
-    tb.appendChild(tr);
-  });
-}
-function promoteSelectedIntake(){
-  const intake=S.get("intake",[]), wip=S.get("wip",[]);
-  const limit=Number(S.get("wipLimit",3));
-  const active=wip.filter(x=>x.status==="ACTIVO").length;
-  const ids=[...document.querySelectorAll("#intake_table input[type=checkbox]:checked")].map(c=>c.getAttribute("data-id"));
-  if(ids.length===0){alert("Selecciona entradas.");return;}
-  const toPromote=intake.filter(i=>ids.includes(i.id)).filter(i=>i.decision==="enter"||i.type==="complex");
-  if(toPromote.length===0){alert("Nada para promover (necesita ENTRA o tipo complejo).");return;}
-  if(active+toPromote.length>limit){alert("WIP lleno. Decide qué sale si esto entra.");return;}
-  toPromote.forEach(i=>{
-    const newId="PC-"+String(Math.floor(Math.random()*90)+10);
-    wip.unshift({id:newId,problem:i.text,dri:i.dri||"Por definir",dod:"(Definir DoD antes de actuar)",due:"",status:"ACTIVO"});
-  });
-  const remaining=intake.filter(i=>!toPromote.map(x=>x.id).includes(i.id));
-  S.set("intake",remaining); S.set("wip",wip); renderAll(); alert("Promovido a WIP.");
-}
-function addDecision(){
-  const list=S.get("decisions",[]);
-  list.unshift({date:nowPretty(),type:document.getElementById("dec_type").value,text:document.getElementById("dec_text").value.trim(),dri:document.getElementById("dec_dri").value.trim(),due:document.getElementById("dec_due").value,status:"VIGENTE"});
-  S.set("decisions",list); renderAll(); alert("Decisión registrada.");
-}
-function renderDecisions(){
-  const list=S.get("decisions",[]);
-  const tb=document.querySelector("#dec_table tbody"); tb.innerHTML="";
-  list.forEach(r=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td class="mono">${escapeHtml(r.date)}</td><td>${badge(labelDecisionType(r.type),"info")}</td><td>${escapeHtml(r.text)}</td><td>${escapeHtml(r.dri)}</td><td class="mono">${r.due||"—"}</td><td>${badge(r.status,"ok")}</td>`;
-    tb.appendChild(tr);
-  });
-}
-function addRitual(){
-  const list=S.get("rituals",[]);
-  list.unshift({date:nowPretty(),type:document.getElementById("rit_type").value,out:document.getElementById("rit_out").value.trim()});
-  S.set("rituals",list); renderAll(); alert("Ritual registrado.");
-}
-function renderRituals(){
-  const list=S.get("rituals",[]);
-  const tb=document.querySelector("#rit_table tbody"); tb.innerHTML="";
-  list.forEach(r=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td class="mono">${escapeHtml(r.date)}</td><td>${badge(labelRitual(r.type),"info")}</td><td>${escapeHtml(r.out)}</td>`;
-    tb.appendChild(tr);
-  });
-}
-function saveExit(){
-  S.set("exit",{ok:document.getElementById("exit_ok").value,ev:document.getElementById("exit_ev").value.trim(),date:nowPretty()});
-  const el=document.getElementById("exit_saved"); el.style.display="block"; setTimeout(()=>el.style.display="none",1400);
-}
-function classify(){
-  const impact=document.getElementById("in_impact").value;
-  const rev=document.getElementById("in_reversible").value;
-  const sop=document.getElementById("in_sop").value;
-  const cross=document.getElementById("in_cross").value;
-  const flow=document.getElementById("in_flow").value;
-  const urg=document.getElementById("in_urgency").value;
-
-  let complexity=0; const reasons=[];
-  if(sop==="no"){complexity+=2;reasons.push("No está cubierto por SOP/regla → requiere decisión.");}
-  if(cross==="yes"){complexity+=2;reasons.push("Cruza áreas / requiere coordinación → aumenta complejidad.");}
-  if(rev==="no"){complexity+=2;reasons.push("Difícilmente reversible → sube el nivel decisional.");}
-  if(rev==="partial"){complexity+=1;reasons.push("Reversibilidad parcial → deja efectos en cadena.");}
-  if(impact==="high"||impact==="legal"){complexity+=2;reasons.push("Impacto alto/legal → requiere gobierno explícito.");}
-  if(impact==="med"){complexity+=1;reasons.push("Impacto medio → requiere priorización explícita.");}
-  if(flow==="exception"||flow==="unknown"){complexity+=1;reasons.push("No es flujo repetible → es excepción/problema a clasificar.");}
-  if(urg==="panic"){complexity+=1;reasons.push("Hay pánico: riesgo de obedecer urgencia sin triage.");}
-
-  let workType="excepción simple";
-  if(flow==="flow"&&sop==="yes"&&cross==="no"&&impact!=="legal") workType="flujo operativo";
-  else if(flow==="exception"&&sop==="yes"&&cross==="no"&&impact!=="legal") workType="excepción simple";
-  else if(complexity>=5) workType="problema complejo";
-  else if(complexity>=3) workType="excepción / caso especial (posible complejo)";
-
-  let decisionLevel="operativa";
-  if(workType==="problema complejo"){
-    if(impact==="legal"||rev==="no") decisionLevel="sistémica";
-    else decisionLevel="táctica";
-  } else if(workType.includes("excepción")){
-    decisionLevel=(impact==="high"||impact==="legal"||cross==="yes")?"táctica":"operativa";
-  }
-
-  let dri="Staff / Responsable directo";
-  if(decisionLevel==="táctica") dri="Operaciones / Gerencia (DRI táctico)";
-  if(decisionLevel==="sistémica") dri="Dirección / CEO (DRI sistémico)";
-
-  const wip=S.get("wip",[]);
-  const limit=Number(S.get("wipLimit",3));
-  const active=wip.filter(x=>x.status==="ACTIVO").length;
-
-  let intakeDecision="OPERATIVO (resolver dentro de reglas)";
-  let wipNote="";
-  if(workType==="problema complejo"){
-    if(active>=limit){intakeDecision="ESPERA (WIP lleno)"; wipNote="WIP lleno: antes de entrar, define qué sale.";}
-    else {intakeDecision="ENTRA (como problema complejo)"; wipNote="Si entra, exige DoD + caducidad y evita reapertura.";}
-  } else if(workType.includes("excepción")){
-    intakeDecision=(decisionLevel==="táctica")?"ESPERA/ENTRA según WIP":"OPERATIVO (sin WIP)";
-  } else {intakeDecision="OPERATIVO (flujo)";}
-
-  const out=document.getElementById("out");
-  out.style.display="block"; out.className="callout";
-  out.innerHTML=`
-    <div class="kpi" style="margin-top:0;">
-      <span class="pill info">Tipo de trabajo: <strong>${escapeHtml(workType)}</strong></span>
-      <span class="pill info">Nivel decisión: <strong>${escapeHtml(decisionLevel)}</strong></span>
-      <span class="pill info">DRI sugerido: <strong>${escapeHtml(dri)}</strong></span>
-    </div>
-    <div class="hr"></div>
-    <div><strong>Recomendación:</strong> ${escapeHtml(intakeDecision)}.</div>
-    ${wipNote?`<div class="help" style="margin-top:6px;"><strong>Nota WIP:</strong> ${escapeHtml(wipNote)}</div>`:""}
-    <div class="hr"></div>
-    <div><strong>Por qué:</strong></div>
-    <ul class="help" style="margin:8px 0 0 18px; padding:0;">
-      ${reasons.slice(0,6).map(r=>`<li>${escapeHtml(r)}</li>`).join("")}
-    </ul>`;
-
-  const out2=document.getElementById("out2");
-  out2.style.display="block";
-  out2.innerHTML=`
-    <strong>Siguiente paso mínimo (según los 6 entregables):</strong><br>
-    1) Intake: registrar entrada y decisión.<br>
-    2) Si entra como complejo → WIP: crea slot y asigna DRI.<br>
-    3) Antes de actuar → define DoD.<br>
-    4) Registra la decisión → Decisiones.<br>
-    5) Cierra en ritual → Rituales.`;
-}
-function addToIntakeFromAssistant(){
-  const text=document.getElementById("in_text").value.trim();
-  const list=S.get("intake",[]);
-  const id="IN-"+String(Math.floor(Math.random()*900)+100);
-  list.unshift({id,date:nowPretty(),text,type:"complex",decision:"wait",dri:"Por definir",out:"—"});
-  S.set("intake",list); renderAll(); alert("Enviado a Intake."); showTab('intake');
-}
-function resetDemo(){
-  document.getElementById("in_text").value=
-`Somos consultores certificados ClickUp. Implementamos en empresas sin sistema previo.
-No tenemos avatar definido. Muchos clientes no adoptan, se saturan y nos convierten en muleta.`;
-  document.getElementById("in_impact").value="high";
-  document.getElementById("in_reversible").value="partial";
-  document.getElementById("in_sop").value="no";
-  document.getElementById("in_cross").value="yes";
-  document.getElementById("in_flow").value="unknown";
-  document.getElementById("in_urgency").value="urgent";
-  document.getElementById("out").style.display="none";
-  document.getElementById("out2").style.display="none";
-}
-function renderAll(){renderKPIs();renderWip();renderIntake();renderDecisions();renderRituals();}
-(function init(){if(S.get("wipLimit",null)===null) S.set("wipLimit",3);renderAll();})();
 </script>
 
 </body>
