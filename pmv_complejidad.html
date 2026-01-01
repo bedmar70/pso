@@ -16,31 +16,40 @@ header{background:var(--nav);color:#fff;padding:16px;}
 header h1{margin:0;font-size:18px;}
 header p{margin:4px 0 0;font-size:12px;opacity:.85}
 nav{display:flex;overflow:auto;background:var(--nav2);}
-nav button{padding:12px 14px;border:none;background:none;color:#fff;opacity:.8;cursor:pointer;font-size:13px;}
+nav button{padding:12px 14px;border:none;background:none;color:#fff;opacity:.8;cursor:pointer;font-size:13px;white-space:nowrap;}
 nav button.active{opacity:1;border-bottom:2px solid var(--accent);}
 .wrap{max-width:1100px;margin:0 auto;padding:14px;}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;}
 section{display:none}
 section.active{display:block}
 h2{margin-top:0;font-size:16px;}
+h3{margin:14px 0 8px;font-size:14px}
 .help{font-size:13px;color:var(--muted);line-height:1.45}
 .callout{border-left:4px solid var(--accent);background:#eef2ff;padding:12px;border-radius:10px;margin:12px 0}
 .callout.warn{border-left-color:var(--warn);background:#fff7ed}
 .callout.ok{border-left-color:var(--ok);background:#ecfdf5}
-label{display:block;font-size:13px;font-weight:600;margin-top:10px;}
+label{display:block;font-size:13px;font-weight:700;margin-top:10px;}
+.small{font-size:12px;color:var(--muted)}
 input,textarea,select{
   width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);
-  font-size:14px;box-sizing:border-box;
+  font-size:14px;box-sizing:border-box;background:#fff;
 }
-textarea{min-height:80px}
-button.primary{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;}
-button.ghost{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;}
+textarea{min-height:90px}
+button.primary{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;}
+button.ghost{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;}
 .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
 th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
 th{color:var(--muted);font-size:12px}
-.action{cursor:pointer;color:#475569}
+.action{cursor:pointer;color:#475569;margin-right:10px}
 .action:hover{color:#0f172a}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.pill.info{background:#e0ecff;color:#1e3a8a}
+.pill.warn{background:#ffedd5;color:#7c2d12}
+.pill.ok{background:#dcfce7;color:#14532d}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:960px){.grid2{grid-template-columns:1fr 1fr}}
+.hr{height:1px;background:var(--line);margin:12px 0}
 </style>
 </head>
 
@@ -48,211 +57,698 @@ th{color:var(--muted);font-size:12px}
 
 <header>
 <h1>Complexity Governor</h1>
-<p>De problemas difusos a acciones gobernables</p>
+<p>De problemas difusos → decisiones explícitas → ejecución gobernable</p>
 </header>
 
 <nav>
 <button class="active" onclick="showTab('inicio')">Inicio</button>
-<button onclick="showTab('clasificar')">1. Clasificar</button>
-<button onclick="showTab('intake')">2. Intake</button>
-<button onclick="showTab('wip')">3. WIP</button>
-<button onclick="showTab('decisiones')">4. Decisiones</button>
-<button onclick="showTab('rituales')">5. Rituales</button>
+<button onclick="showTab('clasificar')">1) Clasificar</button>
+<button onclick="showTab('intake')">2) Intake</button>
+<button onclick="showTab('wip')">3) WIP</button>
+<button onclick="showTab('decisiones')">4) Decisiones</button>
+<button onclick="showTab('rituales')">5) Rituales</button>
 <button onclick="showTab('salida')">Salida</button>
 </nav>
 
 <div class="wrap">
 
-<!-- INICIO -->
 <section id="inicio" class="card active">
-<h2>Qué es este sistema</h2>
-<div class="callout">
-Este sistema convierte <strong>problemas complejos y difusos</strong>  
-en <strong>decisiones claras y acciones sostenibles</strong>.
-</div>
+  <h2>Qué es esto</h2>
+  <div class="callout">
+    Este sistema NO es un gestor de tareas. Es un sistema para:
+    <ul class="help">
+      <li>clasificar lo que llega</li>
+      <li>decidir qué entra y qué no</li>
+      <li>limitar complejidad activa</li>
+      <li>registrar decisiones para evitar reaperturas</li>
+      <li>sostener el cierre con rituales mínimos</li>
+    </ul>
+  </div>
 
-<div class="help">
-No empieza con herramientas.<br>
-Empieza gobernando:
-<ul>
-<li>qué entra</li>
-<li>qué no entra</li>
-<li>quién decide</li>
-<li>cuándo algo se considera cerrado</li>
-</ul>
-</div>
+  <h3>Cómo usarlo (orden obligatorio)</h3>
+  <div class="callout ok">
+    <ol class="help">
+      <li><strong>Clasificar</strong> el input real (WhatsApp/email).</li>
+      <li><strong>Intake</strong>: ENTRA / ESPERA / NO ENTRA / OPERATIVO.</li>
+      <li><strong>WIP</strong>: si es complejo y entra, ocupa un slot.</li>
+      <li><strong>Decisiones</strong>: cada WIP exige DRI + decisión explícita + (si aplica) caducidad.</li>
+      <li><strong>Rituales</strong>: aquí se registran cierres reales y revisiones (para que el sistema “recuerde”).</li>
+    </ol>
+  </div>
 
-<div class="callout warn">
-Si intentas usar herramientas sin esto, amplificas el caos.
-</div>
+  <div class="callout warn">
+    Regla de oro: si algo complejo entra sin decisión explícita, el sistema se convierte en “ruido organizado”.
+  </div>
+
+  <div class="btnbar">
+    <button class="ghost" onclick="loadDemoJourney()">Cargar demo (viaje consultor → cliente)</button>
+    <button class="ghost" onclick="resetAll()">Borrar datos (solo local)</button>
+  </div>
 </section>
 
-<!-- CLASIFICAR -->
 <section id="clasificar" class="card">
-<h2>1️⃣ Clasificar</h2>
-<div class="help">
-Aquí traemos el problema tal como existe hoy.<br>
-No lo resolvemos. Lo entendemos.
-</div>
+  <h2>1) Clasificar</h2>
+  <div class="help">
+    <strong>Qué es:</strong> Un filtro cognitivo. <br>
+    <strong>Para qué sirve:</strong> Evita convertir “todo” en proyecto/tarea. <br>
+    <strong>Qué requiere:</strong> Traer el input tal cual llega (sin embellecer).
+  </div>
 
-<label>Problema real</label>
-<textarea id="c_text">
-Somos consultores certificados ClickUp, pero muchos clientes no adoptan porque no tienen sistema previo.
-</textarea>
+  <label>Entrada real</label>
+  <textarea id="c_text">Implementamos ClickUp en clientes que no están preparados y se saturan. Nos convertimos en muleta.</textarea>
+  <div class="small">Ejemplo realista: describe el problema como un WhatsApp.</div>
 
-<label>¿Existe una regla clara que lo cubra?</label>
-<select id="c_rule"><option>No</option><option>Sí</option></select>
+  <div class="grid2">
+    <div>
+      <label>¿Existe una regla/SOP clara que lo cubra?</label>
+      <select id="c_rule">
+        <option value="no" selected>No</option>
+        <option value="yes">Sí</option>
+      </select>
+      <div class="small">Si “sí”, probablemente es operativo/flujo (no complejo).</div>
+    </div>
+    <div>
+      <label>¿Cruza áreas o requiere coordinación?</label>
+      <select id="c_cross">
+        <option value="yes" selected>Sí</option>
+        <option value="no">No</option>
+      </select>
+      <div class="small">Si cruza áreas, suele requerir decisión, no solo ejecución.</div>
+    </div>
+  </div>
 
-<label>¿Cruza áreas o roles?</label>
-<select id="c_cross"><option>Sí</option><option>No</option></select>
+  <div class="grid2">
+    <div>
+      <label>Impacto si no se actúa</label>
+      <select id="c_impact">
+        <option value="low">Bajo</option>
+        <option value="med" selected>Medio</option>
+        <option value="high">Alto</option>
+        <option value="legal">Legal/contractual</option>
+      </select>
+      <div class="small">Impacto alto/Legal suele elevar el nivel de decisión.</div>
+    </div>
+    <div>
+      <label>Reversibilidad</label>
+      <select id="c_rev">
+        <option value="yes">Reversible</option>
+        <option value="partial" selected>Parcial</option>
+        <option value="no">No reversible</option>
+      </select>
+      <div class="small">No reversible = exige gobierno explícito.</div>
+    </div>
+  </div>
 
-<div class="btnbar">
-<button class="primary" onclick="classify()">Clasificar problema</button>
-<button class="ghost" onclick="sendToIntake()">Enviar a Intake</button>
-</div>
+  <div class="btnbar">
+    <button class="primary" onclick="classify()">Clasificar y explicar</button>
+    <button class="ghost" onclick="sendToIntake()">Enviar a Intake</button>
+  </div>
 
-<div id="c_result" class="callout" style="display:none"></div>
+  <div id="c_result" class="callout" style="display:none"></div>
 </section>
 
-<!-- INTAKE -->
 <section id="intake" class="card">
-<h2>2️⃣ Intake</h2>
-<div class="help">
-Aquí decidimos conscientemente si este problema entra al sistema.
-</div>
+  <h2>2) Intake</h2>
+  <div class="help">
+    <strong>Qué es:</strong> La puerta de entrada. <br>
+    <strong>Para qué sirve:</strong> Evita el “cubo sin fondo” y el “todo a la vez”. <br>
+    <strong>Qué requiere:</strong> Decidir conscientemente y registrar la decisión.
+  </div>
 
-<label>Entrada</label>
-<textarea id="i_text"></textarea>
+  <label>Entrada</label>
+  <textarea id="i_text"></textarea>
 
-<label>Decisión</label>
-<select id="i_decision">
-<option>ENTRA</option>
-<option>ESPERA</option>
-<option>NO ENTRA</option>
-</select>
+  <div class="grid2">
+    <div>
+      <label>Decisión del Intake</label>
+      <select id="i_decision">
+        <option value="enter">ENTRA (ocupa WIP si es complejo)</option>
+        <option value="wait">ESPERA (backlog consciente)</option>
+        <option value="no">NO ENTRA (descartar explícito)</option>
+        <option value="ops">OPERATIVO (resolver sin contaminar WIP)</option>
+      </select>
+      <div class="small">“OPERATIVO” es clave: no todo debe convertirse en “problema complejo”.</div>
+    </div>
+    <div>
+      <label>DRI propuesto</label>
+      <input id="i_dri" placeholder="Ej: Director de Operaciones / Gerencia / Dirección">
+      <div class="small">DRI = quien decide y sostiene el cierre (no quien “hace todo”).</div>
+    </div>
+  </div>
 
-<label>Responsable (DRI)</label>
-<input id="i_dri" placeholder="Dirección / Gerencia">
+  <div class="grid2">
+    <div>
+      <label>Si esto entra, ¿qué sale?</label>
+      <input id="i_out" placeholder="Ej: Pausamos PC-02 esta semana">
+      <div class="small">Si no sale nada, no entra nada (regla anti-colapso).</div>
+    </div>
+    <div>
+      <label>Notas</label>
+      <input id="i_notes" placeholder="Ej: decisión válida 7 días; revisar en ritual">
+      <div class="small">La urgencia se evalúa, no se obedece.</div>
+    </div>
+  </div>
 
-<button class="primary" onclick="addIntake()">Registrar decisión</button>
+  <div class="btnbar">
+    <button class="primary" onclick="addIntake()">Registrar en Intake</button>
+  </div>
 
-<table id="intakeTable">
-<thead><tr><th>Entrada</th><th>Decisión</th><th>DRI</th><th></th></tr></thead>
-<tbody></tbody>
-</table>
+  <table id="intakeTable">
+    <thead>
+      <tr><th>Entrada</th><th>Decisión</th><th>DRI</th><th>Qué sale</th><th>Notas</th><th>Acciones</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="callout ok">
+    Tip: Si marcas ENTRA y es complejo, lo correcto es pasar por WIP y luego crear una DECISIÓN explícita.
+  </div>
 </section>
 
-<!-- WIP -->
 <section id="wip" class="card">
-<h2>3️⃣ WIP – Problemas complejos activos</h2>
-<div class="help">
-Aquí solo viven los problemas que requieren decisión real.
-</div>
+  <h2>3) WIP (Problemas complejos activos)</h2>
+  <div class="help">
+    <strong>Qué es:</strong> Capacidad de complejidad. <br>
+    <strong>Para qué sirve:</strong> Evita que el sistema intente sostener 10 decisiones complejas a la vez. <br>
+    <strong>Qué requiere:</strong> Mantener pocos problemas complejos activos y cerrarlos.
+  </div>
 
-<table id="wipTable">
-<thead><tr><th>Problema</th><th>DRI</th><th></th></tr></thead>
-<tbody></tbody>
-</table>
+  <div class="grid2">
+    <div>
+      <label>Límite WIP (recomendado 2–3)</label>
+      <input type="number" id="wipLimit" min="1" value="3">
+      <div class="small">Esto no limita tareas. Limita problemas complejos simultáneos.</div>
+    </div>
+    <div>
+      <label>Acciones</label>
+      <div class="btnbar">
+        <button class="ghost" onclick="saveWipLimit()">Guardar límite</button>
+        <button class="ghost" onclick="pullFromIntake()">Traer ENTRA (desde Intake) → WIP</button>
+      </div>
+      <div class="small">“Rollup” práctico: no reescribas lo ya decidido en Intake.</div>
+    </div>
+  </div>
+
+  <table id="wipTable">
+    <thead>
+      <tr><th>ID</th><th>Problema complejo</th><th>DRI</th><th>Estado</th><th>Acciones</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="callout warn">
+    Si WIP está lleno, cualquier nuevo complejo debe forzar: “¿qué sale si esto entra?”.
+  </div>
 </section>
 
-<!-- DECISIONES -->
 <section id="decisiones" class="card">
-<h2>4️⃣ Decisiones</h2>
-<div class="help">
-Cada problema complejo debe tener al menos una decisión explícita.
-</div>
+  <h2>4) Decisiones</h2>
 
-<label>Decisión</label>
-<input id="d_text">
+  <div class="help">
+    <strong>Qué es:</strong> Memoria del sistema para evitar reaperturas. <br>
+    <strong>Para qué sirve:</strong> Que el equipo no re-decida lo mismo cada semana. <br>
+    <strong>Qué requiere del usuario:</strong>
+    <ul class="help">
+      <li>Elegir a qué problema WIP se asocia (si aplica)</li>
+      <li>Escribir la decisión en formato verificable (no “ser mejores”)</li>
+      <li>Asignar DRI real (quien sostiene el cierre)</li>
+      <li>(Opcional) poner caducidad si el contexto cambia</li>
+    </ul>
+  </div>
 
-<label>DRI</label>
-<input id="d_dri">
+  <div class="callout">
+    <strong>Cómo escribir una decisión buena</strong> (plantilla):
+    <div class="small" style="margin-top:6px">
+      “A partir de hoy, haremos X bajo condición Y. Si ocurre Z, se escala a W. Revisamos el día R.”
+    </div>
+  </div>
 
-<button class="primary" onclick="addDecision()">Registrar decisión</button>
+  <div class="grid2">
+    <div>
+      <label>Asociar a Problema WIP (rollup)</label>
+      <select id="d_wip"></select>
+      <div class="small">Si no hay WIP, probablemente estás intentando decidir sin puerta/capacidad.</div>
+    </div>
+    <div>
+      <label>Tipo de decisión</label>
+      <select id="d_type">
+        <option value="operativa">Operativa (dentro de reglas)</option>
+        <option value="tactica" selected>Táctica (ajusta reglas/capacidad)</option>
+        <option value="sistemica">Sistémica (cambia el marco)</option>
+      </select>
+      <div class="small">Si es sistémica, suele ser Dirección / CEO como DRI.</div>
+    </div>
+  </div>
 
-<table id="decisionTable">
-<thead><tr><th>Decisión</th><th>DRI</th><th></th></tr></thead>
-<tbody></tbody>
-</table>
+  <label>Decisión (texto)</label>
+  <input id="d_text" placeholder="Ej: No implementamos ClickUp sin fase previa de contención (criterio X).">
+  <div class="small">Debe poder verificarse: ¿cómo sabemos que se está cumpliendo?</div>
+
+  <div class="grid2">
+    <div>
+      <label>DRI (quién decide y sostiene)</label>
+      <input id="d_dri" placeholder="Ej: Dirección / Dir. Operaciones">
+      <div class="small">Confusión típica: “como es de operaciones, que lo decida operaciones”. No. Decide quien tiene autoridad real.</div>
+    </div>
+    <div>
+      <label>Caducidad (opcional)</label>
+      <input id="d_due" type="date">
+      <div class="small">Útil en complejidad: se revisa y ratifica en ritual.</div>
+    </div>
+  </div>
+
+  <div class="btnbar">
+    <button class="primary" onclick="addDecision()">Registrar decisión</button>
+  </div>
+
+  <table id="decisionTable">
+    <thead>
+      <tr><th>WIP</th><th>Tipo</th><th>Decisión</th><th>DRI</th><th>Caduca</th><th>Acciones</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="callout ok">
+    Integración sugerida:
+    <ul class="help">
+      <li><strong>L10:</strong> decisiones clave pueden ir como “Issues resueltos / acuerdos”.</li>
+      <li><strong>ClickUp:</strong> solo después: convertir decisión en proyecto/tareas/SOP ejecutables.</li>
+    </ul>
+  </div>
 </section>
 
-<!-- RITUALES -->
 <section id="rituales" class="card">
-<h2>5️⃣ Rituales</h2>
-<div class="help">
-Los rituales sostienen el sistema sin heroicidad.
-Aquí registramos <strong>cierres reales</strong>.
-</div>
+  <h2>5) Rituales</h2>
 
-<label>Resultado del ritual</label>
-<input id="r_text" placeholder="Ej: Se cierra problema X">
+  <div class="help">
+    <strong>Qué es:</strong> La cadencia que mantiene vivo el sistema. <br>
+    <strong>Para qué sirve:</strong> Convertir decisiones en cierres, y cierres en capacidad liberada. <br>
+    <strong>Qué requiere del usuario:</strong>
+    <ul class="help">
+      <li>Ejecutar el ritual con frecuencia fija (aunque haya “urgencia”)</li>
+      <li>Registrar qué se cerró, qué entra y qué se revisa</li>
+      <li>Ratificar o ajustar decisiones con caducidad</li>
+    </ul>
+  </div>
 
-<button class="primary" onclick="addRitual()">Registrar</button>
+  <div class="callout">
+    <strong>Rituales mínimos recomendados</strong>:
+    <ul class="help">
+      <li><strong>Intake semanal (30 min):</strong> qué entra / qué sale.</li>
+      <li><strong>Cierre 2× semana (15 min):</strong> qué se cerró / qué se reabrió y por qué.</li>
+      <li><strong>Revisión de decisiones (mensual 20 min):</strong> ratificar/ajustar/retirar decisiones con caducidad.</li>
+    </ul>
+  </div>
 
-<table id="ritualTable">
-<thead><tr><th>Resultado</th><th></th></tr></thead>
-<tbody></tbody>
-</table>
+  <div class="grid2">
+    <div>
+      <label>Tipo de ritual</label>
+      <select id="r_type">
+        <option value="intake">Intake (puerta)</option>
+        <option value="cierre" selected>Cierre (reducción de abiertos)</option>
+        <option value="revdec">Revisión de decisiones (caducidad)</option>
+      </select>
+      <div class="small">Un ritual existe si produce salida verificable.</div>
+    </div>
+    <div>
+      <label>Referenciar decisión (rollup)</label>
+      <select id="r_dec"></select>
+      <div class="small">Opcional: enlaza una decisión revisada o cerrada.</div>
+    </div>
+  </div>
+
+  <label>Salida del ritual (qué quedó distinto en el mundo)</label>
+  <textarea id="r_out" placeholder="Ej: Se cierra PC-02. Se ratifica DEC-05. Entra nuevo problema PC-07 y sale PC-01."></textarea>
+  <div class="small">
+    Buen formato: “Se cierra X / Entra Y / Sale Z / Se ratifica o ajusta decisión D”.
+  </div>
+
+  <div class="btnbar">
+    <button class="primary" onclick="addRitual()">Registrar ritual</button>
+  </div>
+
+  <table id="ritualTable">
+    <thead>
+      <tr><th>Fecha</th><th>Tipo</th><th>Decisión</th><th>Salida</th><th>Acciones</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="callout warn">
+    Señal de sistema frágil: “cancelamos el ritual por urgencia”.
+    Eso equivale a “apagamos la torre de control porque hay muchos aviones”.
+  </div>
 </section>
 
-<!-- SALIDA -->
 <section id="salida" class="card">
-<h2>Salida del sistema</h2>
-<div class="callout ok">
-La fase termina cuando:
-<ul>
-<li>los problemas se clasifican sin el consultor</li>
-<li>el Intake se respeta</li>
-<li>los problemas se cierran</li>
-</ul>
-</div>
+  <h2>Salida del sistema</h2>
+  <div class="help">
+    <strong>Qué es:</strong> Condición de fin (sin dependencia del consultor). <br>
+    <strong>Para qué sirve:</strong> No crear “muletas” ni consultoría eterna.
+  </div>
+
+  <div class="callout ok">
+    Esta fase termina cuando, durante 3–4 semanas:
+    <ul class="help">
+      <li>El equipo clasifica entradas sin ti.</li>
+      <li>Intake funciona y se respeta.</li>
+      <li>WIP se mantiene (no se rompe).</li>
+      <li>Decisiones se registran y no se reabren sin causa.</li>
+      <li>Los rituales producen cierres verificables.</li>
+    </ul>
+  </div>
 </section>
 
 </div>
 
 <script>
+/* ---------- basic state (localStorage) ---------- */
+const S = {
+  get:(k,f)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+function now(){ return new Date().toLocaleString('es-ES',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',year:'numeric'}); }
+function uid(prefix){ return prefix+"-"+Math.floor(Math.random()*9000+1000); }
+function esc(s){ return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
 function showTab(id){
-document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-document.querySelector(`[onclick="showTab('${id}')"]`).classList.add("active");
-document.getElementById(id).classList.add("active");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.querySelector(`[onclick="showTab('${id}')"]`).classList.add("active");
+  document.getElementById(id).classList.add("active");
 }
 
+/* ---------- demo + reset ---------- */
+function resetAll(){
+  if(!confirm("¿Borrar todos los datos locales?")) return;
+  ["intake","wip","decisions","rituals","wipLimit"].forEach(k=>localStorage.removeItem(k));
+  renderAll();
+}
+function loadDemoJourney(){
+  S.set("wipLimit",3);
+  S.set("intake",[
+    {id:uid("IN"), text:"Implementamos ClickUp en clientes sin sistema previo: saturación, baja adopción, dependencia.", decision:"enter", dri:"Dirección", out:"—", notes:"Requiere fase previa."},
+    {id:uid("IN"), text:"Cliente pide 12 vistas nuevas y automatizaciones sin criterios de cierre.", decision:"wait", dri:"Consultor", out:"—", notes:"Evaluar en ritual."},
+    {id:uid("IN"), text:"Tarea administrativa: migrar facturas a plantilla", decision:"ops", dri:"Admin", out:"—", notes:"Operativo."}
+  ]);
+  S.set("wip",[
+    {id:"PC-01", text:"Rediseñar oferta: fase previa obligatoria antes de ClickUp", dri:"Dirección", status:"ACTIVO"},
+    {id:"PC-02", text:"Definir Intake de clientes (quién entra / quién no)", dri:"Dirección", status:"ACTIVO"}
+  ]);
+  S.set("decisions",[
+    {id:"DEC-01", wip:"PC-01", type:"tactica", text:"No implementamos ClickUp sin pasar por fase de contención (WIP/DoD/DRI/Intake).", dri:"Dirección", due:"", date:now()},
+    {id:"DEC-02", wip:"PC-02", type:"tactica", text:"Rechazamos clientes que exigen herramienta primero sin aceptar límites (WIP/Intake).", dri:"Dirección", due:"", date:now()}
+  ]);
+  S.set("rituals",[
+    {id:uid("RIT"), date:now(), type:"intake", dec:"DEC-02", out:"Se filtran 5 leads: 2 entran fase previa, 2 se posponen, 1 se descarta."},
+    {id:uid("RIT"), date:now(), type:"cierre", dec:"DEC-01", out:"Se cierra PC-02 (Intake definido y usado en 5 leads). PC-01 sigue activo."}
+  ]);
+  renderAll();
+  alert("Demo cargada.");
+}
+
+/* ---------- assistant classification ---------- */
 function classify(){
-const rule=c_rule.value, cross=c_cross.value;
-let type = (rule==="No" && cross==="Sí") ? "Problema COMPLEJO" : "Excepción u Operativo";
-c_result.style.display="block";
-c_result.innerHTML=`<strong>Clasificación:</strong> ${type}<br>
-Este problema requiere diseño del sistema, no solo ejecución.`;
-}
+  const rule = document.getElementById("c_rule").value;
+  const cross = document.getElementById("c_cross").value;
+  const impact = document.getElementById("c_impact").value;
+  const rev = document.getElementById("c_rev").value;
 
+  let score = 0;
+  const reasons=[];
+  if(rule==="no"){score+=2;reasons.push("No hay regla/SOP → requiere decisión.");}
+  if(cross==="yes"){score+=2;reasons.push("Cruza áreas → coordinación y trade-offs.");}
+  if(impact==="high"||impact==="legal"){score+=2;reasons.push("Impacto alto/legal → nivel de decisión sube.");}
+  if(impact==="med"){score+=1;reasons.push("Impacto medio → requiere priorización explícita.");}
+  if(rev==="no"){score+=2;reasons.push("Poco reversible → exige gobierno explícito.");}
+  if(rev==="partial"){score+=1;reasons.push("Reversibilidad parcial → riesgo de efectos en cadena.");}
+
+  let type="Operativo/flujo";
+  if(score>=5) type="Problema COMPLEJO";
+  else if(score>=3) type="Excepción (posible complejo)";
+  else type="Operativo/flujo";
+
+  const out = document.getElementById("c_result");
+  out.style.display="block";
+  out.innerHTML = `
+    <strong>Clasificación:</strong> <span class="pill ${type.includes("COMPLEJO")?"warn":"info"}">${esc(type)}</span>
+    <div class="hr"></div>
+    <strong>Por qué:</strong>
+    <ul class="help" style="margin:8px 0 0 18px">
+      ${reasons.map(r=>`<li>${esc(r)}</li>`).join("") || "<li>Encaja como operativo (reglas claras, baja coordinación, reversible).</li>"}
+    </ul>
+    <div class="hr"></div>
+    <div class="small"><strong>Siguiente paso:</strong> envíalo a Intake. Si es complejo y entra, ocupará WIP.</div>
+  `;
+}
 function sendToIntake(){
-i_text.value=c_text.value;
-showTab('intake');
+  document.getElementById("i_text").value = document.getElementById("c_text").value.trim();
+  showTab('intake');
 }
 
+/* ---------- Intake ---------- */
 function addIntake(){
-const row=intakeTable.querySelector("tbody").insertRow();
-row.innerHTML=`<td>${i_text.value}</td><td>${i_decision.value}</td><td>${i_dri.value}</td>
-<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
-if(i_decision.value==="ENTRA"){
-const wrow=wipTable.querySelector("tbody").insertRow();
-wrow.innerHTML=`<td>${i_text.value}</td><td>${i_dri.value}</td>
-<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
+  const intake = S.get("intake",[]);
+  intake.unshift({
+    id: uid("IN"),
+    text: document.getElementById("i_text").value.trim(),
+    decision: document.getElementById("i_decision").value,
+    dri: document.getElementById("i_dri").value.trim(),
+    out: document.getElementById("i_out").value.trim(),
+    notes: document.getElementById("i_notes").value.trim()
+  });
+  S.set("intake",intake);
+  renderAll();
+  alert("Registrado en Intake.");
 }
+function pullFromIntake(){
+  const intake = S.get("intake",[]);
+  const wip = S.get("wip",[]);
+  const limit = Number(S.get("wipLimit",3));
+  const active = wip.filter(x=>x.status==="ACTIVO").length;
+
+  const entrants = intake.filter(x=>x.decision==="enter");
+  if(entrants.length===0){ alert("No hay entradas con ENTRA."); return; }
+
+  // promote in order, respecting WIP limit
+  let promoted = 0;
+  for(const it of entrants){
+    if(active + promoted >= limit) break;
+    wip.unshift({ id: "PC-"+String(Math.floor(Math.random()*90)+10), text: it.text, dri: it.dri || "Por definir", status:"ACTIVO" });
+    // mark intake as wait after promotion to avoid re-promoting
+    it.decision = "wait";
+    promoted++;
+  }
+  S.set("wip", wip);
+  S.set("intake", intake);
+  renderAll();
+  alert(`Promovidos a WIP: ${promoted}. (Los promovidos pasan a ESPERA en Intake)`);
+}
+function renderIntake(){
+  const intake = S.get("intake",[]);
+  const tb = document.querySelector("#intakeTable tbody");
+  tb.innerHTML="";
+  intake.forEach((r,idx)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(r.text)}</td>
+      <td><span class="pill ${r.decision==="enter"?"ok":(r.decision==="no"?"warn":"info")}">${esc(r.decision.toUpperCase())}</span></td>
+      <td>${esc(r.dri||"—")}</td>
+      <td>${esc(r.out||"—")}</td>
+      <td>${esc(r.notes||"—")}</td>
+      <td>
+        <span class="action" onclick="editIntake(${idx})">✏️</span>
+        <span class="action" onclick="delIntake(${idx})">🗑</span>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+function editIntake(idx){
+  const intake = S.get("intake",[]);
+  const r = intake[idx];
+  const text = prompt("Editar entrada:", r.text); if(text===null) return;
+  const dri = prompt("Editar DRI:", r.dri||""); if(dri===null) return;
+  r.text = text; r.dri = dri;
+  S.set("intake",intake); renderAll();
+}
+function delIntake(idx){
+  const intake = S.get("intake",[]);
+  intake.splice(idx,1);
+  S.set("intake",intake); renderAll();
 }
 
+/* ---------- WIP ---------- */
+function saveWipLimit(){
+  const v = Number(document.getElementById("wipLimit").value || 3);
+  S.set("wipLimit", v);
+  renderAll();
+  alert("Límite WIP guardado.");
+}
+function renderWip(){
+  const wip = S.get("wip",[]);
+  const tb = document.querySelector("#wipTable tbody");
+  tb.innerHTML="";
+  wip.forEach((r,idx)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${esc(r.id)}</strong></td>
+      <td>${esc(r.text)}</td>
+      <td>${esc(r.dri||"—")}</td>
+      <td><span class="pill ${r.status==="ACTIVO"?"warn":"ok"}">${esc(r.status)}</span></td>
+      <td>
+        <span class="action" onclick="editWip(${idx})">✏️</span>
+        <span class="action" onclick="toggleWip(${idx})">✅</span>
+        <span class="action" onclick="delWip(${idx})">🗑</span>
+      </td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById("wipLimit").value = Number(S.get("wipLimit",3));
+  renderWipDropdown();
+}
+function editWip(idx){
+  const wip = S.get("wip",[]);
+  const r = wip[idx];
+  const text = prompt("Editar problema WIP:", r.text); if(text===null) return;
+  const dri = prompt("Editar DRI:", r.dri||""); if(dri===null) return;
+  r.text = text; r.dri = dri;
+  S.set("wip",wip); renderAll();
+}
+function toggleWip(idx){
+  const wip = S.get("wip",[]);
+  wip[idx].status = (wip[idx].status==="ACTIVO") ? "CERRADO" : "ACTIVO";
+  S.set("wip",wip); renderAll();
+}
+function delWip(idx){
+  const wip = S.get("wip",[]);
+  wip.splice(idx,1);
+  S.set("wip",wip); renderAll();
+}
+
+/* ---------- Decisions ---------- */
+function renderWipDropdown(){
+  const wip = S.get("wip",[]);
+  const sel = document.getElementById("d_wip");
+  if(!sel) return;
+  sel.innerHTML = `<option value="">(Sin asociar)</option>` + wip.map(w=>`<option value="${esc(w.id)}">${esc(w.id)} · ${esc(w.text).slice(0,60)}${w.text.length>60?"…":""}</option>`).join("");
+}
+function renderDecisionDropdown(){
+  const decs = S.get("decisions",[]);
+  const sel = document.getElementById("r_dec");
+  if(!sel) return;
+  sel.innerHTML = `<option value="">(Sin referenciar)</option>` + decs.map(d=>`<option value="${esc(d.id)}">${esc(d.id)} · ${esc(d.text).slice(0,60)}${d.text.length>60?"…":""}</option>`).join("");
+}
 function addDecision(){
-const row=decisionTable.querySelector("tbody").insertRow();
-row.innerHTML=`<td>${d_text.value}</td><td>${d_dri.value}</td>
-<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
+  const decisions = S.get("decisions",[]);
+  const id = "DEC-"+String(Math.floor(Math.random()*90)+10);
+  decisions.unshift({
+    id,
+    wip: document.getElementById("d_wip").value,
+    type: document.getElementById("d_type").value,
+    text: document.getElementById("d_text").value.trim(),
+    dri: document.getElementById("d_dri").value.trim(),
+    due: document.getElementById("d_due").value,
+    date: now()
+  });
+  S.set("decisions",decisions);
+  renderAll();
+  alert("Decisión registrada.");
+}
+function renderDecisions(){
+  const decisions = S.get("decisions",[]);
+  const tb = document.querySelector("#decisionTable tbody");
+  tb.innerHTML="";
+  decisions.forEach((r,idx)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(r.wip||"—")}</td>
+      <td><span class="pill info">${esc(r.type)}</span></td>
+      <td>${esc(r.text)}</td>
+      <td>${esc(r.dri||"—")}</td>
+      <td>${esc(r.due||"—")}</td>
+      <td>
+        <span class="action" onclick="editDecision(${idx})">✏️</span>
+        <span class="action" onclick="delDecision(${idx})">🗑</span>
+      </td>`;
+    tb.appendChild(tr);
+  });
+  renderDecisionDropdown();
+}
+function editDecision(idx){
+  const decisions = S.get("decisions",[]);
+  const r = decisions[idx];
+  const text = prompt("Editar decisión:", r.text); if(text===null) return;
+  const dri = prompt("Editar DRI:", r.dri||""); if(dri===null) return;
+  r.text = text; r.dri = dri;
+  S.set("decisions",decisions); renderAll();
+}
+function delDecision(idx){
+  const decisions = S.get("decisions",[]);
+  decisions.splice(idx,1);
+  S.set("decisions",decisions); renderAll();
 }
 
+/* ---------- Rituals ---------- */
 function addRitual(){
-const row=ritualTable.querySelector("tbody").insertRow();
-row.innerHTML=`<td>${r_text.value}</td>
-<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
+  const rituals = S.get("rituals",[]);
+  rituals.unshift({
+    id: uid("RIT"),
+    date: now(),
+    type: document.getElementById("r_type").value,
+    dec: document.getElementById("r_dec").value,
+    out: document.getElementById("r_out").value.trim()
+  });
+  S.set("rituals",rituals);
+  renderAll();
+  alert("Ritual registrado.");
 }
+function renderRituals(){
+  const rituals = S.get("rituals",[]);
+  const tb = document.querySelector("#ritualTable tbody");
+  tb.innerHTML="";
+  rituals.forEach((r,idx)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(r.date)}</td>
+      <td><span class="pill info">${esc(r.type)}</span></td>
+      <td>${esc(r.dec||"—")}</td>
+      <td>${esc(r.out)}</td>
+      <td>
+        <span class="action" onclick="editRitual(${idx})">✏️</span>
+        <span class="action" onclick="delRitual(${idx})">🗑</span>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+function editRitual(idx){
+  const rituals = S.get("rituals",[]);
+  const r = rituals[idx];
+  const out = prompt("Editar salida del ritual:", r.out); if(out===null) return;
+  r.out = out;
+  S.set("rituals",rituals); renderAll();
+}
+function delRitual(idx){
+  const rituals = S.get("rituals",[]);
+  rituals.splice(idx,1);
+  S.set("rituals",rituals); renderAll();
+}
+
+/* ---------- render all ---------- */
+function renderAll(){
+  renderIntake();
+  renderWip();
+  renderDecisions();
+  renderRituals();
+  renderWipDropdown();
+  renderDecisionDropdown();
+}
+(function init(){
+  if(S.get("wipLimit",null)===null) S.set("wipLimit",3);
+  if(S.get("intake",null)===null) S.set("intake",[]);
+  if(S.get("wip",null)===null) S.set("wip",[]);
+  if(S.get("decisions",null)===null) S.set("decisions",[]);
+  if(S.get("rituals",null)===null) S.set("rituals",[]);
+  renderAll();
+})();
 </script>
 
 </body>
