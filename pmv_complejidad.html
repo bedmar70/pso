@@ -3,80 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Complexity Governor · PMV</title>
+<title>Complexity Governor · Guided PMV</title>
 
 <style>
 :root{
   --bg:#f4f6f8; --card:#ffffff; --ink:#0f172a; --muted:#475569;
-  --nav:#0b1220; --nav2:#111b2e; --accent:#3b82f6; --warn:#f97316; --ok:#16a34a;
-  --line:#e2e8f0;
+  --nav:#0b1220; --nav2:#111b2e; --accent:#3b82f6;
+  --warn:#f97316; --ok:#16a34a; --line:#e2e8f0;
 }
 body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);}
 header{background:var(--nav);color:#fff;padding:16px;}
 header h1{margin:0;font-size:18px;}
 header p{margin:4px 0 0;font-size:12px;opacity:.85}
-
 nav{display:flex;overflow:auto;background:var(--nav2);}
-nav button{
-  padding:12px 14px;border:none;background:none;color:#fff;
-  opacity:.8;cursor:pointer;font-size:13px;
-}
+nav button{padding:12px 14px;border:none;background:none;color:#fff;opacity:.8;cursor:pointer;font-size:13px;}
 nav button.active{opacity:1;border-bottom:2px solid var(--accent);}
-
-.wrap{max-width:1000px;margin:0 auto;padding:14px;}
+.wrap{max-width:1100px;margin:0 auto;padding:14px;}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;}
 section{display:none}
 section.active{display:block}
-
 h2{margin-top:0;font-size:16px;}
+.help{font-size:13px;color:var(--muted);line-height:1.45}
+.callout{border-left:4px solid var(--accent);background:#eef2ff;padding:12px;border-radius:10px;margin:12px 0}
+.callout.warn{border-left-color:var(--warn);background:#fff7ed}
+.callout.ok{border-left-color:var(--ok);background:#ecfdf5}
 label{display:block;font-size:13px;font-weight:600;margin-top:10px;}
 input,textarea,select{
   width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);
   font-size:14px;box-sizing:border-box;
 }
-textarea{min-height:90px}
-
-.help{font-size:13px;color:var(--muted);line-height:1.45}
-.callout{border-left:4px solid var(--accent);background:#eef2ff;padding:12px;border-radius:10px;margin:12px 0}
-.callout.warn{border-left-color:var(--warn);background:#fff7ed}
-.callout.ok{border-left-color:var(--ok);background:#ecfdf5}
-
-button.primary{
-  background:var(--accent);color:#fff;border:none;
-  padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;
-}
-button.ghost{
-  background:#fff;border:1px solid var(--line);
-  padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;
-}
+textarea{min-height:80px}
+button.primary{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;}
+button.ghost{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;}
 .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-
 table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
 th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
 th{color:var(--muted);font-size:12px}
-
-.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
-.pill.info{background:#e0ecff;color:#1e3a8a}
-.pill.warn{background:#ffedd5;color:#7c2d12}
-.pill.ok{background:#dcfce7;color:#14532d}
+.action{cursor:pointer;color:#475569}
+.action:hover{color:#0f172a}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Complexity Governor</h1>
-  <p>Gobernar complejidad antes de herramientas</p>
+<h1>Complexity Governor</h1>
+<p>De problemas difusos a acciones gobernables</p>
 </header>
 
 <nav>
-  <button class="active" onclick="showTab('inicio')">Inicio</button>
-  <button onclick="showTab('clasificar')">1. Clasificar</button>
-  <button onclick="showTab('intake')">2. Intake</button>
-  <button onclick="showTab('wip')">3. WIP</button>
-  <button onclick="showTab('decisiones')">4. Decisiones</button>
-  <button onclick="showTab('rituales')">5. Rituales</button>
-  <button onclick="showTab('salida')">Salida</button>
+<button class="active" onclick="showTab('inicio')">Inicio</button>
+<button onclick="showTab('clasificar')">1. Clasificar</button>
+<button onclick="showTab('intake')">2. Intake</button>
+<button onclick="showTab('wip')">3. WIP</button>
+<button onclick="showTab('decisiones')">4. Decisiones</button>
+<button onclick="showTab('rituales')">5. Rituales</button>
+<button onclick="showTab('salida')">Salida</button>
 </nav>
 
 <div class="wrap">
@@ -85,60 +67,48 @@ th{color:var(--muted);font-size:12px}
 <section id="inicio" class="card active">
 <h2>Qué es este sistema</h2>
 <div class="callout">
-<strong>Complexity Governor</strong> es un sistema de gobierno.
-No gestiona tareas.  
-Decide <strong>qué entra, quién decide y cuándo se cierra</strong>.
+Este sistema convierte <strong>problemas complejos y difusos</strong>  
+en <strong>decisiones claras y acciones sostenibles</strong>.
 </div>
 
-<h2>Orden obligatorio</h2>
-<div class="callout ok">
-<ol>
-<li>Clasificar lo que llega</li>
-<li>Decidir si entra (Intake)</li>
-<li>Limitar complejidad (WIP)</li>
-<li>Asignar decisión (DRI)</li>
-<li>Sostener con rituales</li>
-</ol>
+<div class="help">
+No empieza con herramientas.<br>
+Empieza gobernando:
+<ul>
+<li>qué entra</li>
+<li>qué no entra</li>
+<li>quién decide</li>
+<li>cuándo algo se considera cerrado</li>
+</ul>
 </div>
 
 <div class="callout warn">
-Si te saltas un paso, el sistema se rompe.
+Si intentas usar herramientas sin esto, amplificas el caos.
 </div>
 </section>
 
 <!-- CLASIFICAR -->
 <section id="clasificar" class="card">
-<h2>1️⃣ Clasificar (Asistente)</h2>
+<h2>1️⃣ Clasificar</h2>
 <div class="help">
-Trae aquí cualquier cosa tal como llega (email, WhatsApp, idea).
-No la resuelvas aún.
+Aquí traemos el problema tal como existe hoy.<br>
+No lo resolvemos. Lo entendemos.
 </div>
 
-<label>Entrada real</label>
-<textarea id="c_text">Cliente pide cambio de diseño una semana antes de instalar.</textarea>
+<label>Problema real</label>
+<textarea id="c_text">
+Somos consultores certificados ClickUp, pero muchos clientes no adoptan porque no tienen sistema previo.
+</textarea>
 
-<label>¿Está cubierto por una regla clara?</label>
-<select id="c_sop">
-  <option value="yes">Sí</option>
-  <option value="no" selected>No</option>
-</select>
+<label>¿Existe una regla clara que lo cubra?</label>
+<select id="c_rule"><option>No</option><option>Sí</option></select>
 
-<label>¿Cruza áreas o requiere coordinación?</label>
-<select id="c_cross">
-  <option value="no">No</option>
-  <option value="yes" selected>Sí</option>
-</select>
-
-<label>Impacto si no se actúa</label>
-<select id="c_impact">
-  <option value="low">Bajo</option>
-  <option value="med" selected>Medio</option>
-  <option value="high">Alto</option>
-</select>
+<label>¿Cruza áreas o roles?</label>
+<select id="c_cross"><option>Sí</option><option>No</option></select>
 
 <div class="btnbar">
-  <button class="primary" onclick="classify()">Clasificar</button>
-  <button class="ghost" onclick="sendToIntake()">Enviar a Intake</button>
+<button class="primary" onclick="classify()">Clasificar problema</button>
+<button class="ghost" onclick="sendToIntake()">Enviar a Intake</button>
 </div>
 
 <div id="c_result" class="callout" style="display:none"></div>
@@ -148,49 +118,39 @@ No la resuelvas aún.
 <section id="intake" class="card">
 <h2>2️⃣ Intake</h2>
 <div class="help">
-Aquí decides si entra o no.
+Aquí decidimos conscientemente si este problema entra al sistema.
 </div>
 
-<label>Nueva entrada</label>
+<label>Entrada</label>
 <textarea id="i_text"></textarea>
 
 <label>Decisión</label>
 <select id="i_decision">
-  <option value="enter">ENTRA</option>
-  <option value="wait">ESPERA</option>
-  <option value="no">NO ENTRA</option>
-  <option value="ops">OPERATIVO</option>
+<option>ENTRA</option>
+<option>ESPERA</option>
+<option>NO ENTRA</option>
 </select>
 
-<label>DRI</label>
-<input id="i_dri" placeholder="Rol responsable">
+<label>Responsable (DRI)</label>
+<input id="i_dri" placeholder="Dirección / Gerencia">
 
-<div class="btnbar">
-  <button class="primary" onclick="addIntake()">Registrar</button>
-</div>
+<button class="primary" onclick="addIntake()">Registrar decisión</button>
 
 <table id="intakeTable">
-<thead>
-<tr><th>Entrada</th><th>Decisión</th><th>DRI</th></tr>
-</thead>
+<thead><tr><th>Entrada</th><th>Decisión</th><th>DRI</th><th></th></tr></thead>
 <tbody></tbody>
 </table>
 </section>
 
 <!-- WIP -->
 <section id="wip" class="card">
-<h2>3️⃣ WIP (Problemas complejos)</h2>
+<h2>3️⃣ WIP – Problemas complejos activos</h2>
 <div class="help">
-Solo problemas complejos activos.
+Aquí solo viven los problemas que requieren decisión real.
 </div>
 
-<label>Límite WIP</label>
-<input type="number" id="wipLimit" value="3">
-
 <table id="wipTable">
-<thead>
-<tr><th>Problema</th><th>DRI</th></tr>
-</thead>
+<thead><tr><th>Problema</th><th>DRI</th><th></th></tr></thead>
 <tbody></tbody>
 </table>
 </section>
@@ -198,24 +158,20 @@ Solo problemas complejos activos.
 <!-- DECISIONES -->
 <section id="decisiones" class="card">
 <h2>4️⃣ Decisiones</h2>
+<div class="help">
+Cada problema complejo debe tener al menos una decisión explícita.
+</div>
 
-<label>Decisión tomada</label>
+<label>Decisión</label>
 <input id="d_text">
-
-<label>Tipo</label>
-<select id="d_type">
-  <option>Sistémica</option>
-  <option>Táctica</option>
-  <option>Operativa</option>
-</select>
 
 <label>DRI</label>
 <input id="d_dri">
 
-<button class="primary" onclick="addDecision()">Registrar</button>
+<button class="primary" onclick="addDecision()">Registrar decisión</button>
 
 <table id="decisionTable">
-<thead><tr><th>Decisión</th><th>Tipo</th><th>DRI</th></tr></thead>
+<thead><tr><th>Decisión</th><th>DRI</th><th></th></tr></thead>
 <tbody></tbody>
 </table>
 </section>
@@ -223,23 +179,32 @@ Solo problemas complejos activos.
 <!-- RITUALES -->
 <section id="rituales" class="card">
 <h2>5️⃣ Rituales</h2>
+<div class="help">
+Los rituales sostienen el sistema sin heroicidad.
+Aquí registramos <strong>cierres reales</strong>.
+</div>
 
 <label>Resultado del ritual</label>
-<input id="r_text">
+<input id="r_text" placeholder="Ej: Se cierra problema X">
 
 <button class="primary" onclick="addRitual()">Registrar</button>
 
 <table id="ritualTable">
-<thead><tr><th>Resultado</th></tr></thead>
+<thead><tr><th>Resultado</th><th></th></tr></thead>
 <tbody></tbody>
 </table>
 </section>
 
 <!-- SALIDA -->
 <section id="salida" class="card">
-<h2>Salida</h2>
+<h2>Salida del sistema</h2>
 <div class="callout ok">
-Esta fase termina cuando el sistema funciona sin el consultor.
+La fase termina cuando:
+<ul>
+<li>los problemas se clasifican sin el consultor</li>
+<li>el Intake se respeta</li>
+<li>los problemas se cierran</li>
+</ul>
 </div>
 </section>
 
@@ -247,45 +212,46 @@ Esta fase termina cuando el sistema funciona sin el consultor.
 
 <script>
 function showTab(id){
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.querySelector(`[onclick="showTab('${id}')"]`).classList.add("active");
-  document.getElementById(id).classList.add("active");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+document.querySelector(`[onclick="showTab('${id}')"]`).classList.add("active");
+document.getElementById(id).classList.add("active");
 }
 
 function classify(){
-  const sop=c_sop.value, cross=c_cross.value, impact=c_impact.value;
-  let type="Operativo";
-  if(sop==="no" && cross==="yes") type="Complejo";
-  else if(sop==="no") type="Excepción";
-
-  c_result.style.display="block";
-  c_result.innerHTML=`<strong>Clasificación:</strong> ${type}<br>
-  <span class="pill info">Motivo: reglas=${sop}, coordinación=${cross}, impacto=${impact}</span>`;
+const rule=c_rule.value, cross=c_cross.value;
+let type = (rule==="No" && cross==="Sí") ? "Problema COMPLEJO" : "Excepción u Operativo";
+c_result.style.display="block";
+c_result.innerHTML=`<strong>Clasificación:</strong> ${type}<br>
+Este problema requiere diseño del sistema, no solo ejecución.`;
 }
 
 function sendToIntake(){
-  i_text.value=c_text.value;
-  showTab('intake');
+i_text.value=c_text.value;
+showTab('intake');
 }
 
 function addIntake(){
-  const row=intakeTable.querySelector("tbody").insertRow();
-  row.insertCell(0).innerText=i_text.value;
-  row.insertCell(1).innerText=i_decision.value;
-  row.insertCell(2).innerText=i_dri.value;
+const row=intakeTable.querySelector("tbody").insertRow();
+row.innerHTML=`<td>${i_text.value}</td><td>${i_decision.value}</td><td>${i_dri.value}</td>
+<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
+if(i_decision.value==="ENTRA"){
+const wrow=wipTable.querySelector("tbody").insertRow();
+wrow.innerHTML=`<td>${i_text.value}</td><td>${i_dri.value}</td>
+<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
+}
 }
 
 function addDecision(){
-  const row=decisionTable.querySelector("tbody").insertRow();
-  row.insertCell(0).innerText=d_text.value;
-  row.insertCell(1).innerText=d_type.value;
-  row.insertCell(2).innerText=d_dri.value;
+const row=decisionTable.querySelector("tbody").insertRow();
+row.innerHTML=`<td>${d_text.value}</td><td>${d_dri.value}</td>
+<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
 }
 
 function addRitual(){
-  const row=ritualTable.querySelector("tbody").insertRow();
-  row.insertCell(0).innerText=r_text.value;
+const row=ritualTable.querySelector("tbody").insertRow();
+row.innerHTML=`<td>${r_text.value}</td>
+<td><span class="action" onclick="this.parentElement.parentElement.remove()">🗑</span></td>`;
 }
 </script>
 
