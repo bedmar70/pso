@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSO Comm Center v1.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+    
+    /* Efectos Cyber */
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .input-dark {
+      background: #020617;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      transition: all 0.3s;
+    }
+    .input-dark:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+    
+    /* Toggle Switch */
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #38bdf8;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #38bdf8;
+    }
+    
+    /* Estados de Tarjetas */
+    .card-active { border-left: 4px solid #4ade80; background: rgba(74, 222, 128, 0.05); }
+    .card-inactive { border-left: 4px solid #94a3b8; opacity: 0.6; filter: grayscale(0.8); }
+    
+    /* Animaciones */
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="min-h-screen p-6 flex justify-center">
+
+  <div class="w-full max-w-6xl space-y-6">
+
+    <div class="flex justify-between items-center pb-4 border-b border-gray-800">
+      <div>
+        <h1 class="text-3xl font-bold text-white tracking-tight">PSO <span class="text-[#38bdf8]">COMM CENTER</span></h1>
+        <p class="text-gray-400 text-sm mt-1">Generador de Notificaciones Asistidas</p>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-gray-500 uppercase font-bold">Project Manager</div>
+        <div class="text-white font-mono">Ana Martínez</div>
+      </div>
+    </div>
+
+    <div class="glass-panel p-6 rounded-xl">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+        
+        <div class="md:col-span-6 relative">
+          <label class="text-xs text-gray-400 uppercase font-bold mb-2 block">1. Buscar Proyecto (ClickUp)</label>
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-gray-500"></i>
+            <input type="text" id="searchProject" class="input-dark w-full pl-10 p-3 rounded-lg text-lg font-bold" placeholder="Escribe para buscar..." autocomplete="off">
+            <div id="searchResults" class="absolute z-50 w-full bg-gray-900 border border-gray-700 mt-1 rounded-lg hidden shadow-2xl max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="text-xs text-gray-400 uppercase font-bold mb-2 block">2. Fase / Documento</label>
+          <select id="selFase" class="input-dark w-full p-3 rounded-lg cursor-pointer" disabled>
+            <option value="">- Selecciona Proyecto -</option>
+          </select>
+        </div>
+        <div class="md:col-span-3">
+          <label class="text-xs text-gray-400 uppercase font-bold mb-2 block">3. Nuevo Estado (Trigger)</label>
+          <select id="selEstado" class="input-dark w-full p-3 rounded-lg cursor-pointer font-bold text-white" disabled>
+            <option value="">- Esperando Fase -</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="panelComunicaciones" class="hidden">
+      
+      <div class="flex items-center gap-3 mb-4">
+        <h2 class="text-xl font-bold text-white"><i class="fa-regular fa-paper-plane text-[#38bdf8] mr-2"></i> Previsualización de Borradores</h2>
+        <span class="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded">Los textos se han cargado según la Matriz de Definición</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div id="cardClient" class="glass-panel p-5 rounded-xl transition-all duration-300 card-inactive">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="bg-blue-900/50 text-blue-200 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Cliente</span>
+                <span id="checkStatusClient" class="text-[10px] text-gray-500"><i class="fa-solid fa-circle-xmark"></i> Check OFF</span>
+              </div>
+              <h3 id="nameClient" class="font-bold text-lg text-white mt-1">Sin asignar</h3>
+              <div id="emailClient" class="text-xs text-gray-400 truncate">...</div>
+            </div>
+            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggle" id="toggleClient" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                <label for="toggleClient" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-700 cursor-pointer"></label>
+            </div>
+          </div>
+          
+          <div class="space-y-3 opacity-50 transition-opacity" id="editorClient">
+            <div>
+               <label class="text-[10px] text-gray-500 uppercase">Asunto</label>
+               <input type="text" id="subjectClient" class="w-full bg-black/20 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300">
+            </div>
+            <div>
+               <label class="text-[10px] text-gray-500 uppercase">Cuerpo del Mensaje</label>
+               <textarea id="bodyClient" rows="6" class="w-full bg-black/20 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300"></textarea>
+            </div>
+            <div class="text-xs text-[#38bdf8]"><i class="fa-solid fa-paperclip"></i> Se adjuntará PDF del boceto (si existe)</div>
+          </div>
+        </div>
+
+        <div id="cardProvider" class="glass-panel p-5 rounded-xl transition-all duration-300 card-inactive">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="bg-purple-900/50 text-purple-200 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Proveedor</span>
+                <span id="checkStatusProvider" class="text-[10px] text-gray-500"><i class="fa-solid fa-circle-xmark"></i> Check OFF</span>
+              </div>
+              <h3 id="nameProvider" class="font-bold text-lg text-white mt-1">Sin asignar</h3>
+              <div id="emailProvider" class="text-xs text-gray-400 truncate">...</div>
+            </div>
+            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                <input type="checkbox" id="toggleProvider" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                <label for="toggleProvider" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-700 cursor-pointer"></label>
+            </div>
+          </div>
+          <div class="space-y-3 opacity-50 transition-opacity" id="editorProvider">
+            <div>
+               <label class="text-[10px] text-gray-500 uppercase">Asunto</label>
+               <input type="text" id="subjectProvider" class="w-full bg-black/20 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300">
+            </div>
+            <div>
+               <label class="text-[10px] text-gray-500 uppercase">Cuerpo del Mensaje</label>
+               <textarea id="bodyProvider" rows="6" class="w-full bg-black/20 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300"></textarea>
+            </div>
+            <div class="text-xs text-[#38bdf8]"><i class="fa-solid fa-paperclip"></i> Se adjuntará Ficha Técnica</div>
+          </div>
+        </div>
+
+        <div id="cardCommercial" class="glass-panel p-5 rounded-xl transition-all duration-300 card-inactive">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="bg-orange-900/50 text-orange-200 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Comercial</span>
+                <span id="checkStatusCommercial" class="text-[10px] text-gray-500"><i class="fa-solid fa-circle-xmark"></i> Check OFF</span>
+              </div>
+              <h3 id="nameCommercial" class="font-bold text-lg text-white mt-1">Sin asignar</h3>
+              <div id="emailCommercial" class="text-xs text-gray-400 truncate">...</div>
+            </div>
+            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                <input type="checkbox" id="toggleCommercial" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                <label for="toggleCommercial" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-700 cursor-pointer"></label>
+            </div>
+          </div>
+          <div class="space-y-3 opacity-50 transition-opacity" id="editorCommercial">
+             <div>
+               <label class="text-[10px] text-gray-500 uppercase">Asunto</label>
+               <input type="text" id="subjectCommercial" class="w-full bg-black/20 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300">
+            </div>
+            <div>
+               <label class="text-[10px] text-gray-500 uppercase">Cuerpo del Mensaje</label>
+               <textarea id="bodyCommercial" rows="6" class="w-full bg-black/20 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300"></textarea>
+            </div>
+            <div class="text-xs text-gray-500">Nota: El comercial solo recibe el enlace a la tarea.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mt-8 flex justify-end">
+        <button onclick="generarBorradores()" class="bg-gradient-to-r from-[#38bdf8] to-blue-600 text-black font-bold text-lg py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:scale-[1.02] transition-transform flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> GENERAR BORRADORES
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // -----------------------------------------------------
+    // 1. DATOS SIMULADOS (Lo que vendría de N8N/ClickUp)
+    // -----------------------------------------------------
+    const MOCK_PROJECT = {
+        id: "123456",
+        name: "Proyecto Pandora - Envases 500ml",
+        stakeholders: {
+            client: { name: "VerdeFlexibles S.L.", email: "ana@verdeflexibles.es", cc: "compras@verdeflexibles.es" },
+            provider: { name: "Gráficas Pepe", email: "pedidos@graficaspepe.com" },
+            commercial: { name: "Alberto Gómez", email: "alberto@psdoro.es" }
+        },
+        // AQUÍ ESTÁ LA CLAVE: Los checks de ClickUp
+        checks: {
+            notifyClient: true,      // Checkbox ClickUp ACTIVADO
+            notifyProvider: false,   // Checkbox ClickUp DESACTIVADO
+            notifyCommercial: true   // Checkbox ClickUp ACTIVADO
+        }
+    };
+
+    // -----------------------------------------------------
+    // 2. MATRIZ DE COMUNICACIONES (La lógica de negocio)
+    // -----------------------------------------------------
+    const COMM_MATRIX = {
+        "Boceto": {
+            "Enviado Solicitante": {
+                "Client": { subject: "Revisión Boceto - {{PROYECTO}}", body: "Hola {{CLIENTE}},\n\nAdjuntamos el boceto para vuestra validación.\n\nSaludos." },
+                "Provider": null, // No se notifica
+                "Commercial": { subject: "Aviso: Boceto enviado a cliente", body: "Alberto, ya hemos enviado el boceto. Link: {{LINK}}" }
+            },
+            "No Conforme": {
+                "Client": { subject: "Recibidos comentarios - {{PROYECTO}}", body: "Hola {{CLIENTE}},\n\nHemos recibido vuestras correcciones. Procedemos a revisar." },
+                "Provider": { subject: "URGENTE: Corrección Boceto", body: "Hola {{PROVEEDOR}},\n\nEl cliente ha rechazado el arte. Ver notas adjuntas." },
+                "Commercial": { subject: "Alerta: Boceto Rechazado", body: "Ojo, el cliente ha rechazado el boceto." }
+            }
+        },
+        "Cliché": {
+             "Solicitado": {
+                "Client": null,
+                "Provider": { subject: "Orden de Compra - Cliché {{PROYECTO}}", body: "Hola,\n\nProcedan con la fabricación según ficha técnica adjunta." },
+                "Commercial": { subject: "Cliché Solicitado", body: "El proyecto pasa a producción." }
+             }
+        }
+    };
+
+    // Variables Globales
+    let currentProject = null;
+
+    // --- Lógica de UI ---
+    
+    // 1. Simular Búsqueda
+    document.getElementById('searchProject').addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase();
+        const results = document.getElementById('searchResults');
+        
+        if (val.length > 2 && "proyecto pandora".includes(val)) {
+            results.classList.remove('hidden');
+            results.innerHTML = `
+                <div class="p-4 hover:bg-gray-800 cursor-pointer border-b border-gray-700" onclick="selectProject()">
+                    <div class="font-bold text-white">Proyecto Pandora - Envases 500ml</div>
+                    <div class="text-xs text-[#38bdf8] mt-1">ID: #123456 • Cliente: VerdeFlexibles</div>
+                </div>
+            `;
+        } else {
+            results.classList.add('hidden');
+        }
+    });
+
+    // 2. Seleccionar Proyecto (Carga de Datos)
+    function selectProject() {
+        document.getElementById('searchResults').classList.add('hidden');
+        document.getElementById('searchProject').value = MOCK_PROJECT.name;
+        currentProject = MOCK_PROJECT;
+
+        // Llenar Fases
+        const selFase = document.getElementById('selFase');
+        selFase.innerHTML = '<option value="">- Selecciona -</option>' + Object.keys(COMM_MATRIX).map(k => `<option value="${k}">${k}</option>`).join('');
+        selFase.disabled = false;
+
+        // Visualizar Datos en las Tarjetas (Aún ocultas las entradas)
+        renderStakeholderInfo();
+        
+        // Mostrar panel (pero desactivado hasta elegir estado)
+        document.getElementById('panelComunicaciones').classList.remove('hidden');
+        document.getElementById('panelComunicaciones').classList.add('fade-in');
+    }
+
+    // 3. Renderizar info base de Stakeholders y CHECKS
+    function renderStakeholderInfo() {
+        // Cliente
+        document.getElementById('nameClient').innerText = currentProject.stakeholders.client.name;
+        document.getElementById('emailClient').innerText = currentProject.stakeholders.client.email + " (CC: " + currentProject.stakeholders.client.cc + ")";
+        applyCheckStatus('Client', currentProject.checks.notifyClient);
+
+        // Proveedor
+        document.getElementById('nameProvider').innerText = currentProject.stakeholders.provider.name;
+        document.getElementById('emailProvider').innerText = currentProject.stakeholders.provider.email;
+        applyCheckStatus('Provider', currentProject.checks.notifyProvider);
+
+        // Comercial
+        document.getElementById('nameCommercial').innerText = currentProject.stakeholders.commercial.name;
+        document.getElementById('emailCommercial').innerText = currentProject.stakeholders.commercial.email;
+        applyCheckStatus('Commercial', currentProject.checks.notifyCommercial);
+    }
+
+    // Función auxiliar para activar/desactivar visualmente según el Check de ClickUp
+    function applyCheckStatus(role, isChecked) {
+        const toggle = document.getElementById(`toggle${role}`);
+        const card = document.getElementById(`card${role}`);
+        const statusText = document.getElementById(`checkStatus${role}`);
+        const editor = document.getElementById(`editor${role}`);
+
+        toggle.checked = isChecked;
+        
+        if (isChecked) {
+            card.classList.remove('card-inactive');
+            card.classList.add('card-active');
+            statusText.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i> Check ClickUp: SÍ';
+            statusText.classList.add('text-green-400');
+            editor.classList.remove('opacity-50');
+            editor.classList.add('opacity-100');
+        } else {
+            card.classList.add('card-inactive');
+            card.classList.remove('card-active');
+            statusText.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Check ClickUp: NO';
+            statusText.classList.remove('text-green-400');
+            editor.classList.remove('opacity-100');
+            editor.classList.add('opacity-50');
+        }
+    }
+
+    // Listener para los Toggles Manuales (La PM puede forzar)
+    ['Client', 'Provider', 'Commercial'].forEach(role => {
+        document.getElementById(`toggle${role}`).addEventListener('change', (e) => {
+            const card = document.getElementById(`card${role}`);
+            const editor = document.getElementById(`editor${role}`);
+            if(e.target.checked) {
+                card.classList.remove('card-inactive');
+                card.classList.add('card-active');
+                editor.classList.remove('opacity-50');
+                editor.classList.add('opacity-100');
+            } else {
+                card.classList.add('card-inactive');
+                card.classList.remove('card-active');
+                editor.classList.add('opacity-50');
+                editor.classList.remove('opacity-100');
+            }
+        });
+    });
+
+    // 4. Lógica de Matrices (Cambio de Selects)
+    document.getElementById('selFase').addEventListener('change', (e) => {
+        const fase = e.target.value;
+        const selEstado = document.getElementById('selEstado');
+        if(!fase) { selEstado.disabled = true; return; }
+        
+        const estados = Object.keys(COMM_MATRIX[fase]);
+        selEstado.innerHTML = '<option value="">- Elige Estado -</option>' + estados.map(s => `<option value="${s}">${s}</option>`).join('');
+        selEstado.disabled = false;
+    });
+
+    document.getElementById('selEstado').addEventListener('change', (e) => {
+        const estado = e.target.value;
+        const fase = document.getElementById('selFase').value;
+        if(!estado) return;
+
+        const templates = COMM_MATRIX[fase][estado];
+        
+        // Cargar plantillas
+        fillTemplate('Client', templates.Client);
+        fillTemplate('Provider', templates.Provider);
+        fillTemplate('Commercial', templates.Commercial);
+    });
+
+    function fillTemplate(role, templateData) {
+        const subjectInput = document.getElementById(`subject${role}`);
+        const bodyInput = document.getElementById(`body${role}`);
+        const toggle = document.getElementById(`toggle${role}`);
+
+        if (templateData) {
+            // Reemplazar variables básicas
+            let subj = templateData.subject.replace('{{PROYECTO}}', currentProject.name);
+            let body = templateData.body
+                .replace('{{CLIENTE}}', currentProject.stakeholders.client.name.split(' ')[0])
+                .replace('{{PROVEEDOR}}', currentProject.stakeholders.provider.name)
+                .replace('{{LINK}}', 'https://clickup.com/...');
+
+            subjectInput.value = subj;
+            bodyInput.value = body;
+
+            // Lógica inteligente: Si hay plantilla PERO el check estaba apagado, lo dejamos apagado (respetamos ClickUp).
+            // Pero si el check estaba encendido, aseguramos que se vea activo.
+            // Si NO hay plantilla (null), forzamos apagado.
+        } else {
+            subjectInput.value = "No se requiere notificación";
+            bodyInput.value = "";
+            // Si la matriz dice que no toca, desactivamos aunque el check esté activo
+            toggle.checked = false;
+            toggle.dispatchEvent(new Event('change')); 
+        }
+    }
+
+    // 5. Generar Borradores
+    function generarBorradores() {
+        // Recopilar quién está activo
+        const toSend = [];
+        ['Client', 'Provider', 'Commercial'].forEach(role => {
+            if(document.getElementById(`toggle${role}`).checked) {
+                toSend.push(role);
+            }
+        });
+
+        if(toSend.length === 0) {
+            Swal.fire('Atención', 'No has seleccionado ningún destinatario.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Enviando a N8N',
+            text: `Se generarán borradores para: ${toSend.join(', ')}`,
+            icon: 'success',
+            background: '#1e293b',
+            color: '#fff',
+            confirmButtonColor: '#38bdf8'
+        });
+    }
+
+  </script>
+</body>
+</html>
