@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FM API Explorer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f1117;--s1:#1a1d27;--s2:#22263a;--bd:#2e3348;
+    --gr:#00d4aa;--gd:#00d4aa18;--tx:#e2e6f0;--mu:#6b7280;
+    --re:#ff5c5c;--am:#f59e0b;--bl:#4f8ef7;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:20px}
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--bd)}
+  .logo{background:var(--gr);color:#000;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;width:32px;height:32px;border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+  .ts{font-size:11px;color:var(--mu);margin-left:auto;font-family:'JetBrains Mono',monospace;background:var(--s2);padding:3px 9px;border-radius:5px}
+  .grid{display:grid;grid-template-columns:250px 1fr;gap:14px}
+  .panel{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
+  .pt{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+  .f{margin-bottom:9px}
+  .f label{font-size:11px;color:var(--mu);display:block;margin-bottom:3px;font-family:'JetBrains Mono',monospace}
+  .f input{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--tx);font-family:'JetBrains Mono',monospace;outline:none}
+  .f input:focus{border-color:var(--gr)}
+  .f input::placeholder{color:#444}
+  .ep{display:flex;flex-direction:column;gap:5px}
+  .eb{background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;cursor:pointer;text-align:left;width:100%;transition:all .12s}
+  .eb:hover,.eb.on{border-color:var(--gr);background:var(--gd)}
+  .em{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;margin-right:5px}
+  .get{background:#00d4aa22;color:var(--gr)}
+  .post{background:#4f8ef722;color:var(--bl)}
+  .ep-p{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--tx)}
+  .ep-d{font-size:10px;color:var(--mu);margin-top:1px}
+  .sb{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--s1);border:1px solid var(--bd);border-radius:8px;font-size:12px;color:var(--mu);margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--mu);flex-shrink:0}
+  .dot.ok{background:var(--gr)}
+  .dot.err{background:var(--re)}
+  .dot.spin{background:var(--am);animation:p .8s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+  .rr{display:flex;gap:7px;margin-bottom:10px}
+  .ms{width:78px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px;font-size:12px;color:var(--tx);font-family:'JetBrains Mono',monospace;outline:none;flex-shrink:0}
+  .ui{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px 11px;font-size:12px;color:var(--tx);font-family:'JetBrains Mono',monospace;outline:none}
+  .ui:focus,.ms:focus{border-color:var(--gr)}
+  .rb{background:var(--gr);color:#000;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .rb:hover{opacity:.85}
+  .rb:disabled{opacity:.35;cursor:not-allowed}
+  .fr{display:flex;gap:6px;margin-bottom:10px}
+  .fi{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--tx);font-family:'JetBrains Mono',monospace;outline:none}
+  .fi:focus{border-color:var(--gr)}
+  .cb{background:var(--s2);border:1px solid var(--bd);color:var(--mu);border-radius:5px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'JetBrains Mono',monospace}
+  .cb:hover{border-color:var(--gr);color:var(--gr)}
+  .ra{background:var(--s1);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+  .rh{padding:9px 13px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:9px;font-size:11px;font-family:'JetBrains Mono',monospace}
+  .rc{padding:2px 8px;border-radius:4px;font-weight:700;font-size:11px}
+  .c2{background:#00d4aa22;color:var(--gr)}.c4{background:#ff5c5c22;color:var(--re)}.ce{background:#f59e0b22;color:var(--am)}
+  .rt{margin-left:auto;color:var(--mu)}
+  .rb2{padding:13px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;max-height:500px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+  .rb2::-webkit-scrollbar{width:5px}
+  .rb2::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+  .jk{color:#7dd3fc}.js{color:#86efac}.jn{color:#fbbf24}.jb{color:#c084fc}.jnu{color:var(--mu)}
+  .bi{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:9px 11px;font-size:12px;color:var(--tx);font-family:'JetBrains Mono',monospace;outline:none;resize:vertical;min-height:80px;margin-bottom:9px}
+  .bi:focus{border-color:var(--gr)}
+  .note{background:#4f8ef711;border:1px solid #4f8ef733;border-radius:7px;padding:9px 11px;font-size:11px;color:var(--bl);line-height:1.6;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>
+    <div class="logo">FM</div>
+    Sage Sales Management · API Explorer
+    <span class="ts" id="ts">ts: —</span>
+  </h1>
+
+  <div class="note">
+    Endpoint: <strong>https://api.forcemanager.com/api/v4</strong> · CORS soportado · Webhooks disponibles.
+    FM llama a N8N cuando ocurre un evento (pedido creado, oportunidad actualizada, etc).
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <div class="pt">Credenciales</div>
+        <div class="f"><label>Public Key</label><input type="password" id="pub" placeholder="0f0d9153…" autocomplete="off"></div>
+        <div class="f"><label>Private Key</label><input type="password" id="priv" placeholder="f71f1573…" autocomplete="off"></div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Endpoints</div>
+        <div class="ep">
+          <button class="eb" onclick="sel(this,'GET','/api/v4/versions')">
+            <span class="em get">GET</span><span class="ep-p">/versions</span>
+            <div class="ep-d">Primer test · verifica auth</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/versions')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/versions</span>
+            <div class="ep-d">Primer test · verifica auth</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/opportunities?pageSize=10')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/opportunities</span>
+            <div class="ep-d">Pipeline · oportunidades</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/salesOrders?pageSize=10')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/salesOrders</span>
+            <div class="ep-d">Pedidos (Nº FM)</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/accounts?pageSize=10')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/accounts</span>
+            <div class="ep-d">Empresas · cuentas</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/contacts?pageSize=10')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/contacts</span>
+            <div class="ep-d">Contactos</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/users')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/users</span>
+            <div class="ep-d">Usuarios</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/webhooks')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/webhooks</span>
+            <div class="ep-d">Webhooks configurados</div>
+          </button>
+          <button class="eb" onclick="sel(this,'POST','/api/v4/webhooks','{&quot;url&quot;:&quot;https://n8n.escueladeefectividad.com/webhook/fm-eventos&quot;,&quot;entity&quot;:&quot;salesOrders&quot;,&quot;action&quot;:&quot;create&quot;}')">
+            <span class="em post">POST</span><span class="ep-p">/api/v4/webhooks</span>
+            <div class="ep-d">Registrar webhook en N8N</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/valueLists?pageSize=50')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/valueLists</span>
+            <div class="ep-d">Listas de valores · estados</div>
+          </button>
+          <button class="eb" onclick="sel(this,'GET','/api/v4/products?pageSize=10')">
+            <span class="em get">GET</span><span class="ep-p">/api/v4/products</span>
+            <div class="ep-d">Productos / referencias</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sb"><span class="dot" id="dot"></span><span id="stxt">Introduce credenciales y ejecuta</span></div>
+
+      <div class="rr">
+        <select class="ms" id="method"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+        <input class="ui" id="url" value="/api/v4/versions">
+        <button class="rb" id="rbtn" onclick="run()">Ejecutar →</button>
+      </div>
+
+      <div id="bsec" style="display:none">
+        <textarea class="bi" id="body" placeholder='{"name":"Test","statusId":1}'></textarea>
+      </div>
+
+      <div class="fr">
+        <input class="fi" id="filter" placeholder="Filtrar campos: id, name, status…" oninput="doFilter()">
+        <button class="cb" onclick="doCopy()">Copiar</button>
+      </div>
+
+      <div class="ra">
+        <div class="rh">
+          <span id="rcode"></span>
+          <span id="rep" style="color:var(--mu);font-size:11px"></span>
+          <span class="rt" id="rtime"></span>
+        </div>
+        <div class="rb2" id="rbody">// La respuesta aparecerá aquí</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const FM_BASE = 'https://api.forcemanager.com';
+let lastRaw = '', lastParsed = null;
+
+async function sha1(s) {
+  const b = new TextEncoder().encode(s);
+  const h = await crypto.subtle.digest('SHA-1', b);
+  return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+function st(state, txt) {
+  document.getElementById('dot').className = 'dot '+({ok:'ok',err:'err',loading:'spin'}[state]||'');
+  document.getElementById('stxt').textContent = txt;
+}
+
+function sel(el, m, p) {
+  document.querySelectorAll('.eb').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('method').value = m;
+  document.getElementById('url').value = p;
+  document.getElementById('bsec').style.display = m!=='GET'?'block':'none';
+}
+
+document.getElementById('method').addEventListener('change', function(){
+  document.getElementById('bsec').style.display = this.value!=='GET'?'block':'none';
+});
+
+function hl(j) {
+  return j.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m=>{
+    let c='jn';
+    if(/^"/.test(m)){c=/:$/.test(m)?'jk':'js';}
+    else if(/true|false/.test(m)){c='jb';}
+    else if(/null/.test(m)){c='jnu';}
+    return `<span class="${c}">${m}</span>`;
+  });
+}
+
+function doFilter() {
+  if (!lastParsed) return;
+  const q = document.getElementById('filter').value.trim();
+  if (!q) { document.getElementById('rbody').innerHTML = hl(JSON.stringify(lastParsed,null,2)); return; }
+  const keys = q.split(',').map(k=>k.trim()).filter(Boolean);
+  function f(o) {
+    if (Array.isArray(o)) return o.map(f).filter(Boolean);
+    if (typeof o==='object'&&o) {
+      const r={};
+      keys.forEach(k=>{if(o[k]!==undefined)r[k]=o[k];});
+      return Object.keys(r).length?r:null;
+    }
+    return null;
+  }
+  document.getElementById('rbody').innerHTML = hl(JSON.stringify(f(lastParsed),null,2));
+}
+
+function doCopy() {
+  if (!lastRaw) return;
+  navigator.clipboard.writeText(lastRaw).then(()=>{
+    const b=document.querySelector('.cb');
+    b.textContent='✓';
+    setTimeout(()=>b.textContent='Copiar',1500);
+  });
+}
+
+async function run() {
+  const pub  = document.getElementById('pub').value.trim();
+  const priv = document.getElementById('priv').value.trim();
+  const path = document.getElementById('url').value.trim();
+  const meth = document.getElementById('method').value;
+  const body = document.getElementById('body').value.trim();
+
+  if (!pub||!priv) { st('err','Introduce Public Key y Private Key'); return; }
+  if (!path)       { st('err','Introduce un endpoint'); return; }
+
+  const btn = document.getElementById('rbtn');
+  btn.disabled = true;
+  st('loading', meth + ' ' + path + ' …');
+  document.getElementById('rbody').textContent = '// Cargando…';
+  document.getElementById('rcode').innerHTML = '';
+  document.getElementById('rtime').textContent = '';
+
+  const ts  = Math.floor(Date.now()/1000).toString();
+  const sig = await sha1(ts + pub + priv);
+
+  // Llamada directa a FM (CORS compliant según su documentación)
+  const headers = {
+    'Content-Type':       'application/json',
+    'X-FM-PublicKey':     pub,
+    'X-FM-UnixTimestamp': ts,
+    'X-FM-Signature':     sig,
+    'X-FM-API-Version':   '4'
+  };
+
+  const opts = { method: meth, headers };
+  if (meth !== 'GET' && body) opts.body = body;
+
+  try {
+    const t0  = performance.now();
+    const res = await fetch(FM_BASE + path, opts);
+    const ms  = Math.round(performance.now() - t0);
+    const txt = await res.text();
+    lastRaw   = txt;
+
+    try { lastParsed = JSON.parse(txt); } catch(e) { lastParsed = null; }
+    const pretty = lastParsed ? JSON.stringify(lastParsed, null, 2) : txt;
+
+    const cls = res.ok ? 'c2' : 'c4';
+    document.getElementById('rcode').innerHTML  = `<span class="rc ${cls}">${res.status} ${res.statusText}</span>`;
+    document.getElementById('rep').textContent  = meth + ' ' + path;
+    document.getElementById('rtime').textContent = ms + 'ms';
+    document.getElementById('rbody').innerHTML   = hl(pretty);
+    st(res.ok ? 'ok' : 'err', res.ok ? `✓ ${res.status} · ${ms}ms · ${txt.length} bytes` : `Error ${res.status}`);
+  } catch(e) {
+    lastRaw = ''; lastParsed = null;
+    document.getElementById('rcode').innerHTML  = '<span class="rc ce">ERROR</span>';
+    document.getElementById('rbody').textContent =
+      'Error: ' + e.message +
+      '\n\nFM bloquea llamadas desde file://\n' +
+      'Sube este archivo a GitHub Pages para que funcione:\n\n' +
+      '1. Crea un repo en github.com\n' +
+      '2. Sube fm_explorer.html\n' +
+      '3. Settings → Pages → Branch: main\n' +
+      '4. Abre la URL https://TU-USUARIO.github.io/REPO/fm_explorer.html';
+    st('err', 'Abre desde GitHub Pages · no desde file://');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('url').addEventListener('keydown', e=>{ if(e.key==='Enter') run(); });
+setInterval(()=>{ document.getElementById('ts').textContent='ts: '+Math.floor(Date.now()/1000); }, 1000);
+</script>
+</body>
+</html>
