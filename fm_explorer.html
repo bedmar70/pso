@@ -74,8 +74,8 @@
   </h1>
 
   <div class="note">
-    Endpoint: <strong>https://api.forcemanager.com/api/v4</strong> · CORS soportado · Webhooks disponibles.
-    FM llama a N8N cuando ocurre un evento (pedido creado, oportunidad actualizada, etc).
+    HTML → N8N proxy → FM · Endpoint correcto: <strong>api.forcemanager.com/api/v4</strong> · Webhooks disponibles.
+    Asegúrate de que el workflow <strong>FM API Proxy</strong> está activo en N8N.
   </div>
 
   <div class="grid">
@@ -168,7 +168,7 @@
 </div>
 
 <script>
-const FM_BASE = 'https://api.forcemanager.com';
+const N8N_PROXY = 'https://n8n.escueladeefectividad.com/webhook/fm-proxy';
 let lastRaw = '', lastParsed = null;
 
 async function sha1(s) {
@@ -250,21 +250,19 @@ async function run() {
   const ts  = Math.floor(Date.now()/1000).toString();
   const sig = await sha1(ts + pub + priv);
 
-  // Llamada directa a FM (CORS compliant según su documentación)
-  const headers = {
-    'Content-Type':       'application/json',
-    'X-FM-PublicKey':     pub,
-    'X-FM-UnixTimestamp': ts,
-    'X-FM-Signature':     sig,
-    'X-FM-API-Version':   '4'
-  };
-
-  const opts = { method: meth, headers };
-  if (meth !== 'GET' && body) opts.body = body;
+  // Enviar a N8N que hace de proxy hacia FM
+  const payload = { path, method: meth, ts, pubKey: pub, sig };
+  if (meth !== 'GET' && body) {
+    try { payload.body = JSON.parse(body); } catch(e) { payload.body = body; }
+  }
 
   try {
     const t0  = performance.now();
-    const res = await fetch(FM_BASE + path, opts);
+    const res = await fetch(N8N_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
     const ms  = Math.round(performance.now() - t0);
     const txt = await res.text();
     lastRaw   = txt;
@@ -281,15 +279,8 @@ async function run() {
   } catch(e) {
     lastRaw = ''; lastParsed = null;
     document.getElementById('rcode').innerHTML  = '<span class="rc ce">ERROR</span>';
-    document.getElementById('rbody').textContent =
-      'Error: ' + e.message +
-      '\n\nFM bloquea llamadas desde file://\n' +
-      'Sube este archivo a GitHub Pages para que funcione:\n\n' +
-      '1. Crea un repo en github.com\n' +
-      '2. Sube fm_explorer.html\n' +
-      '3. Settings → Pages → Branch: main\n' +
-      '4. Abre la URL https://TU-USUARIO.github.io/REPO/fm_explorer.html';
-    st('err', 'Abre desde GitHub Pages · no desde file://');
+    document.getElementById('rbody').textContent = 'Error: ' + e.message + '\n\nComprueba que el workflow FM API Proxy está activo en N8N.';
+    st('err', 'Error conectando con N8N');
   } finally {
     btn.disabled = false;
   }
