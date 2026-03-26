@@ -85,11 +85,11 @@
         <label class="required">TIPO DE GESTIÓN (Selecciona para empezar)</label>
         <select id="tipoGestion" name="tipo_gestion_comercial" class="cyber-input text-lg font-bold bg-black border-[#00f3ff]" required>
           <option value="">▼ SELECCIONAR OPERACIÓN...</option>
-          <option value="Diseño nuevo">🚀 DISEÑO NUEVO</option>
+          <option value="Alta nueva">🚀 ALTA NUEVA</option>
           <option value="Modificación">📝 MODIFICACIÓN</option>
           <option value="Consultas - Varios">❓ CONSULTAS VARIOS</option>
           <option value="Consulta - Precio Cliché">💰 CONSULTA PRECIO CLICHÉS</option>
-          <option value="Solicitud de Plano">📐 SOLICITUD DE PLANO</option>
+          <option value="Consulta - Diseño Plano">📐 CONSULTA DISEÑO PLANO</option>
         </select>
       </div>
 
@@ -197,6 +197,18 @@
             <option value="SI">SI</option>
             <option value="NO">NO</option>
           </select>
+        </div>
+
+        <div id="campo_requierePruebaColor" class="hidden-force col-span-1 md:col-span-2">
+          <label>¿Requiere Prueba de Color?</label>
+          <div class="flex items-center gap-3 mt-1 p-3 rounded-lg border border-[#00f3ff]/20 bg-[#00f3ff]/5">
+            <input type="checkbox" name="requierePruebaColor" id="inputRequierePruebaColor"
+              class="w-5 h-5 accent-[#00f3ff] cursor-pointer rounded"
+              value="true">
+            <label for="inputRequierePruebaColor" class="text-sm text-[#00f3ff] cursor-pointer m-0 normal-case tracking-normal font-normal">
+              Sí, esta solicitud requiere prueba de color antes de la aprobación final
+            </label>
+          </div>
         </div>
 
         <div id="campo_tipoImpresion" class="hidden-force col-span-1">
@@ -310,13 +322,11 @@
     // --- VISIBILIDAD & OBLIGATORIEDAD ---
     // CAMBIOS APLICADOS EN ESTOS ARRAYS
     const TIPOS = {
-      'Diseño nuevo': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos'],
-      'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'observaciones', 'buscarProyecto'],
+      'Alta nueva': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'requierePruebaColor', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos'],
+      'Modificación': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'prioridadBoceto', 'necesitaCosteCliches', 'requierePruebaColor', 'tipoImpresion', 'materiales', 'enlaceDiseno', 'archivos', 'observaciones', 'buscarProyecto'],
       'Consultas - Varios': ['nombreSolicitante', 'emailSolicitante', 'descripcion', 'archivos', 'enlaceDiseno', 'observaciones'],
-      // CAMBIO 1: Agregado 'tipoImpresion' a la lista
       'Consulta - Precio Cliché': ['nombreSolicitante', 'emailSolicitante', 'nombreProyecto', 'descripcion', 'cliente', 'referenciaPSO', 'necesitaCosteCliches', 'tipoImpresion', 'enlaceDiseno', 'archivos', 'observaciones', 'metricasTecnicas'],
-      // CAMBIO 3: Agregado 'cliente' a la lista
-      'Solicitud de Plano': ['descripcion', 'archivos', 'emailSolicitante', 'cliente', 'tipoPlano', 'medidas', 'maculas', 'extrasPlano']
+      'Consulta - Diseño Plano': ['descripcion', 'archivos', 'emailSolicitante', 'cliente', 'tipoPlano', 'medidas', 'maculas', 'extrasPlano']
     };
 
     function setObligatorio(idInput, idLabel, obligatorio) {
@@ -369,7 +379,7 @@
         setObligatorio('inputBarnices', 'labelBarnices', true);
       }
 
-      if (seleccion === 'Solicitud de Plano') {
+      if (seleccion === 'Consulta - Diseño Plano') {
         setObligatorio('inputTipoPlano', 'labelTipoPlano', true);
         setObligatorio('inputMedidas', 'labelMedidas', true);
         setObligatorio('inputMaculas', 'labelMaculas', true);
@@ -523,7 +533,14 @@
 
             // INYECCIÓN DE DATOS DE PLANO EN LA DESCRIPCIÓN
             const tipoGestion = document.getElementById('tipoGestion').value;
-            if (tipoGestion === 'Solicitud de Plano') {
+            // CHECKBOX: requierePruebaColor — FormData solo incluye el campo si está marcado
+            // Lo normalizamos siempre a true/false para que n8n lo reciba correctamente
+            const checkPruebaColor = document.getElementById('inputRequierePruebaColor');
+            if (checkPruebaColor) {
+                formData.set('requierePruebaColor', checkPruebaColor.checked ? 'true' : 'false');
+            }
+
+            if (tipoGestion === 'Consulta - Diseño Plano') {
                 const tipoPlano = document.getElementById('inputTipoPlano').value;
                 const medidas = document.getElementById('inputMedidas').value;
                 const maculas = document.getElementById('inputMaculas').value;
