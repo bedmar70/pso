@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSO · Modelo de negocio digital</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c0f;
+  --surface:#111318;
+  --surface2:#181c24;
+  --border:#1e2430;
+  --border2:#2a3040;
+  --accent:#00e5c4;
+  --accent2:#0084ff;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --green:#22c55e;
+  --purple:#a855f7;
+  --text:#e8eaf0;
+  --muted:#6b7280;
+  --muted2:#4a5260;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,12,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;gap:0}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--accent);letter-spacing:-.02em;margin-right:32px}
+.nav-logo span{color:var(--text)}
+.nav-tabs{display:flex;gap:2px;flex:1}
+.nav-tab{padding:6px 16px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.nav-tab:hover{color:var(--text);background:var(--surface2)}
+.nav-tab.active{color:var(--accent);background:rgba(0,229,196,.08);font-weight:500}
+.nav-badge{margin-left:auto;font-size:11px;color:var(--muted);padding:4px 10px;border:1px solid var(--border2);border-radius:20px}
+
+/* MAIN */
+main{padding-top:56px}
+.section{display:none;padding:40px 40px 80px;max-width:1000px;margin:0 auto;animation:fadeIn .3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{text-align:center;padding:60px 20px 40px}
+.hero-eyebrow{font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:20px}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,56px);font-weight:800;line-height:1.05;letter-spacing:-.03em;margin-bottom:20px}
+.hero-title .hl{color:var(--accent)}
+.hero-sub{font-size:16px;color:var(--muted);max-width:560px;margin:0 auto 40px;line-height:1.6}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#000;padding:12px 28px;border-radius:8px;font-weight:500;font-size:14px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.hero-cta:hover{opacity:.85}
+
+/* PAIN CARDS */
+.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:32px 0}
+.pain-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.pain-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--red)}
+.pain-icon{font-size:24px;margin-bottom:10px}
+.pain-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:6px}
+.pain-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* SECTION TITLES */
+.sec-title{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;letter-spacing:-.02em;margin-bottom:6px}
+.sec-sub{color:var(--muted);font-size:14px;margin-bottom:32px}
+
+/* APPS LAYER */
+.apps-container{position:relative}
+.layer{margin-bottom:16px;border-radius:14px;overflow:hidden;border:1px solid var(--border2)}
+.layer-header{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--surface);cursor:pointer;transition:background .2s}
+.layer-header:hover{background:var(--surface2)}
+.layer-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.layer-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px}
+.layer-desc{font-size:13px;color:var(--muted);margin-left:auto}
+.layer-chevron{color:var(--muted);transition:transform .3s;margin-left:12px;font-size:18px}
+.layer.open .layer-chevron{transform:rotate(180deg)}
+.layer-body{display:none;padding:20px;background:var(--surface2);border-top:1px solid var(--border)}
+.layer.open .layer-body{display:block}
+.app-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.app-card{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:16px}
+.app-card-name{font-size:13px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.app-card-role{font-size:11px;color:var(--muted);line-height:1.4}
+.dot-blue{background:#0084ff}
+.dot-teal{background:#00e5c4}
+.dot-amber{background:#f59e0b}
+.dot-purple{background:#a855f7}
+.dot-gray{background:#6b7280}
+
+/* PIPELINE */
+.pipeline{display:flex;flex-direction:column;gap:0}
+.pip-state{display:flex;align-items:stretch;gap:0;margin-bottom:0}
+.pip-connector{width:2px;background:var(--border2);margin-left:23px;height:20px}
+.pip-row{display:flex;align-items:flex-start;gap:16px;padding:14px 0}
+.pip-circle{width:24px;height:24px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.pip-content{flex:1}
+.pip-state-name{font-size:14px;font-weight:500;margin-bottom:3px}
+.pip-who{display:flex;gap:6px;flex-wrap:wrap}
+.pip-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.b-maria{background:rgba(0,229,196,.12);color:var(--accent)}
+.b-n8n{background:rgba(0,132,255,.12);color:var(--accent2)}
+.b-client{background:rgba(168,85,247,.12);color:var(--purple)}
+.b-prov{background:rgba(245,158,11,.12);color:var(--amber)}
+.b-erp{background:rgba(34,197,94,.12);color:var(--green)}
+.b-admin{background:rgba(239,68,68,.12);color:var(--red)}
+.pip-auto{font-size:11px;color:var(--muted);margin-top:4px;padding-left:0}
+.s-gray{border-color:var(--muted2);color:var(--muted)}
+.s-blue{border-color:var(--accent2);color:var(--accent2)}
+.s-amber{border-color:var(--amber);color:var(--amber)}
+.s-green{border-color:var(--green);color:var(--green)}
+
+/* AUTOMATIONS */
+.auto-list{display:flex;flex-direction:column;gap:8px}
+.auto-item{display:grid;grid-template-columns:28px 1fr auto auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;transition:border-color .2s}
+.auto-item:hover{border-color:var(--border2)}
+.auto-num{font-size:11px;font-weight:700;color:var(--muted2);font-family:'Syne',sans-serif}
+.auto-body{}
+.auto-trigger{font-size:13px;font-weight:500;color:var(--text)}
+.auto-action{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+.auto-dest{font-size:11px;padding:3px 9px;border-radius:10px;white-space:nowrap}
+.auto-type{font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid;white-space:nowrap}
+.type-wh{border-color:var(--accent2);color:var(--accent2)}
+.type-n8{border-color:var(--accent);color:var(--accent)}
+.type-er{border-color:var(--green);color:var(--green)}
+
+/* FIELDS */
+.fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-group{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.field-group-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.field-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.field-item:last-child{border-bottom:none}
+.field-name{font-size:12px;color:var(--text)}
+.field-type{font-size:10px;padding:1px 7px;border-radius:6px;background:var(--surface2);color:var(--muted)}
+.field-new{font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(245,158,11,.15);color:var(--amber);margin-left:4px}
+
+/* COMPARISON */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.comp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;position:relative}
+.comp-card.winner{border-color:var(--accent)}
+.comp-card.winner::after{content:'Recomendado';position:absolute;top:-1px;right:20px;background:var(--accent);color:#000;font-size:10px;font-weight:700;padding:3px 10px;border-radius:0 0 6px 6px;letter-spacing:.05em}
+.comp-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px}
+.comp-apps{font-size:12px;color:var(--muted);margin-bottom:16px}
+.comp-item{display:flex;gap:8px;margin-bottom:8px;font-size:13px;line-height:1.4}
+.comp-item.pro::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.comp-item.con::before{content:'✗';color:var(--red);font-weight:700;flex-shrink:0}
+.comp-verdict{margin-top:16px;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5}
+.v-good{background:rgba(0,229,196,.08);color:var(--accent)}
+.v-warn{background:rgba(245,158,11,.08);color:var(--amber)}
+
+/* NEXT STEPS */
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+.step-num{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--accent);opacity:.4;flex-shrink:0;line-height:1;min-width:32px}
+.step-body{}
+.step-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.step-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.step-who{display:flex;gap:6px;margin-top:8px}
+
+/* TOGGLE FILTERS */
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:var(--surface);transition:all .2s;font-family:'DM Sans',sans-serif}
+.filter-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,229,196,.08)}
+
+/* HIDDEN */
+.hidden{display:none!important}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:32px 0}
+
+@media(max-width:640px){
+  section{padding:24px 20px 60px}
+  .fields-grid,.comp-grid{grid-template-columns:1fr}
+  nav{padding:0 16px}
+  .nav-tab{padding:6px 10px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">PSO<span>·sistema</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goTo('vision')">Visión</button>
+    <button class="nav-tab" onclick="goTo('apps')">Arquitectura</button>
+    <button class="nav-tab" onclick="goTo('pipeline')">Pipeline</button>
+    <button class="nav-tab" onclick="goTo('automatizaciones')">Automatizaciones</button>
+    <button class="nav-tab" onclick="goTo('campos')">Datos</button>
+    <button class="nav-tab" onclick="goTo('decision')">Decisión</button>
+    <button class="nav-tab" onclick="goTo('siguientes')">Siguientes pasos</button>
+  </div>
+  <span class="nav-badge">Plásticos Sierra del Oro</span>
+</nav>
+
+<!-- VISIÓN -->
+<section class="section active" id="vision">
+  <div class="hero">
+    <div class="hero-eyebrow">Propuesta de arquitectura digital</div>
+    <h1 class="hero-title">El negocio necesita<br><span class="hl">una sola fuente de verdad</span></h1>
+    <p class="hero-sub">Hoy los datos del mismo pedido se introducen tres veces en tres herramientas distintas. Esto tiene solución.</p>
+    <button class="hero-cta" onclick="goTo('apps')">Ver la arquitectura propuesta →</button>
+  </div>
+
+  <div class="sec-title">Los cuellos de botella actuales</div>
+  <p class="sec-sub">Lo que está pasando hoy y por qué escala mal</p>
+
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon">📋</div>
+      <div class="pain-title">Datos introducidos dos veces</div>
+      <div class="pain-desc">El comercial introduce el pedido en FM. María vuelve a introducir los mismos datos en ClickUp. El 70% de los campos son idénticos.</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📧</div>
+      <div class="pain-title">Correo como sistema de gestión</div>
+      <div class="pain-desc">María trabaja sobre correos. Los bocetos, validaciones y estados del cliché viajan por email sin trazabilidad estructurada.</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">🏝</div>
+      <div class="pain-title">Tres islas sin puente</div>
+      <div class="pain-desc">FM, ClickUp y el ERP no se hablan. Cuando el ERP integre con FM, ClickUp quedará desconectado y todo lo construido ahí quedará obsoleto.</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">🔍</div>
+      <div class="pain-title">Sin trazabilidad real</div>
+      <div class="pain-desc">No hay un sitio donde ver el estado de todos los proyectos de preimpresión activos, quién está esperando qué y desde cuándo.</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">💰</div>
+      <div class="pain-title">Costes fuera del circuito</div>
+      <div class="pain-desc">El coste del cliché se comunica por email a administración. No llega automáticamente al ERP, lo que rompe la trazabilidad contable del pedido.</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">⏱</div>
+      <div class="pain-title">Pedidos sin aviso estructurado</div>
+      <div class="pain-desc">Los PDFs de pedido llegan a María por email en cualquier momento del proceso: antes del diseño, a mitad, o después del cliché.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sec-title">La oportunidad</div>
+  <p class="sec-sub">FM y el ERP son del mismo fabricante: Sage. Eso lo cambia todo.</p>
+
+  <div class="pain-grid" style="--red: var(--green)">
+    <div class="pain-card" style="border-top-color: var(--accent)">
+      <div class="pain-icon">🔗</div>
+      <div class="pain-title">Integración nativa Sage</div>
+      <div class="pain-desc">FM y el ERP de Sage tienen integración nativa. Los datos del pedido pueden fluir automáticamente sin ningún desarrollo extra.</div>
+    </div>
+    <div class="pain-card" style="border-top-color: var(--accent)">
+      <div class="pain-icon">⚙️</div>
+      <div class="pain-title">FM tiene webhooks y API</div>
+      <div class="pain-desc">Cada cambio de estado en FM puede disparar una acción automática: email al cliente, al proveedor, a administración, al ERP.</div>
+    </div>
+    <div class="pain-card" style="border-top-color: var(--accent)">
+      <div class="pain-icon">📊</div>
+      <div class="pain-title">Un solo sistema maestro</div>
+      <div class="pain-desc">Con FM como centro comercial y el ERP como centro operativo, cada dato nace una vez y llega a donde tiene que llegar.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ARQUITECTURA -->
+<section class="section" id="apps">
+  <div class="sec-title">Arquitectura del sistema</div>
+  <p class="sec-sub">Tres capas, cada una con un rol claro. Haz clic en cada capa para ver el detalle.</p>
+
+  <div class="apps-container">
+
+    <div class="layer" id="layer1">
+      <div class="layer-header" onclick="toggleLayer('layer1')">
+        <span class="layer-dot dot-blue"></span>
+        <span class="layer-name">Capa comercial · Sage Sales Management (FM)</span>
+        <span class="layer-desc">Sistema maestro comercial</span>
+        <span class="layer-chevron">⌄</span>
+      </div>
+      <div class="layer-body">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Todo lo que tiene que ver con clientes, pedidos y el proceso de venta nace y vive aquí. Los comerciales ya trabajan en esta herramienta.</p>
+        <div class="app-cards">
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#0084ff;display:inline-block"></span>Pipeline comercial</div>
+            <div class="app-card-role">Lead → Oportunidad → Pedido confirmado. El flujo comercial clásico que ya usan los comerciales.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#00e5c4;display:inline-block"></span>Pipeline preimpresión</div>
+            <div class="app-card-role">Nuevo pipeline en FM para María. Los estados del boceto y cliché, sin salir de FM.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#a855f7;display:inline-block"></span>Clientes y contactos</div>
+            <div class="app-card-role">Base de datos de clientes con emails de contacto. N8N los usa para enviar notificaciones automáticas.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Campos personalizados</div>
+            <div class="app-card-role">11 campos nuevos en FM: versión boceto, proveedor diseño, coste cliché, albarán, prioridad…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;align-items:center;height:36px;gap:8px">
+      <div style="height:1px;flex:1;background:var(--border2)"></div>
+      <span style="font-size:11px;color:var(--muted);padding:4px 12px;border:1px solid var(--border2);border-radius:10px">N8N conecta automáticamente</span>
+      <div style="height:1px;flex:1;background:var(--border2)"></div>
+    </div>
+
+    <div class="layer" id="layer2">
+      <div class="layer-header" onclick="toggleLayer('layer2')">
+        <span class="layer-dot dot-amber"></span>
+        <span class="layer-name">Capa de automatización · N8N</span>
+        <span class="layer-desc">El cartero inteligente</span>
+        <span class="layer-chevron">⌄</span>
+      </div>
+      <div class="layer-body">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">N8N escucha los webhooks de FM y ejecuta la lógica de negocio: envía emails, sincroniza con el ERP, calcula tiempos de inactividad.</p>
+        <div class="app-cards">
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Escucha webhooks FM</div>
+            <div class="app-card-role">Cada cambio de estado en FM dispara N8N en tiempo real. Sin polling, sin retrasos.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Email noreply automático</div>
+            <div class="app-card-role">Notificaciones sin intervención de María: cliente, proveedor, administración, comercial.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Email real para respuestas</div>
+            <div class="app-card-role">Cuando el cliente o proveedor necesita responder, el email sale de una dirección real de PSO.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Control de inactividad</div>
+            <div class="app-card-role">Si un boceto lleva 30 días sin aprobarse, N8N cambia el estado y avisa automáticamente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;align-items:center;height:36px;gap:8px">
+      <div style="height:1px;flex:1;background:var(--border2)"></div>
+      <span style="font-size:11px;color:var(--muted);padding:4px 12px;border:1px solid var(--border2);border-radius:10px">Integración nativa Sage</span>
+      <div style="height:1px;flex:1;background:var(--border2)"></div>
+    </div>
+
+    <div class="layer" id="layer3">
+      <div class="layer-header" onclick="toggleLayer('layer3')">
+        <span class="layer-dot dot-teal"></span>
+        <span class="layer-name">Capa operativa · Sage ERP</span>
+        <span class="layer-desc">Sistema maestro operativo y contable</span>
+        <span class="layer-chevron">⌄</span>
+      </div>
+      <div class="layer-body">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">El ERP recibe los datos del pedido y de preimpresión automáticamente. Es el sistema maestro de facturación, stock y producción.</p>
+        <div class="app-cards">
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#00e5c4;display:inline-block"></span>Facturación y contabilidad</div>
+            <div class="app-card-role">Los datos del pedido llegan desde FM vía integración nativa Sage. Sin reintroducción manual.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#00e5c4;display:inline-block"></span>Órdenes de producción</div>
+            <div class="app-card-role">Cuando María marca "Listo para producción", N8N crea la orden en el ERP con todos los datos.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#00e5c4;display:inline-block"></span>Costes de clichés</div>
+            <div class="app-card-role">El coste del cliché fluye automáticamente al ERP. Administración no tiene que introducirlo manualmente.</div>
+          </div>
+          <div class="app-card">
+            <div class="app-card-name"><span style="width:8px;height:8px;border-radius:50%;background:#00e5c4;display:inline-block"></span>Stock y materiales</div>
+            <div class="app-card-role">El ERP gestiona el inventario de materiales (PET, PEBD…) vinculado a cada orden de fabricación.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px 24px">
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px;color:var(--accent)">Lo que esto elimina</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:var(--muted)">
+      <span>✗ ClickUp (herramienta sin conexión al ERP)</span>
+      <span>✗ Emails manuales de María a clientes y proveedores</span>
+      <span>✗ Introducción doble de datos de pedido</span>
+      <span>✗ Costes de cliché comunicados por email a administración</span>
+      <span>✗ PDFs que llegan fuera de tiempo sin aviso estructurado</span>
+      <span>✗ Proyectos estancados sin que nadie lo detecte</span>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="section" id="pipeline">
+  <div class="sec-title">Pipeline de preimpresión</div>
+  <p class="sec-sub">Los estados por los que pasa cada proyecto de boceto y cliché dentro de FM. María solo arrastra tarjetas.</p>
+
+  <div class="pipeline">
+
+    <div class="pip-row">
+      <div class="pip-circle s-gray">·</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Solicitud recibida</div>
+        <div class="pip-who">
+          <span class="pip-badge b-n8n">N8N automático</span>
+          <span class="pip-badge b-maria">avisa a María</span>
+        </div>
+        <div class="pip-auto">FM crea el registro automáticamente cuando el comercial confirma el pedido. María recibe email con resumen.</div>
+      </div>
+    </div>
+    <div class="pip-connector"></div>
+
+    <div class="pip-row">
+      <div class="pip-circle s-blue">1</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Revisión de datos</div>
+        <div class="pip-who">
+          <span class="pip-badge b-maria">María revisa</span>
+        </div>
+        <div class="pip-auto">María verifica que el pedido tiene todos los datos. Si faltan → N8N email al comercial pidiendo información.</div>
+      </div>
+    </div>
+    <div class="pip-connector"></div>
+
+    <div class="pip-row">
+      <div class="pip-circle s-blue">2</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Enviado a proveedor</div>
+        <div class="pip-who">
+          <span class="pip-badge b-prov">email automático proveedor</span>
+          <span class="pip-badge b-n8n">noreply</span>
+        </div>
+        <div class="pip-auto">N8N envía email al proveedor de diseño con todos los datos del pedido: ref. PSO, materiales, tipo, versión solicitada.</div>
+      </div>
+    </div>
+    <div class="pip-connector"></div>
+
+    <div class="pip-row">
+      <div class="pip-circle s-blue">3</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Boceto recibido</div>
+        <div class="pip-who">
+          <span class="pip-badge b-maria">María adjunta boceto</span>
+        </div>
+        <div class="pip-auto">María recibe el boceto del proveedor y lo adjunta en FM. El contador de versión (v1, v2…) se actualiza.</div>
+      </div>
+    </div>
+    <div class="pip-connector"></div>
+
+    <div class="pip-row">
+      <div class="pip-circle s-blue">4</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Esperando ok boceto</div>
+        <div class="pip-who">
+          <span class="pip-badge b-client">email cliente</span>
+          <span class="pip-badge b-n8n">30 días → inactivo</span>
+        </div>
+        <div class="pip-auto">N8N envía el boceto al cliente para aprobación. Si en 30 días no hay respuesta, el estado cambia a Inactivo automáticamente.</div>
+      </div>
+    </div>
+    <div class="pip-connector"></div>
+
+    <div class="pip-row">
+      <div class="pip-circle s-amber">5</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Cliché pedido</div>
+        <div class="pip-who">
+          <span class="pip-badge b-prov">email fábrica clichés</span>
+          <span class="pip-badge b-admin">aviso administración</span>
+          <span class="pip-badge b-maria">aviso comercial</span>
+        </div>
+        <div class="pip-auto">N8N envía orden a la fábrica de clichés, avisa a administración con el coste estimado, y notifica al comercial que el boceto fue aprobado.</div>
+      </div>
+    </div>
+    <div class="pip-connector"></div>
+
+    <div class="pip-row">
+      <div class="pip-circle s-amber">6</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Cliché recibido · revisado</div>
+        <div class="pip-who">
+          <span class="pip-badge b-maria">María revisa</span>
+        </div>
+        <div class="pip-auto">Recepción adjunta el albarán (obligatorio). María revisa el cliché. Si hay incidencia → N8N email a fábrica con detalle del problema.</div>
+      </div>
+    </div>
+    <div class="pip-connector"></div>
+
+    <div class="pip-row">
+      <div class="pip-circle s-green">✓</div>
+      <div class="pip-content">
+        <div class="pip-state-name">Listo para producción → ERP</div>
+        <div class="pip-who">
+          <span class="pip-badge b-erp">orden de producción en ERP</span>
+          <span class="pip-badge b-n8n">sincronización automática</span>
+        </div>
+        <div class="pip-auto">N8N escribe en el ERP: referencia, cliente, materiales, cliché validado, fecha entrega, coste. El ERP abre la orden de fabricación sin ninguna intervención manual.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- AUTOMATIZACIONES -->
+<section class="section" id="automatizaciones">
+  <div class="sec-title">Automatizaciones</div>
+  <p class="sec-sub">Lo que el sistema hace solo, sin que nadie lo active manualmente.</p>
+
+  <div class="filter-bar">
+    <button class="filter-btn on" onclick="filterAuto('all',this)">Todas</button>
+    <button class="filter-btn" onclick="filterAuto('cliente',this)">→ Cliente</button>
+    <button class="filter-btn" onclick="filterAuto('proveedor',this)">→ Proveedor</button>
+    <button class="filter-btn" onclick="filterAuto('admin',this)">→ Administración</button>
+    <button class="filter-btn" onclick="filterAuto('erp',this)">→ ERP</button>
+  </div>
+
+  <div class="auto-list" id="auto-list">
+
+    <div class="auto-item" data-dest="interno">
+      <span class="auto-num">01</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Pedido confirmado en FM</div>
+        <div class="auto-action">Crea registro en pipeline preimpresión · email a María con resumen del pedido</div>
+      </div>
+      <span class="auto-dest b-maria">María</span>
+      <span class="auto-type type-wh">webhook FM</span>
+    </div>
+
+    <div class="auto-item" data-dest="interno">
+      <span class="auto-num">02</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Estado → Revisión · faltan datos</div>
+        <div class="auto-action">Email respondible al comercial solicitando los datos que faltan · incluye enlace al registro</div>
+      </div>
+      <span class="auto-dest b-maria">Comercial</span>
+      <span class="auto-type type-n8">N8N logic</span>
+    </div>
+
+    <div class="auto-item" data-dest="proveedor">
+      <span class="auto-num">03</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Estado → Enviado a proveedor</div>
+        <div class="auto-action">Email noreply al proveedor de diseño con ref. PSO, materiales, tipo de impresión y versión solicitada</div>
+      </div>
+      <span class="auto-dest b-prov">Proveedor diseño</span>
+      <span class="auto-type type-wh">webhook FM</span>
+    </div>
+
+    <div class="auto-item" data-dest="cliente">
+      <span class="auto-num">04</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Estado → Boceto recibido + adjunto subido</div>
+        <div class="auto-action">Email real al cliente con boceto adjunto · plantilla estandarizada con datos del pedido · respondible</div>
+      </div>
+      <span class="auto-dest b-client">Cliente</span>
+      <span class="auto-type type-wh">webhook FM</span>
+    </div>
+
+    <div class="auto-item" data-dest="cliente">
+      <span class="auto-num">05</span>
+      <div class="auto-body">
+        <div class="auto-trigger">30 días sin actividad en "Esperando ok boceto"</div>
+        <div class="auto-action">Cambia estado a Inactivo · email recordatorio al cliente · aviso a María</div>
+      </div>
+      <span class="auto-dest b-client">Cliente + María</span>
+      <span class="auto-type type-n8">N8N logic</span>
+    </div>
+
+    <div class="auto-item" data-dest="proveedor admin">
+      <span class="auto-num">06</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Estado → Cliché pedido · boceto aprobado</div>
+        <div class="auto-action">Email noreply a fábrica de clichés · email a administración con coste estimado · aviso al comercial de ok boceto</div>
+      </div>
+      <span class="auto-dest b-prov">Fábrica + Admin</span>
+      <span class="auto-type type-wh">webhook FM</span>
+    </div>
+
+    <div class="auto-item" data-dest="proveedor">
+      <span class="auto-num">07</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Estado → Cliché con incidencia</div>
+        <div class="auto-action">Email respondible a fábrica de clichés con detalle de la incidencia · adjunta imagen del problema</div>
+      </div>
+      <span class="auto-dest b-prov">Fábrica clichés</span>
+      <span class="auto-type type-wh">webhook FM</span>
+    </div>
+
+    <div class="auto-item" data-dest="erp">
+      <span class="auto-num">08</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Estado → Listo para producción</div>
+        <div class="auto-action">N8N escribe en ERP: ref. pedido, cliente, materiales, cliché validado, fecha entrega, coste cliché → ERP abre orden de producción</div>
+      </div>
+      <span class="auto-dest b-erp">ERP Sage</span>
+      <span class="auto-type type-er">ERP sync</span>
+    </div>
+
+    <div class="auto-item" data-dest="erp">
+      <span class="auto-num">09</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Pedido confirmado en FM (integración nativa Sage)</div>
+        <div class="auto-action">Datos del pedido fluyen al ERP automáticamente: cliente, facturación, cantidades, precio</div>
+      </div>
+      <span class="auto-dest b-erp">ERP Sage</span>
+      <span class="auto-type type-er">ERP sync</span>
+    </div>
+
+    <div class="auto-item" data-dest="admin erp">
+      <span class="auto-num">10</span>
+      <div class="auto-body">
+        <div class="auto-trigger">Coste cliché registrado en FM</div>
+        <div class="auto-action">N8N escribe el coste en el ERP vinculado al pedido · administración ve el cargo sin intervención manual</div>
+      </div>
+      <span class="auto-dest b-admin">Admin + ERP</span>
+      <span class="auto-type type-er">ERP sync</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- CAMPOS -->
+<section class="section" id="campos">
+  <div class="sec-title">Datos del sistema</div>
+  <p class="sec-sub">Los datos que ya existen en FM y los que hay que crear. Ninguno se introduce dos veces.</p>
+
+  <div class="fields-grid">
+    <div class="field-group">
+      <div class="field-group-title">Datos heredados del pedido FM · ya existen</div>
+      <div class="field-item"><span class="field-name">Nº pedido FM</span><span class="field-type">Texto</span></div>
+      <div class="field-item"><span class="field-name">Ref. PSO / SAP</span><span class="field-type">Texto</span></div>
+      <div class="field-item"><span class="field-name">Cliente</span><span class="field-type">Relación</span></div>
+      <div class="field-item"><span class="field-name">Email cliente</span><span class="field-type">Email</span></div>
+      <div class="field-item"><span class="field-name">Comercial</span><span class="field-type">Relación</span></div>
+      <div class="field-item"><span class="field-name">Fecha entrega pedido</span><span class="field-type">Fecha</span></div>
+      <div class="field-item"><span class="field-name">Materiales · proceso</span><span class="field-type">Texto</span></div>
+      <div class="field-item"><span class="field-name">Cantidad · precio</span><span class="field-type">Número</span></div>
+      <div class="field-item"><span class="field-name">Tipo de producto (CI/BTI)</span><span class="field-type">Lista</span></div>
+    </div>
+    <div class="field-group">
+      <div class="field-group-title">Campos nuevos a crear en FM</div>
+      <div class="field-item"><span class="field-name">Tipo gestión<span class="field-new">Nuevo</span></span><span class="field-type">Lista</span></div>
+      <div class="field-item"><span class="field-name">Proveedor diseño<span class="field-new">Nuevo</span></span><span class="field-type">Relación</span></div>
+      <div class="field-item"><span class="field-name">Versión boceto<span class="field-new">Nuevo</span></span><span class="field-type">Número</span></div>
+      <div class="field-item"><span class="field-name">URL / adjunto boceto<span class="field-new">Nuevo</span></span><span class="field-type">Adjunto</span></div>
+      <div class="field-item"><span class="field-name">Requiere prueba color<span class="field-new">Nuevo</span></span><span class="field-type">Sí/No</span></div>
+      <div class="field-item"><span class="field-name">Proveedor clichés<span class="field-new">Nuevo</span></span><span class="field-type">Relación</span></div>
+      <div class="field-item"><span class="field-name">Cargo clichés<span class="field-new">Nuevo</span></span><span class="field-type">Lista</span></div>
+      <div class="field-item"><span class="field-name">Coste cliché estimado<span class="field-new">Nuevo</span></span><span class="field-type">Moneda</span></div>
+      <div class="field-item"><span class="field-name">Albarán cliché<span class="field-new">Nuevo</span></span><span class="field-type">Adjunto</span></div>
+      <div class="field-item"><span class="field-name">Prioridad<span class="field-new">Nuevo</span></span><span class="field-type">Lista</span></div>
+      <div class="field-item"><span class="field-name">Observaciones internas<span class="field-new">Nuevo</span></span><span class="field-type">Texto</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px 24px">
+    <div style="font-size:13px;font-weight:500;color:var(--accent);margin-bottom:12px">¿Por qué esto elimina ClickUp?</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6">El formulario de ClickUp que María usa hoy pide 18 campos. El 70% de ellos son datos que el comercial ya introdujo en FM al crear el pedido. Con este diseño, FM ya tiene esos datos y N8N los usa directamente para las notificaciones. María no necesita introducir nada que ya esté en el pedido. Solo gestiona los 11 campos específicos de preimpresión, y lo hace dentro de FM donde ya vive toda la información.</p>
+  </div>
+</section>
+
+<!-- DECISIÓN -->
+<section class="section" id="decision">
+  <div class="sec-title">La decisión arquitectónica</div>
+  <p class="sec-sub">Dos opciones. Solo una tiene sentido a largo plazo.</p>
+
+  <div class="comp-grid">
+    <div class="comp-card winner">
+      <div class="comp-title">Sistema A</div>
+      <div class="comp-apps">FM + ERP Sage · N8N como conector</div>
+      <div class="comp-item pro">Cero duplicidad de datos. Cada dato se introduce una sola vez.</div>
+      <div class="comp-item pro">FM y ERP son familia Sage. Integración nativa sin desarrollo extra.</div>
+      <div class="comp-item pro">Sin coste adicional de licencias. FM y ERP ya están pagados.</div>
+      <div class="comp-item pro">Cuando el ERP integre con FM, todo funciona. Nada queda obsoleto.</div>
+      <div class="comp-item pro">Trazabilidad contable completa. El coste del cliché llega al ERP solo.</div>
+      <div class="comp-item con">María debe aprender a gestionar su trabajo en FM. Requiere formación.</div>
+      <div class="comp-verdict v-good">Recomendado. Arquitectura limpia, escalable y sin deuda técnica.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-title">Sistema B</div>
+      <div class="comp-apps">FM + ClickUp + ERP · N8N como sincronizador</div>
+      <div class="comp-item pro">María conoce ClickUp. Menor fricción de adopción a corto plazo.</div>
+      <div class="comp-item pro">ClickUp permite gestión granular de tareas del equipo de diseño.</div>
+      <div class="comp-item con">El 70% de los datos de ClickUp ya están en FM. Duplicidad garantizada.</div>
+      <div class="comp-item con">Tres sistemas maestros sin jerarquía clara. ¿Quién manda?</div>
+      <div class="comp-item con">N8N debe sincronizar tres sistemas. Cualquier fallo rompe la cadena.</div>
+      <div class="comp-item con">Cuando el ERP integre con FM, ClickUp queda desconectado e inútil.</div>
+      <div class="comp-verdict v-warn">Viable a corto plazo. Generará problemas cuando el ERP esté activo.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:24px">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--accent);margin-bottom:10px">La pregunta que hay que responder en la próxima reunión</div>
+    <p style="font-size:15px;color:var(--text);line-height:1.6;font-style:italic">"Podemos seguir construyendo en ClickUp, pero cuando el ERP esté integrado con FM, ClickUp habrá quedado fuera de la cadena y habremos gastado tiempo y dinero en algo que habrá que desmontar. ¿Preferimos decidir ahora o volver a decidir cuando el problema ya sea más grande?"</p>
+  </div>
+</section>
+
+<!-- SIGUIENTES PASOS -->
+<section class="section" id="siguientes">
+  <div class="sec-title">Siguientes pasos</div>
+  <p class="sec-sub">Lo que hay que hacer, en qué orden y quién lo lidera.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Validar qué versión de ERP Sage se está implantando</div>
+        <div class="step-desc">La integración nativa FM-ERP varía según sea Sage 50, Sage 200 o Sage X3. Esto determina qué datos fluyen automáticamente y cuáles necesitan N8N.</div>
+        <div class="step-who">
+          <span class="pip-badge b-maria">Ramón · dirección</span>
+          <span class="pip-badge b-n8n">proveedor ERP</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Confirmar el plan de FM contratado y acceso a API</div>
+        <div class="step-desc">Se necesita plan Professional o superior para webhooks y API. Sin esto, N8N no puede escuchar los cambios de estado en FM.</div>
+        <div class="step-who">
+          <span class="pip-badge b-maria">Responsable IT de PSO</span>
+          <span class="pip-badge b-n8n">Sage Sales Management</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Tomar la decisión arquitectónica: Sistema A o Sistema B</div>
+        <div class="step-desc">Esta decisión debe tomarla dirección antes de que se construya nada más. Cada semana que pasa sin decidirlo es una semana de trabajo que puede quedar obsoleto.</div>
+        <div class="step-who">
+          <span class="pip-badge b-maria">Ramón · CEO</span>
+          <span class="pip-badge b-admin">María</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Crear el pipeline de preimpresión en FM</div>
+        <div class="step-desc">Con la decisión tomada, configurar los 8 estados del pipeline y los 11 campos personalizados en FM. Esta tarea la hace el administrador de FM con guía del consultor.</div>
+        <div class="step-who">
+          <span class="pip-badge b-maria">Admin FM de PSO</span>
+          <span class="pip-badge b-n8n">consultor</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Configurar los webhooks y las automatizaciones en N8N</div>
+        <div class="step-desc">Las 10 automatizaciones descritas en este documento. El workflow base ya está construido. Solo hay que ajustar los endpoints y las plantillas de email de PSO.</div>
+        <div class="step-who">
+          <span class="pip-badge b-n8n">consultor</span>
+          <span class="pip-badge b-maria">María · valida plantillas</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Prueba piloto con 3 pedidos reales</div>
+        <div class="step-desc">Antes de lanzar al equipo completo, probar el flujo con 3 pedidos reales durante 2 semanas. María valida que las notificaciones llegan correctamente y que los estados funcionan.</div>
+        <div class="step-who">
+          <span class="pip-badge b-admin">María</span>
+          <span class="pip-badge b-n8n">consultor</span>
+          <span class="pip-badge b-client">1 comercial piloto</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:20px 24px;text-align:center">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:8px">El modelo de negocio define la escalabilidad</div>
+    <p style="font-size:13px;color:var(--muted);max-width:600px;margin:0 auto;line-height:1.6">Las herramientas no son el problema. El problema es que cada herramienta se implantó respondiendo a una urgencia, sin diseñar primero cómo se relacionan entre sí. Esta propuesta no es una migración técnica. Es una decisión de modelo de negocio que Ramón necesita liderar.</p>
+  </div>
+</section>
+
+<script>
+function goTo(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs=['vision','apps','pipeline','automatizaciones','campos','decision','siguientes'];
+  const idx=tabs.indexOf(id);
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleLayer(id){
+  document.getElementById(id).classList.toggle('open');
+}
+
+function filterAuto(dest,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.auto-item').forEach(item=>{
+    if(dest==='all'){item.style.display='grid';return;}
+    const d=item.dataset.dest||'';
+    item.style.display=d.includes(dest)?'grid':'none';
+  });
+}
+</script>
+</body>
+</html>
